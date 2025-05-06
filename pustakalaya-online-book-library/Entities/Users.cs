@@ -7,18 +7,18 @@ namespace pustakalaya_online_book_library.Entities
     public class Users
     {
         [Key]
-        private Guid userId {  get; set; }
+        public Guid UserId {  get; set; }
         [Required]
-        private string userName { get; set; }
+        public string UserName { get; set; }
         [Required]
-        private string userNmail { get; set; }
+        public string UserEmail { get; set; }
         [Required]
-        private string userPassword { get; set; }
+        public string userPassword { get; set; }
         [Required]
-        private string userContact { get; set; }
+        public string userContact { get; set; }
         [Required]
-        private string userAddress { get; set; }
+        public string userAddress { get; set; }
 
-        private string profileURL { get; set; }
+        public string profileURL { get; set; }
     }
 }
