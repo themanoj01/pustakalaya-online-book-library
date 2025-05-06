@@ -15,6 +15,9 @@ namespace pustakalaya_online_book_library.Data
         public DbSet<Genre> Genres { get; set; }
         public DbSet<BookAuthor> BookAuthors { get; set; }
         public DbSet<BookGenre> BookGenres { get; set; }
+        public DbSet<Review> Reviews { get; set; }
+        public DbSet<Announcement> Announcements { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -45,7 +48,29 @@ namespace pustakalaya_online_book_library.Data
                 .HasOne(bg => bg.Genre)
                 .WithMany(g => g.BookGenres)
                 .HasForeignKey(bg => bg.GenreId);
-        }
+
+            modelBuilder.Entity<Review>()
+                .HasKey(r => r.Id);
+            modelBuilder.Entity<Review>()
+                .HasOne(r => r.Book)
+                .WithMany(b => b.Reviews)
+                .HasForeignKey(r => r.BookId)
+                .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<Review>()
+                .HasOne(r => r.User)
+                .WithMany(u => u.Reviews) 
+                .HasForeignKey(r => r.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<Review>()
+                .HasIndex(r => new { r.BookId, r.UserId })
+                .IsUnique();
+
+            modelBuilder.Entity<Announcement>()
+                .HasOne(a => a.CreatedBy)
+                .WithMany() 
+                .HasForeignKey(a => a.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+    }
 
     }
 }

@@ -20,5 +20,7 @@ namespace pustakalaya_online_book_library.Entities
         public string userAddress { get; set; }
 
         public string profileURL { get; set; }
+        public List<Review> Reviews { get; set; } = new List<Review>();
+
     }
 }
