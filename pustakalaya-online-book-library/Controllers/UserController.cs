@@ -15,10 +15,10 @@ namespace pustakalaya_online_book_library.Controllers
             _userService = userService;
         }
 
-        [HttpPost("/register")]
+        /*[HttpPost("/register")]
         public IActionResult RegisterUser([FromBody] UserDTO userDTO)
         {
             _userService.AddUser(userDTO);
-        }
+        }*/
     }
 }
