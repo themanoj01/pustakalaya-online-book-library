@@ -1,0 +1,609 @@
+/* OrderConfirmationPage.css */
+
+/* General Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f5f7fa;
+    color: #333;
+    line-height: 1.6;
+  }
+  
+  .container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 15px;
+  }
+  
+  /* Header Styles */
+  .header {
+    background-color: #4f46e5;
+    color: white;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  .header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 0;
+  }
+  
+  .logo {
+    display: flex;
+    align-items: center;
+  }
+  
+  .logo h1 {
+    margin-left: 10px;
+    font-size: 1.5rem;
+    font-weight: 700;
+  }
+  
+  /* Main Content Styles */
+  .main-content {
+    padding: 30px 0;
+    min-height: calc(100vh - 180px);
+  }
+  
+  /* Success Banner Styles */
+  .success-banner {
+    display: flex;
+    align-items: center;
+    background-color: #ecfdf5;
+    border: 1px solid #10b981;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 30px;
+    animation: fadeIn 0.5s ease forwards;
+  }
+  
+  .success-icon {
+    color: #10b981;
+    margin-right: 15px;
+    flex-shrink: 0;
+  }
+  
+  .success-message h2 {
+    color: #064e3b;
+    font-size: 1.5rem;
+    margin-bottom: 5px;
+  }
+  
+  .success-message p {
+    color: #065f46;
+  }
+  
+  /* Confirmation Grid Layout */
+  .confirmation-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
+  
+  @media (min-width: 992px) {
+    .confirmation-grid {
+      grid-template-columns: 1.2fr 0.8fr;
+    }
+  }
+  
+  /* Card Styles */
+  .confirmation-card {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+    margin-bottom: 30px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  .confirmation-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+  }
+  
+  .card-header {
+    padding: 15px 20px;
+    border-bottom: 1px solid #e5e7eb;
+    background-color: #f9fafb;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .card-header h3 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #1f2937;
+  }
+  
+  /* Order Details Styles */
+  .order-id {
+    color: #6b7280;
+    font-size: 0.9rem;
+  }
+  
+  .order-info {
+    padding: 20px;
+    border-bottom: 1px solid #e5e7eb;
+  }
+  
+  .info-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+
+  .item-details{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .info-row:last-child {
+    margin-bottom: 0;
+  }
+  
+  .label {
+    color: #6b7280;
+  }
+  
+  .value {
+    font-weight: 500;
+  }
+  
+  .value.status {
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.9rem;
+  }
+  
+  .value.status.paid {
+    background-color: #ecfdf5;
+    color: #10b981;
+  }
+  
+  .value.status.cancellation-pending {
+    background-color: #fef2f2;
+    color: #ef4444;
+  }
+  
+  /* Order Items Styles */
+  .order-items {
+    padding: 20px;
+    border-bottom: 1px solid #e5e7eb;
+  }
+  
+  .order-items h4 {
+    font-size: 1.1rem;
+    margin-bottom: 15px;
+  }
+  
+  .items-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .order-item {
+    display: flex;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #f3f4f6;
+  }
+  
+  .order-item:last-child {
+    padding-bottom: 0;
+    border-bottom: none;
+  }
+  
+  .item-image {
+    margin-right: 15px;
+  }
+  
+  .item-image img {
+    width: 60px;
+    height: 84px;
+    object-fit: cover;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .item-details {
+    flex-grow: 1;
+  }
+  
+  .item-details h5 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 2px;
+  }
+  
+  .author {
+    color: #6b7280;
+    font-size: 0.9rem;
+    margin-bottom: 5px;
+  }
+  
+  .item-price-qty {
+    display: flex;
+    gap: 10px;
+  }
+  
+  .price {
+    font-weight: 600;
+    color: #4f46e5;
+  }
+  
+  .quantity {
+    color: #6b7280;
+  }
+  
+  /* Order Summary Styles */
+  .order-summary {
+    padding: 20px;
+  }
+  
+  .summary-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+  
+  .summary-row.total {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #e5e7eb;
+    font-weight: 700;
+    font-size: 1.1rem;
+  }
+  
+  /* Customer Info Styles */
+  .customer-info {
+    padding: 20px;
+  }
+  
+  .customer-name {
+    font-weight: 600;
+    font-size: 1.1rem;
+    margin-bottom: 10px;
+  }
+  
+  .customer-email, .customer-phone {
+    display: flex;
+    align-items: center;
+    margin-bottom: 5px;
+    color: #6b7280;
+  }
+  
+  .info-icon {
+    margin-right: 8px;
+    color: #4f46e5;
+  }
+  
+  /* Claim Code Styles */
+  .claim-code-content {
+    padding: 20px;
+  }
+  
+  .claim-code-info {
+    margin-bottom: 15px;
+    color: #6b7280;
+  }
+  
+  .claim-code {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #f9fafb;
+    border: 1px dashed #d1d5db;
+    border-radius: 6px;
+    padding: 12px 15px;
+    font-family: monospace;
+    font-size: 1.2rem;
+    font-weight: 600;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+  }
+  
+  .copy-button {
+    background: transparent;
+    border: none;
+    color: #6b7280;
+    cursor: pointer;
+    transition: color 0.2s ease;
+  }
+  
+  .copy-button:hover {
+    color: #4f46e5;
+  }
+  
+  .copied-notification {
+    text-align: center;
+    color: #10b981;
+    font-size: 0.9rem;
+    margin-top: 5px;
+    animation: fadeInOut 2s ease forwards;
+  }
+  
+  /* Pickup Instructions Styles */
+  .pickup-instructions {
+    padding: 20px;
+  }
+  
+  .instruction {
+    display: flex;
+    margin-bottom: 20px;
+  }
+  
+  .instruction:last-child {
+    margin-bottom: 0;
+  }
+  
+  .instruction-icon {
+    color: #4f46e5;
+    margin-right: 15px;
+    margin-top: 3px;
+    flex-shrink: 0;
+  }
+  
+  .instruction h4 {
+    font-size: 1rem;
+    margin-bottom: 5px;
+  }
+  
+  .instruction p {
+    color: #6b7280;
+    font-size: 0.95rem;
+    margin-bottom: 10px;
+  }
+  
+  .download-button {
+    background-color: #f3f4f6;
+    color: #4f46e5;
+    border: 1px solid #e5e7eb;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .download-button:hover {
+    background-color: #e5e7eb;
+  }
+  
+  /* Cancel Order Styles */
+  .cancel-order-content {
+    padding: 20px;
+  }
+  
+  .cancel-order-content p {
+    color: #6b7280;
+    margin-bottom: 15px;
+  }
+  
+  .cancel-button {
+    background-color: #fef2f2;
+    color: #ef4444;
+    border: 1px solid #fecaca;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    width: 100%;
+  }
+  
+  .cancel-button:hover:not(.disabled) {
+    background-color: #fee2e2;
+  }
+  
+  .cancel-button.disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+  
+  .cancellation-note {
+    color: #ef4444;
+    font-size: 0.9rem;
+    margin-top: 10px;
+    text-align: center;
+  }
+  
+  /* Modal Styles */
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    animation: fadeIn 0.3s ease;
+  }
+  
+  .modal {
+    background-color: white;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    animation: slideUp 0.3s ease forwards;
+  }
+  
+  .modal-header {
+    padding: 15px 20px;
+    border-bottom: 1px solid #e5e7eb;
+    display: flex;
+    align-items: center;
+  }
+  
+  .warning-icon {
+    color: #ef4444;
+    margin-right: 10px;
+  }
+  
+  .modal-header h3 {
+    font-size: 1.2rem;
+    color: #1f2937;
+  }
+  
+  .modal-body {
+    padding: 20px;
+  }
+  
+  .modal-note {
+    margin-top: 10px;
+    color: #6b7280;
+    font-size: 0.9rem;
+  }
+  
+  .modal-footer {
+    padding: 15px 20px;
+    border-top: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+  }
+  
+  .secondary-button {
+    background-color: white;
+    color: #4b5563;
+    border: 1px solid #d1d5db;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .secondary-button:hover {
+    background-color: #f3f4f6;
+  }
+  
+  .primary-button {
+    background-color: #4f46e5;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .primary-button:hover {
+    background-color: #4338ca;
+  }
+  
+  .primary-button.danger {
+    background-color: #ef4444;
+  }
+  
+  .primary-button.danger:hover {
+    background-color: #dc2626;
+  }
+  
+  .primary-button:disabled, .secondary-button:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+  
+  /* Footer Styles */
+  .footer {
+    background-color: #1f2937;
+    color: white;
+    padding: 30px 0;
+  }
+  
+  .footer-content {
+    text-align: center;
+  }
+  
+  .footer-content p:first-child {
+    margin-bottom: 5px;
+  }
+  
+  /* Animations */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  
+  @keyframes fadeInOut {
+    0% {
+      opacity: 0;
+    }
+    20% {
+      opacity: 1;
+    }
+    80% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+    }
+  }
+  
+  @keyframes slideUp {
+    from {
+      transform: translateY(30px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+  
+  /* Additional animations for elements */
+  .confirmation-card {
+    animation: fadeIn 0.5s ease forwards;
+    animation-delay: calc(0.1s * var(--animation-order, 0));
+  }
+  
+  .confirmation-card:nth-child(1) {
+    --animation-order: 1;
+  }
+  
+  .confirmation-card:nth-child(2) {
+    --animation-order: 2;
+  }
+  
+  .confirmation-card:nth-child(3) {
+    --animation-order: 3;
+  }
+  
+  .confirmation-card:nth-child(4) {
+    --animation-order: 4;
+  }
+  
+  /* Pulse animation for buttons */
+  @keyframes pulse {
+    0% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.05);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+  
+  .download-button:active, .cancel-button:active:not(.disabled) {
+    animation: pulse 0.3s ease;
+  }
