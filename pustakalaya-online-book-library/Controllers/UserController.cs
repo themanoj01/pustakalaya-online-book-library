@@ -19,6 +19,8 @@ namespace pustakalaya_online_book_library.Controllers
         public IActionResult RegisterUser([FromBody] UserDTO userDTO)
         {
             _userService.AddUser(userDTO);
+            return null;
+
         }
     }
 }
