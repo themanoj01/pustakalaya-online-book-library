@@ -24,7 +24,8 @@ namespace pustakalaya_online_book_library.Entities
         public string Language { get; set; }
 
         [StringLength(50)]
-        public string Format { get; set; } 
+
+        public string Format { get; set; }
 
         [StringLength(100)]
         public string Publisher { get; set; }
@@ -41,5 +42,11 @@ namespace pustakalaya_online_book_library.Entities
         public ICollection<BookGenre> BookGenres { get; set; }
         public List<Review> Reviews { get; set; } = new List<Review>();
 
+   
+       
+
+        public ICollection<CartDetails> CartDetails { get; set; }
+
+        public ICollection<Book> Books { get; set; }
     }
 }
