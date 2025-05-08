@@ -1,5 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using pustakalaya_online_book_library.Data;
+using pustakalaya_online_book_library.DTOs;
 using pustakalaya_online_book_library.Entities;
 using pustakalaya_online_book_library.Services.Interfaces;
 using System.Collections;
@@ -9,31 +11,26 @@ namespace pustakalaya_online_book_library.Services
     public class ReviewService : IReviewService
     {
         private readonly ApplicationDBContext _context;
-        public ReviewService(ApplicationDBContext context)
+        private readonly IMapper _mapper;
+        public ReviewService(ApplicationDBContext context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
-        public async Task<Review> CreateAsync(Review review)
+        public async Task<Review> CreateAsync(ReviewCreateDto reviewDto)
         {
-            if(!await _context.Books.AnyAsync(b => b.Id == review.BookId))
+            if(!await _context.Books.AnyAsync(b => b.Id == reviewDto.BookId))
             {
-                throw new KeyNotFoundException($"Book with ID {review.BookId} not found.");
+                throw new KeyNotFoundException($"Book with ID {reviewDto.BookId} not found.");
             }
-            if (!await _context.Users.AnyAsync(u => u.UserId == review.UserId))
-                throw new KeyNotFoundException($"User with ID {review.UserId} not found.");
-            if (await _context.Reviews.AnyAsync(r => r.BookId == review.BookId && r.UserId == review.UserId))
-                throw new InvalidOperationException($"User {review.UserId} has already reviewed Book {review.BookId}.");
+            if (!await _context.Users.AnyAsync(u => u.userId == reviewDto.UserId))
+                throw new KeyNotFoundException($"User with ID {reviewDto.UserId} not found.");
+            if (await _context.Reviews.AnyAsync(r => r.BookId == reviewDto.BookId && r.UserId == reviewDto.UserId))
+                throw new InvalidOperationException($"User {reviewDto.UserId} has already reviewed Book {reviewDto.BookId}.");
+            var review = _mapper.Map<Review>(reviewDto);
             _context.Reviews.Add(review);
             await _context.SaveChangesAsync();
-            if (review != null)
-            {
-                return review;
-            }
-            else
-            {
-                throw new InvalidOperationException("Error posting review.");
-            }
-            
+           return review;
         }
 
         public async Task DeleteAsync(Guid id)
@@ -74,18 +71,14 @@ namespace pustakalaya_online_book_library.Services
             return review;
         }
 
-        public async Task UpdateAsync(Guid id, Review review)
+        public async Task UpdateAsync(Guid id, ReviewUpdateDto reviewDto)
         {
             var existingReview = await _context.Reviews.FirstOrDefaultAsync(r => r.Id == id);
             if(existingReview == null)
             {
                 throw new KeyNotFoundException($"Review with ID {id} not found.");
             }
-            if (review.BookId != existingReview.BookId || review.UserId != existingReview.UserId)
-                if (await _context.Reviews.AnyAsync(r => r.BookId == review.BookId && r.UserId == review.UserId && r.Id != id))
-                    throw new InvalidOperationException($"User {review.UserId} has already reviewed Book {review.BookId}.");
-            existingReview.Rating = review.Rating;
-            existingReview.Comment = review.Comment;
+            _mapper.Map(reviewDto, existingReview);
             await _context.SaveChangesAsync();
         }
     }

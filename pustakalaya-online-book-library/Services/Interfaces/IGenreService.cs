@@ -1,4 +1,5 @@
-﻿using pustakalaya_online_book_library.Entities;
+﻿using pustakalaya_online_book_library.DTOs;
+using pustakalaya_online_book_library.Entities;
 
 namespace pustakalaya_online_book_library.Services.Interfaces
 {
@@ -6,8 +7,8 @@ namespace pustakalaya_online_book_library.Services.Interfaces
     {
         Task<IEnumerable<Genre>> GetAllAsync();
         Task<Genre?> GetByIdAsync(Guid id);
-        Task<Genre> CreateAsync(Genre genre);
-        Task UpdateAsync(Guid id, Genre genre);
+        Task<Genre> CreateAsync(GenreCreateDto genre);
+        Task UpdateAsync(Guid id, GenreUpdateDto genre);
         Task DeleteAsync(Guid id);
     }
 }

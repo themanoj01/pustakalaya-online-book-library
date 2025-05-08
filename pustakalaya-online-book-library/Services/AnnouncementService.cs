@@ -1,5 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using pustakalaya_online_book_library.Data;
+using pustakalaya_online_book_library.DTOs;
 using pustakalaya_online_book_library.Entities;
 using pustakalaya_online_book_library.Services.Interfaces;
 using System.Collections;
@@ -10,17 +12,22 @@ namespace pustakalaya_online_book_library.Services
 
     {
         private readonly ApplicationDBContext _context;
-        public AnnouncementService(ApplicationDBContext context)
+        private readonly IMapper _mapper;
+
+        public AnnouncementService(ApplicationDBContext context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
 
-        public async Task<Announcement> CreateAsync(Announcement announcement)
+        public async Task<Announcement> CreateAsync(AnnouncementCreateDto announcementDto)
         {
-            if (!await _context.Users.AnyAsync(u => u.UserId == announcement.UserId))
-                throw new KeyNotFoundException($"User with ID {announcement.UserId} not found.");
+            if (!await _context.Users.AnyAsync(u => u.userId == announcementDto.UserId))
+                throw new KeyNotFoundException($"User with ID {announcementDto.UserId} not found.");
+            var announcement = _mapper.Map<Announcement>(announcementDto);
             _context.Announcements.Add(announcement);
             await _context.SaveChangesAsync();
+
             return announcement;
         }
 
@@ -48,18 +55,17 @@ namespace pustakalaya_online_book_library.Services
             return announcement;
         }
 
-        public async Task UpdateAsync(Guid id, Announcement announcement)
+        public async Task UpdateAsync(Guid id, AnnouncementUpdateDto announcementDto)
         {
             var existing = await _context.Announcements.FirstOrDefaultAsync(a => a.Id == id);
             if (existing == null)
                 throw new KeyNotFoundException($"Announcement with ID {id} not found.");
-            if (!await _context.Users.AnyAsync(u => u.UserId == announcement.UserId))
-                throw new KeyNotFoundException($"User with ID {announcement.UserId} not found.");
-            existing.Title = announcement.Title;
-            existing.Content = announcement.Content;
-            existing.ExpiresAt = announcement.ExpiresAt;
+
+            _mapper.Map(announcementDto, existing);
+
             await _context.SaveChangesAsync();
         }
+
 
     }
 }

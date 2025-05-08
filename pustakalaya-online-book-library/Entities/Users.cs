@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace pustakalaya_online_book_library.Entities
 {
@@ -7,12 +8,13 @@ namespace pustakalaya_online_book_library.Entities
     public class Users
     {
         [Key]
-        public Guid UserId {  get; set; }
+        public Guid userId { get; set; }
         [Required]
-        public string UserName { get; set; }
+        public string userName { get; set; }
         [Required]
-        public string UserEmail { get; set; }
+        public string userEmail { get; set; }
         [Required]
+        [JsonIgnore]
         public string userPassword { get; set; }
         [Required]
         public string userContact { get; set; }
@@ -20,6 +22,7 @@ namespace pustakalaya_online_book_library.Entities
         public string userAddress { get; set; }
 
         public string profileURL { get; set; }
+
         public List<Review> Reviews { get; set; } = new List<Review>();
 
     }
