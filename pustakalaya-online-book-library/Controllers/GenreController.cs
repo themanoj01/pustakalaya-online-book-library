@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using pustakalaya_online_book_library.DTOs;
 using pustakalaya_online_book_library.Entities;
 using pustakalaya_online_book_library.Services.Interfaces;
 
@@ -34,11 +35,11 @@ namespace pustakalaya_online_book_library.Controllers
         }
 
         [HttpPost("Add")]
-        public async Task<IActionResult> Create([FromBody] Genre genre)
+        public async Task<IActionResult> Create([FromBody] GenreCreateDto genreDto)
         {
             try
             {
-                var created = await _genreService.CreateAsync(genre);
+                var created = await _genreService.CreateAsync(genreDto);
                 return Ok(created);
             }
             catch (InvalidOperationException ex)
@@ -48,11 +49,11 @@ namespace pustakalaya_online_book_library.Controllers
         }
 
         [HttpPut("{id:guid}")]
-        public async Task<IActionResult> Update(Guid id, [FromBody] Genre genre)
+        public async Task<IActionResult> Update(Guid id, [FromBody] GenreUpdateDto genreDto)
         {
             try
             {
-                await _genreService.UpdateAsync(id, genre);
+                await _genreService.UpdateAsync(id, genreDto);
                 return NoContent();
             }
             catch (KeyNotFoundException ex)

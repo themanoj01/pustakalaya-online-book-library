@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using pustakalaya_online_book_library.DTOs;
 using pustakalaya_online_book_library.Entities;
 using pustakalaya_online_book_library.Services.Interfaces;
 
@@ -47,7 +48,7 @@ namespace pustakalaya_online_book_library.Controllers
         }
 
         [HttpPost("Add")]
-        public async Task<IActionResult> Create([FromBody] Review review)
+        public async Task<IActionResult> Create([FromBody] ReviewCreateDto review)
         {
             try
             {
@@ -64,7 +65,7 @@ namespace pustakalaya_online_book_library.Controllers
             }
         }
         [HttpPut("{id:guid}")]
-        public async Task<IActionResult> Update(Guid id, [FromBody] Review review)
+        public async Task<IActionResult> Update(Guid id, [FromBody] ReviewUpdateDto review)
         {
             try
             {

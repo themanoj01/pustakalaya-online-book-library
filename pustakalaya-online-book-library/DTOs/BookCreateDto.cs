@@ -6,7 +6,7 @@ namespace pustakalaya_online_book_library.DTOs
     {
         [Required]
         [StringLength(200)]
-        public string Title { get; set; }
+        public string Title { get; set; } 
 
         [Required]
         [StringLength(13)]
