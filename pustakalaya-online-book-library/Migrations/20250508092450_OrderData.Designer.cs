@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using pustakalaya_online_book_library.Data;
@@ -11,9 +12,11 @@ using pustakalaya_online_book_library.Data;
 namespace pustakalaya_online_book_library.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    partial class ApplicationDBContextModelSnapshot : ModelSnapshot
+    [Migration("20250508092450_OrderData")]
+    partial class OrderData
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -26,9 +29,6 @@ namespace pustakalaya_online_book_library.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid?>("BookId")
                         .HasColumnType("uuid");
 
                     b.Property<string>("Description")
@@ -77,8 +77,6 @@ namespace pustakalaya_online_book_library.Migrations
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("BookId");
 
                     b.ToTable("Books");
                 });
@@ -216,34 +214,6 @@ namespace pustakalaya_online_book_library.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("pustakalaya_online_book_library.Entities.WishLists", b =>
-                {
-                    b.Property<Guid>("WishListId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("BookId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("WishListId");
-
-                    b.HasIndex("BookId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Wishlists");
-                });
-
-            modelBuilder.Entity("pustakalaya_online_book_library.Entities.Book", b =>
-                {
-                    b.HasOne("pustakalaya_online_book_library.Entities.Book", null)
-                        .WithMany("Books")
-                        .HasForeignKey("BookId");
-                });
-
             modelBuilder.Entity("pustakalaya_online_book_library.Entities.Cart", b =>
                 {
                     b.HasOne("pustakalaya_online_book_library.Entities.Users", "User")
@@ -304,29 +274,8 @@ namespace pustakalaya_online_book_library.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("pustakalaya_online_book_library.Entities.WishLists", b =>
-                {
-                    b.HasOne("pustakalaya_online_book_library.Entities.Book", "Book")
-                        .WithMany()
-                        .HasForeignKey("BookId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("pustakalaya_online_book_library.Entities.Users", "User")
-                        .WithMany("WishLists")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Book");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("pustakalaya_online_book_library.Entities.Book", b =>
                 {
-                    b.Navigation("Books");
-
                     b.Navigation("CartDetails");
                 });
 
@@ -339,8 +288,6 @@ namespace pustakalaya_online_book_library.Migrations
                 {
                     b.Navigation("Cart")
                         .IsRequired();
-
-                    b.Navigation("WishLists");
                 });
 #pragma warning restore 612, 618
         }
