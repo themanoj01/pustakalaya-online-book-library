@@ -72,5 +72,15 @@ namespace pustakalaya_online_book_library.Data
                 .OnDelete(DeleteBehavior.Cascade);
     }
 
+        public DbSet<Cart> Carts { get; set; }
+
+        public DbSet<Book> Books { get; set; }
+        public DbSet<CartDetails> CartDetails { get; set; }
+
+        public DbSet<Orders> Orders { get; set; }
+
+        public DbSet<OrderedProducts> OrderedProducts { get; set; }
+
+        public DbSet<WishLists> WishLists { get; set; }
     }
 }

@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using pustakalaya_online_book_library.Data;
@@ -11,9 +12,11 @@ using pustakalaya_online_book_library.Data;
 namespace pustakalaya_online_book_library.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    partial class ApplicationDBContextModelSnapshot : ModelSnapshot
+    [Migration("20250508095244_WishListData")]
+    partial class WishListData
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -22,30 +25,13 @@ namespace pustakalaya_online_book_library.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-
-            modelBuilder.Entity("pustakalaya_online_book_library.Entities.Author", b =>
             modelBuilder.Entity("pustakalaya_online_book_library.Entities.Book", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Authors");
-                });
-
-            modelBuilder.Entity("pustakalaya_online_book_library.Entities.Book", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                     b.Property<Guid?>("BookId")
-
                         .HasColumnType("uuid");
 
                     b.Property<string>("Description")
@@ -94,54 +80,6 @@ namespace pustakalaya_online_book_library.Migrations
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
-
-                    b.ToTable("Books");
-                });
-
-            modelBuilder.Entity("pustakalaya_online_book_library.Entities.BookAuthor", b =>
-                {
-                    b.Property<Guid>("BookId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("AuthorId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("BookId", "AuthorId");
-
-                    b.HasIndex("AuthorId");
-
-                    b.ToTable("BookAuthors");
-                });
-
-            modelBuilder.Entity("pustakalaya_online_book_library.Entities.BookGenre", b =>
-                {
-                    b.Property<Guid>("BookId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("GenreId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("BookId", "GenreId");
-
-                    b.HasIndex("GenreId");
-
-                    b.ToTable("BookGenres");
-                });
-
-            modelBuilder.Entity("pustakalaya_online_book_library.Entities.Genre", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Genres");
 
                     b.HasIndex("BookId");
 
@@ -247,29 +185,6 @@ namespace pustakalaya_online_book_library.Migrations
 
             modelBuilder.Entity("pustakalaya_online_book_library.Entities.Users", b =>
                 {
-
-                    b.Property<Guid>("UserId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("UserEmail")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("UserName")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("profileURL")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("userAddress")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("userContact")
-
                     b.Property<Guid>("userId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
@@ -299,22 +214,11 @@ namespace pustakalaya_online_book_library.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-
                     b.HasKey("userId");
 
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("pustakalaya_online_book_library.Entities.BookAuthor", b =>
-                {
-                    b.HasOne("pustakalaya_online_book_library.Entities.Author", "Author")
-                        .WithMany("BookAuthors")
-                        .HasForeignKey("AuthorId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("pustakalaya_online_book_library.Entities.Book", "Book")
-                        .WithMany("BookAuthors")
             modelBuilder.Entity("pustakalaya_online_book_library.Entities.WishLists", b =>
                 {
                     b.Property<Guid>("WishListId")
@@ -362,16 +266,6 @@ namespace pustakalaya_online_book_library.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Author");
-
-                    b.Navigation("Book");
-                });
-
-            modelBuilder.Entity("pustakalaya_online_book_library.Entities.BookGenre", b =>
-                {
-                    b.HasOne("pustakalaya_online_book_library.Entities.Book", "Book")
-                        .WithMany("BookGenres")
-
                     b.HasOne("pustakalaya_online_book_library.Entities.Cart", "Cart")
                         .WithMany("CartDetails")
                         .HasForeignKey("CartId")
@@ -391,10 +285,6 @@ namespace pustakalaya_online_book_library.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-
-                    b.HasOne("pustakalaya_online_book_library.Entities.Genre", "Genre")
-                        .WithMany("BookGenres")
-                        .HasForeignKey("GenreId")
                     b.HasOne("pustakalaya_online_book_library.Entities.Orders", "Orders")
                         .WithMany()
                         .HasForeignKey("OrderId")
@@ -403,12 +293,6 @@ namespace pustakalaya_online_book_library.Migrations
 
                     b.Navigation("Book");
 
-                    b.Navigation("Genre");
-                });
-
-            modelBuilder.Entity("pustakalaya_online_book_library.Entities.Author", b =>
-                {
-                    b.Navigation("BookAuthors");
                     b.Navigation("Orders");
                 });
 
@@ -444,15 +328,6 @@ namespace pustakalaya_online_book_library.Migrations
 
             modelBuilder.Entity("pustakalaya_online_book_library.Entities.Book", b =>
                 {
-                    b.Navigation("BookAuthors");
-
-                    b.Navigation("BookGenres");
-                });
-
-            modelBuilder.Entity("pustakalaya_online_book_library.Entities.Genre", b =>
-                {
-                    b.Navigation("BookGenres");
-
                     b.Navigation("Books");
 
                     b.Navigation("CartDetails");

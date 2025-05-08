@@ -9,6 +9,7 @@ namespace pustakalaya_online_book_library.Entities
     {
         [Key]
         public Guid userId { get; set; }
+
         [Required]
         public string userName { get; set; }
         [Required]
@@ -17,13 +18,19 @@ namespace pustakalaya_online_book_library.Entities
         [JsonIgnore]
         public string userPassword { get; set; }
         [Required]
+
+
+        public List<Review> Reviews { get; set; } = new List<Review>();
+
+        [StringLength(10, MinimumLength = 10)]
         public string userContact { get; set; }
         [Required]
         public string userAddress { get; set; }
 
         public string profileURL { get; set; }
 
-        public List<Review> Reviews { get; set; } = new List<Review>();
+        public virtual Cart Cart { get; set; }
 
+        public virtual ICollection<WishLists> WishLists { get; set; }
     }
 }
