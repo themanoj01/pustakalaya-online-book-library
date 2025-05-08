@@ -74,7 +74,6 @@ namespace pustakalaya_online_book_library.Data
 
         public DbSet<Cart> Carts { get; set; }
 
-        public DbSet<Book> Books { get; set; }
         public DbSet<CartDetails> CartDetails { get; set; }
 
         public DbSet<Orders> Orders { get; set; }

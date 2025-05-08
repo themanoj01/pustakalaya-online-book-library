@@ -1,7 +1,5 @@
 ﻿using CloudinaryDotNet.Actions;
 using CloudinaryDotNet;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using pustakalaya_online_book_library.Data;
 using pustakalaya_online_book_library.DTOs;
 using pustakalaya_online_book_library.Entities;
@@ -26,14 +24,14 @@ namespace pustakalaya_online_book_library.Services
 
         public async Task AddUserAsync(UserDTO userDTO)
         {
-           
+
 
             var existingUser = _context.Users.FirstOrDefault(u => u.userEmail.Equals(userDTO.userEmail));
             if (existingUser != null)
-            if (_context.Users.Any(u => u.userEmail == userDTO.userEmail))
-            {
-                throw new Exception("User already exists");
-            }
+                if (_context.Users.Any(u => u.userEmail == userDTO.userEmail))
+                {
+                    throw new Exception("User already exists");
+                }
 
             string imageUrl = null;
 
@@ -104,64 +102,71 @@ namespace pustakalaya_online_book_library.Services
             return token;
         }
 
-        public void UpdateUserDetails(UserDTO userDTO)
+        public async Task UpdateUserDetails(UserDTO userDTO)
+        {
+            var user = _context.Users.FirstOrDefault(u => u.userEmail.Equals(userDTO.userEmail));
+            if (user == null)
+            {
+                throw new Exception("User Not Found");
+            }
 
             await _emailService.SendEmailAsync(
                 toEmail: user.userEmail,
                 subject: "Account Registration",
                 body: $@"
-                        <html>
-                        <head>
-                        <style>
-                          .container {{
-                            font-family: Arial, sans-serif;
-                            max-width: 600px;
-                            margin: auto;
-                            padding: 20px;
-                            border: 1px solid #e0e0e0;
-                            border-radius: 10px;
-                            background-color: #f9f9f9;
-                           }}
-                        .header {{
-                            background-color: #4CAF50;
-                            color: white;
-                            padding: 10px 20px;
-                            border-radius: 10px 10px 0 0;
-                            text-align: center;
-                            font-size: 24px;
-                        }}
-                        .content {{
-                            padding: 20px;
-                            color: #333;
-                            font-size: 16px;
-                        }}
-                        .footer {{
-                            margin-top: 20px;
-                            font-size: 13px;
-                            color: #888;
-                            text-align: center;
-                        }}
-                    </style>
-                    </head>
-                    <body>
-                        <div class='container'>
-                            <div class='header'>
-                                Welcome to Pustakalaya
-                            </div>
-                        <div class='content'>
-                            <p>Dear <strong>{user.userName}</strong>,</p>
-                            <p>We’re excited to welcome you to <strong>Pustakalaya</strong>! Your account has been successfully registered.</p>
-                            <p>You can now explore a wide collection of books and manage your reading list with ease.</p>
-                            <p>Happy reading! 📖</p>
-                        </div>
-                        <div class='footer'>
-                            &copy; {DateTime.Now.Year} Pustakalaya Online Book Library
-                        </div>
-                        </div>
-                    </body>
-                    </html>"
+            <html>
+            <head>
+            <style>
+              .container {{
+                font-family: Arial, sans-serif;
+                max-width: 600px;
+                margin: auto;
+                padding: 20px;
+                border: 1px solid #e0e0e0;
+                border-radius: 10px;
+                background-color: #f9f9f9;
+              }}
+              .header {{
+                background-color: #4CAF50;
+                color: white;
+                padding: 10px 20px;
+                border-radius: 10px 10px 0 0;
+                text-align: center;
+                font-size: 24px;
+              }}
+              .content {{
+                padding: 20px;
+                color: #333;
+                font-size: 16px;
+              }}
+              .footer {{
+                margin-top: 20px;
+                font-size: 13px;
+                color: #888;
+                text-align: center;
+              }}
+            </style>
+            </head>
+            <body>
+                <div class='container'>
+                    <div class='header'>
+                        Welcome to Pustakalaya
+                    </div>
+                    <div class='content'>
+                        <p>Dear <strong>{user.userName}</strong>,</p>
+                        <p>We’re excited to welcome you to <strong>Pustakalaya</strong>! Your account has been successfully registered.</p>
+                        <p>You can now explore a wide collection of books and manage your reading list with ease.</p>
+                        <p>Happy reading! 📖</p>
+                    </div>
+                    <div class='footer'>
+                        &copy; {DateTime.Now.Year} Pustakalaya Online Book Library
+                    </div>
+                </div>
+            </body>
+            </html>"
             );
         }
+
 
         public async Task updateProfilePic(UserProfilePicDTO userProfilePicDTO)
         {
@@ -199,33 +204,6 @@ namespace pustakalaya_online_book_library.Services
             user.profileURL = imageUrl;
             _context.SaveChanges();
 
-        }
-
-        public Users findByUserId(Guid userId)
-        {
-            var user = _context.Users.FirstOrDefault(x => x.userId == userId);
-            return user;
-        }
-
-        public List<Users> getAllUsers()
-        {
-            return _context.Users.ToList();
-        }
-
-        public string login(LoginDTO loginDTO)
-        {
-            Users user = _context.Users.FirstOrDefault(u=> u.userEmail.Equals(loginDTO.email));
-            if (user == null) {
-                throw new Exception("User Email not Exist");
-            }
-
-            if(!BCrypt.Net.BCrypt.Verify(loginDTO.password, user.userPassword))
-            {
-                throw new Exception("Password not matched");
-            }
-
-            var token = _jwtService.GenerateToken(user);
-            return token;
         }
 
         public void updatePassword(Guid userId, UserPasswordDTO userPasswordDTO)
