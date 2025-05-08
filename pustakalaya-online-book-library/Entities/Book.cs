@@ -42,9 +42,6 @@ namespace pustakalaya_online_book_library.Entities
         public ICollection<BookGenre> BookGenres { get; set; }
         public List<Review> Reviews { get; set; } = new List<Review>();
 
-   
-       
-
         public ICollection<CartDetails> CartDetails { get; set; }
 
         public ICollection<Book> Books { get; set; }

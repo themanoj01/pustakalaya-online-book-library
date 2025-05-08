@@ -45,7 +45,7 @@ namespace pustakalaya_online_book_library.Controllers
             return Ok("Order Cancled Successfully");
         }
 
-        [HttpDelete("/cancle-order")]
+        [HttpDelete("/cancel-order")]
         public IActionResult CancleOrder([FromQuery] Guid orderId) 
         {
             _orderService.cancleOrder(orderId);
