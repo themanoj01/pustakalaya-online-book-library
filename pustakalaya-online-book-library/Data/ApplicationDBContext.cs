@@ -17,7 +17,7 @@ namespace pustakalaya_online_book_library.Data
         public DbSet<BookGenre> BookGenres { get; set; }
         public DbSet<Review> Reviews { get; set; }
         public DbSet<Announcement> Announcements { get; set; }
-
+        public DbSet<Discount> Discounts { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
