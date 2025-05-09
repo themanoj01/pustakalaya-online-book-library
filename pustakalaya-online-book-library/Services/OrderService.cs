@@ -20,7 +20,7 @@ namespace pustakalaya_online_book_library.Services
         {
             decimal totalAmount = 0;
 
-            var user = _context.Users.FirstOrDefault(u => u.userId == orderCreateDTO.UserId);
+            var user = _context.Users.FirstOrDefault(u => u.UserId == orderCreateDTO.UserId);
             if (user == null)
                 throw new Exception("User not found");
 
@@ -60,7 +60,7 @@ namespace pustakalaya_online_book_library.Services
             _context.SaveChanges();
 
             _emailService.SendEmailAsync(
-                toEmail: user.userEmail,
+                toEmail: user.UserEmail,
                 subject: "Order Confirmation",
                 body: $@"
                     <html>
@@ -106,7 +106,7 @@ namespace pustakalaya_online_book_library.Services
                             🛒 Order Confirmed!
                         </div>
                         <div class='content'>
-                            <p>Dear <strong>{user.userName}</strong>,</p>
+                            <p>Dear <strong>{user.UserName}</strong>,</p>
                             <p>Thank you for your purchase! Your order has been placed successfully.</p>
                             <p><strong>Order Details:</strong></p>
                             <ul>
@@ -130,7 +130,7 @@ namespace pustakalaya_online_book_library.Services
         public void cancleOrder(Guid orderId)
         {
             var order = _context.Orders.FirstOrDefault(order => order.OrderId == orderId);
-            var user = _context.Users.FirstOrDefault(storedUser => storedUser.userId == order.UserId);
+            var user = _context.Users.FirstOrDefault(storedUser => storedUser.UserId == order.UserId);
             if (user == null)
             {
                 throw new Exception("User Not Found");
@@ -145,7 +145,7 @@ namespace pustakalaya_online_book_library.Services
             _context.SaveChanges();
 
             _emailService.SendEmailAsync(
-                toEmail: user.userEmail,
+                toEmail: user.UserEmail,
                 subject: "Order Cancle",
                 body: $@"
                 <html>
@@ -187,7 +187,7 @@ namespace pustakalaya_online_book_library.Services
                             ❌ Order Cancelled
                         </div>
                         <div class='content'>
-                            <p>Dear <strong>{user.userName}</strong>,</p>
+                            <p>Dear <strong>{user.UserName}</strong>,</p>
                             <p>We're sorry to inform you that your order has been <strong>cancelled successfully</strong>.</p>
                             <p>If this was a mistake or you need further assistance, please don't hesitate to contact our support team.</p>
                             <p>We hope to serve you better next time!</p>
@@ -204,7 +204,7 @@ namespace pustakalaya_online_book_library.Services
         public void changeOrderStatus(Guid orderId)
         {
             var order = _context.Orders.FirstOrDefault(order => order.OrderId == orderId);
-            var user = _context.Users.FirstOrDefault(storedUser => storedUser.userId == order.UserId);
+            var user = _context.Users.FirstOrDefault(storedUser => storedUser.UserId == order.UserId);
             if (user == null)
             {
                 throw new Exception("User Not Found");
@@ -219,9 +219,9 @@ namespace pustakalaya_online_book_library.Services
             _context.SaveChanges();
 
             _emailService.SendEmailAsync(
-                toEmail: user.userEmail,
+                toEmail: user.UserEmail,
                 subject: "Order Status",
-                body: $"Dear {user.userName},<br/><br/>Your order has been Placed successfully."
+                body: $"Dear {user.UserName},<br/><br/>Your order has been Placed successfully."
             );
         }
 
@@ -232,7 +232,7 @@ namespace pustakalaya_online_book_library.Services
 
         public List<Orders> getOrderByUser(Guid userId)
         {
-            var user = _context.Users.FirstOrDefault(user => user.userId == userId);
+            var user = _context.Users.FirstOrDefault(user => user.UserId == userId);
             if(user == null)
             {
                 throw new Exception("User Not Found");
