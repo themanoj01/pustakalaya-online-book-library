@@ -19,9 +19,9 @@ namespace pustakalaya_online_book_library.Services
         {
             var claims = new[]
             {
-            new Claim("userId", user.userId.ToString()),
-            new Claim("Name", user.userName),
-            new Claim("Email", user.userEmail),
+            new Claim("userId", user.UserId.ToString()),
+            new Claim("Name", user.UserName),
+            new Claim("Email", user.UserEmail),
         };
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));

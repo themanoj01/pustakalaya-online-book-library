@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using pustakalaya_online_book_library.Data;
@@ -11,9 +12,11 @@ using pustakalaya_online_book_library.Data;
 namespace pustakalaya_online_book_library.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    partial class ApplicationDBContextModelSnapshot : ModelSnapshot
+    [Migration("20250509164221_UserChangeData")]
+    partial class UserChangeData
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -76,13 +79,13 @@ namespace pustakalaya_online_book_library.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<Guid?>("BookId")
+                        .HasColumnType("uuid");
+
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasMaxLength(1000)
                         .HasColumnType("character varying(1000)");
-
-                    b.Property<Guid?>("DiscountId")
-                        .HasColumnType("uuid");
 
                     b.Property<string>("Format")
                         .IsRequired()
@@ -126,7 +129,7 @@ namespace pustakalaya_online_book_library.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("DiscountId");
+                    b.HasIndex("BookId");
 
                     b.ToTable("Books");
                 });
@@ -200,31 +203,6 @@ namespace pustakalaya_online_book_library.Migrations
                     b.HasIndex("CartId");
 
                     b.ToTable("CartDetails");
-                });
-
-            modelBuilder.Entity("pustakalaya_online_book_library.Entities.Discount", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<double>("DiscountPercent")
-                        .HasColumnType("double precision");
-
-                    b.Property<DateTime?>("EndDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<DateTime?>("StartDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Discounts");
                 });
 
             modelBuilder.Entity("pustakalaya_online_book_library.Entities.Genre", b =>
@@ -409,11 +387,9 @@ namespace pustakalaya_online_book_library.Migrations
 
             modelBuilder.Entity("pustakalaya_online_book_library.Entities.Book", b =>
                 {
-                    b.HasOne("pustakalaya_online_book_library.Entities.Discount", "Discount")
-                        .WithMany()
-                        .HasForeignKey("DiscountId");
-
-                    b.Navigation("Discount");
+                    b.HasOne("pustakalaya_online_book_library.Entities.Book", null)
+                        .WithMany("Books")
+                        .HasForeignKey("BookId");
                 });
 
             modelBuilder.Entity("pustakalaya_online_book_library.Entities.BookAuthor", b =>
@@ -562,6 +538,8 @@ namespace pustakalaya_online_book_library.Migrations
                     b.Navigation("BookAuthors");
 
                     b.Navigation("BookGenres");
+
+                    b.Navigation("Books");
 
                     b.Navigation("CartDetails");
 

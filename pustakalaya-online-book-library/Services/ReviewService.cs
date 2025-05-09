@@ -23,7 +23,7 @@ namespace pustakalaya_online_book_library.Services
             {
                 throw new KeyNotFoundException($"Book with ID {reviewDto.BookId} not found.");
             }
-            if (!await _context.Users.AnyAsync(u => u.userId == reviewDto.UserId))
+            if (!await _context.Users.AnyAsync(u => u.UserId == reviewDto.UserId))
                 throw new KeyNotFoundException($"User with ID {reviewDto.UserId} not found.");
             if (await _context.Reviews.AnyAsync(r => r.BookId == reviewDto.BookId && r.UserId == reviewDto.UserId))
                 throw new InvalidOperationException($"User {reviewDto.UserId} has already reviewed Book {reviewDto.BookId}.");

@@ -17,7 +17,7 @@ namespace pustakalaya_online_book_library.Services
 
         public void AddToCart(CartDTO cartDto)
         {
-            var user = _context.Users.FirstOrDefault(u => u.userId == cartDto.UserId);
+            var user = _context.Users.FirstOrDefault(u => u.UserId == cartDto.UserId);
             if (user == null)
                 throw new Exception("User not found");
 
@@ -58,9 +58,11 @@ namespace pustakalaya_online_book_library.Services
             _context.SaveChanges();
         }
 
+
+
         public CartResponseDTO getCartByUserId(Guid userId)
         {
-            var user = _context.Users.FirstOrDefault(user => user.userId == userId);
+            var user = _context.Users.FirstOrDefault(user => user.UserId == userId);
             if (user == null) 
             {
                 throw new Exception("User Not Found");

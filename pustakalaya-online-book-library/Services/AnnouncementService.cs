@@ -22,7 +22,7 @@ namespace pustakalaya_online_book_library.Services
 
         public async Task<Announcement> CreateAsync(AnnouncementCreateDto announcementDto)
         {
-            if (!await _context.Users.AnyAsync(u => u.userId == announcementDto.UserId))
+            if (!await _context.Users.AnyAsync(u => u.UserId == announcementDto.UserId))
                 throw new KeyNotFoundException($"User with ID {announcementDto.UserId} not found.");
             var announcement = _mapper.Map<Announcement>(announcementDto);
             _context.Announcements.Add(announcement);
