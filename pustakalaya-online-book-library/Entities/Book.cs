@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace pustakalaya_online_book_library.Entities
 {
@@ -38,12 +39,15 @@ namespace pustakalaya_online_book_library.Entities
         public double Rating { get; set; } = 0.0;
 
         public int TotalSold { get; set; } = 0;
+
+        public Guid? DiscountId { get; set; }
+
+        [ForeignKey("DiscountId")]
+        public Discount? Discount { get; set; }
+
         public ICollection<BookAuthor> BookAuthors { get; set; }
         public ICollection<BookGenre> BookGenres { get; set; }
         public List<Review> Reviews { get; set; } = new List<Review>();
-
         public ICollection<CartDetails> CartDetails { get; set; }
-
-        public ICollection<Book> Books { get; set; }
     }
 }
