@@ -1,7 +1,10 @@
-﻿using pustakalaya_online_book_library.Data;
+﻿using PdfSharpCore.Drawing;
+using PdfSharpCore.Pdf;
+using pustakalaya_online_book_library.Data;
 using pustakalaya_online_book_library.DTOs;
 using pustakalaya_online_book_library.Entities;
 using pustakalaya_online_book_library.Services.Interfaces;
+using System.Security.Cryptography;
 
 namespace pustakalaya_online_book_library.Services
 {
@@ -16,6 +19,15 @@ namespace pustakalaya_online_book_library.Services
             _emailService = emailService;
         }
 
+        string GenerateClaimCode()
+        {
+            var bytes = new byte[6];
+            using var rng = RandomNumberGenerator.Create();
+            rng.GetBytes(bytes);
+            return BitConverter.ToString(bytes).Replace("-", "");
+        }
+
+
         public void AddOrder(OrderCreateDTO orderCreateDTO)
         {
             decimal totalAmount = 0;
@@ -23,13 +35,14 @@ namespace pustakalaya_online_book_library.Services
             var user = _context.Users.FirstOrDefault(u => u.UserId == orderCreateDTO.UserId);
             if (user == null)
                 throw new Exception("User not found");
-
+            string claimCode = GenerateClaimCode();
             var newOrder = new Orders
             {
                 OrderId = Guid.NewGuid(),
                 UserId = orderCreateDTO.UserId,
                 OrderDate = DateTime.UtcNow,
                 Status = "PENDING",
+                ClaimCode = claimCode,
                 PaymentStatus = orderCreateDTO.PaymentStatus,
                 TotalAmount = 0 
             };
@@ -58,6 +71,15 @@ namespace pustakalaya_online_book_library.Services
             newOrder.TotalAmount = totalAmount;
 
             _context.SaveChanges();
+
+            var orderedItems = orderCreateDTO.Products.Select(p =>
+            {
+                var book = _context.Books.FirstOrDefault(b => b.Id == p.BookId);
+                return (book.Title, p.Quantity, (decimal)book.Price);
+            }).ToList();
+
+            // 2. Generate PDF
+            var pdfBytes = GenerateInvoicePdf(newOrder, orderedItems);
 
             _emailService.SendEmailAsync(
                 toEmail: user.UserEmail,
@@ -111,7 +133,8 @@ namespace pustakalaya_online_book_library.Services
                             <p><strong>Order Details:</strong></p>
                             <ul>
                                 <li><span class='highlight'>Order ID:</span> {newOrder.OrderId}</li>
-                                <li><span class='highlight'>Total Amount:</span> ${newOrder.TotalAmount}</li>
+                                <li><span class='highlight'>Total Amount:</span> RS. {newOrder.TotalAmount}</li>
+                                <li><span class='highlight'>Claim Code:</span> {newOrder.ClaimCode}</li>
                                 <li><span class='highlight'>Date:</span> {DateTime.UtcNow.ToString("dd MMM yyyy HH:mm")} (UTC)</li>
                             </ul>
                             <p>You will receive another email once your order is shipped.</p>
@@ -123,7 +146,11 @@ namespace pustakalaya_online_book_library.Services
                         </div>
                     </div>
                 </body>
-                </html>"
+                </html>",
+                attachments: new Dictionary<string, byte[]>
+                {
+                    { "invoice.pdf", pdfBytes }
+                }
             );
         }
 
@@ -240,5 +267,61 @@ namespace pustakalaya_online_book_library.Services
 
             return _context.Orders.Where(o => o.UserId == userId).ToList();
         }
+
+        private byte[] GenerateInvoicePdf(Orders order, List<(string Title, int Quantity, decimal Price)> items)
+        {
+            using var stream = new MemoryStream();
+            var document = new PdfDocument();
+            var page = document.AddPage();
+            var gfx = XGraphics.FromPdfPage(page);
+
+            var fontRegular = new XFont("Arial", 12, XFontStyle.Regular);
+            var fontBold = new XFont("Arial", 14, XFontStyle.Bold);
+            var fontHeader = new XFont("Arial", 18, XFontStyle.BoldItalic);
+            double y = 40;
+
+            // Header
+            gfx.DrawString("PUSTAKALAYA INVOICE", fontHeader, XBrushes.DarkSlateBlue, new XRect(0, y, page.Width, 30), XStringFormats.TopCenter);
+            y += 40;
+
+            // Order Info
+            gfx.DrawString("Order Summary", fontBold, XBrushes.Black, 40, y); y += 25;
+            gfx.DrawString($"Order ID: {order.OrderId}", fontRegular, XBrushes.Black, 40, y); y += 20;
+            gfx.DrawString($"Claim Code: {order.ClaimCode}", fontRegular, XBrushes.Black, 40, y); y += 20;
+            gfx.DrawString($"Order Date: {order.OrderDate:dd MMM yyyy hh:mm tt}", fontRegular, XBrushes.Black, 40, y); y += 30;
+
+            // Table Header
+            gfx.DrawString("Book Title", fontBold, XBrushes.Black, 40, y);
+            gfx.DrawString("Quantity", fontBold, XBrushes.Black, 300, y);
+            gfx.DrawString("Price", fontBold, XBrushes.Black, 400, y);
+            y += 20;
+
+            gfx.DrawLine(XPens.Black, 40, y, page.Width - 40, y); y += 10;
+
+            decimal grandTotal = 0;
+
+            foreach (var item in items)
+            {
+                gfx.DrawString(item.Title, fontRegular, XBrushes.Black, 40, y);
+                gfx.DrawString(item.Quantity.ToString(), fontRegular, XBrushes.Black, 300, y);
+                gfx.DrawString($"Rs. {item.Price * item.Quantity:F2}", fontRegular, XBrushes.Black, 400, y);
+                y += 20;
+
+                grandTotal += item.Price * item.Quantity;
+            }
+
+            y += 10;
+            gfx.DrawLine(XPens.Black, 40, y, page.Width - 40, y); y += 20;
+
+            // Total
+            gfx.DrawString($"Total Amount: Rs. {grandTotal:F2}", fontBold, XBrushes.DarkGreen, 40, y); y += 30;
+
+            // Footer
+            gfx.DrawString("Thank you for shopping with Pustakalaya! 📖", fontRegular, XBrushes.Gray, new XRect(0, y, page.Width, page.Height - y), XStringFormats.TopCenter);
+
+            document.Save(stream, false);
+            return stream.ToArray();
+        }
+
     }
 }

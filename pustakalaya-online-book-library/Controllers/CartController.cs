@@ -42,7 +42,7 @@ namespace pustakalaya_online_book_library.Controllers
         public IActionResult DecreaseItem([FromBody] CartItemQuantity cartItemQuantity)
         {
             _cartService.DecreaseItemQuantity(cartItemQuantity);
-            return Ok("Item Increased");
+            return Ok("Item Decreased");
         }
 
         [HttpDelete("/delete-item")]

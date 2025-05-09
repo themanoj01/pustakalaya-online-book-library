@@ -15,7 +15,7 @@ namespace pustakalaya_online_book_library.Services
             _smtpSettings = smtpSettings.Value;
         }
 
-        public async Task SendEmailAsync(string toEmail, string subject, string body)
+        public async Task SendEmailAsync(string toEmail, string subject, string body, Dictionary<string, byte[]> attachments = null)
         {
             var mailMessage = new MailMessage
             {
@@ -26,6 +26,14 @@ namespace pustakalaya_online_book_library.Services
             };
 
             mailMessage.To.Add(toEmail);
+            if (attachments != null)
+            {
+                foreach (var attachment in attachments)
+                {
+                    var memoryStream = new MemoryStream(attachment.Value);
+                    mailMessage.Attachments.Add(new Attachment(memoryStream, attachment.Key, "application/pdf"));
+                }
+            }
 
             using (var client = new SmtpClient(_smtpSettings.Host, _smtpSettings.Port))
             {

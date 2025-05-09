@@ -20,6 +20,9 @@ namespace pustakalaya_online_book_library.Entities
         public decimal TotalAmount { get; set; }
 
         [Required]
+        public string ClaimCode { get; set; }
+
+        [Required]
         [StringLength(10)]
         public string PaymentStatus { get; set; }
 
