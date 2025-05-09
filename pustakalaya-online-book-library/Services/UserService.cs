@@ -64,13 +64,68 @@ namespace pustakalaya_online_book_library.Services
                 UserName = userDTO.userName,
                 ProfileURL = imageUrl,
                 UserAddress = userDTO.userAddress,
+                OrderCount = 0,
                 UserContact = userDTO.userContact,
                 UserPassword = BCrypt.Net.BCrypt.HashPassword(userDTO.userPassword)
             };
 
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
-
+            await _emailService.SendEmailAsync(
+                toEmail: user.UserEmail,
+                subject: "Account Registration",
+                body: $@"
+                        <html>
+                        <head>
+                        <style>
+                          .container {{
+                            font-family: Arial, sans-serif;
+                            max-width: 600px;
+                            margin: auto;
+                            padding: 20px;
+                            border: 1px solid #e0e0e0;
+                            border-radius: 10px;
+                            background-color: #f9f9f9;
+                           }}
+                        .header {{
+                            background-color: #4CAF50;
+                            color: white;
+                            padding: 10px 20px;
+                            border-radius: 10px 10px 0 0;
+                            text-align: center;
+                            font-size: 24px;
+                        }}
+                        .content {{
+                            padding: 20px;
+                            color: #333;
+                            font-size: 16px;
+                        }}
+                        .footer {{
+                            margin-top: 20px;
+                            font-size: 13px;
+                            color: #888;
+                            text-align: center;
+                        }}
+                    </style>
+                    </head>
+                    <body>
+                        <div class='container'>
+                            <div class='header'>
+                                Welcome to Pustakalaya
+                            </div>
+                        <div class='content'>
+                            <p>Dear <strong>{user.UserName}</strong>,</p>
+                            <p>We’re excited to welcome you to <strong>Pustakalaya</strong>! Your account has been successfully registered.</p>
+                            <p>You can now explore a wide collection of books and manage your reading list with ease.</p>
+                            <p>Happy reading! 📖</p>
+                        </div>
+                        <div class='footer'>
+                            &copy; {DateTime.Now.Year} Pustakalaya Online Book Library
+                        </div>
+                        </div>
+                    </body>
+                    </html>"
+            );
         }
 
 
@@ -209,7 +264,8 @@ namespace pustakalaya_online_book_library.Services
         public void updatePassword(Guid userId, UserPasswordDTO userPasswordDTO)
         {
             var users = _context.Users.FirstOrDefault(user => user.UserId.Equals(userId));
-            if (users == null) {
+            if (users == null)
+            {
                 throw new BadHttpRequestException("User Not Found");
             }
             if (!BCrypt.Net.BCrypt.Verify(userPasswordDTO.oldPassword, users.UserPassword))
@@ -220,7 +276,7 @@ namespace pustakalaya_online_book_library.Services
             _context.SaveChanges();
         }
 
-        
+
 
         public void UpdateUserDetails(UpdateUserDTO userDTO)
         {

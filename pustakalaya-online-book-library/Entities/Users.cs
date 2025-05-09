@@ -19,7 +19,6 @@ namespace pustakalaya_online_book_library.Entities
         public string UserPassword { get; set; }
         [Required]
 
-
         public List<Review> Reviews { get; set; } = new List<Review>();
 
         [StringLength(10, MinimumLength = 10)]
@@ -28,6 +27,8 @@ namespace pustakalaya_online_book_library.Entities
         public string UserAddress { get; set; }
 
         public string ProfileURL { get; set; }
+
+        public int OrderCount { get; set; }
 
         public virtual Cart Cart { get; set; }
 
