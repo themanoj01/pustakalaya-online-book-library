@@ -1,7 +1,10 @@
-﻿using pustakalaya_online_book_library.Data;
+﻿using PdfSharpCore.Drawing;
+using PdfSharpCore.Pdf;
+using pustakalaya_online_book_library.Data;
 using pustakalaya_online_book_library.DTOs;
 using pustakalaya_online_book_library.Entities;
 using pustakalaya_online_book_library.Services.Interfaces;
+using System.Security.Cryptography;
 
 namespace pustakalaya_online_book_library.Services
 {
@@ -16,20 +19,30 @@ namespace pustakalaya_online_book_library.Services
             _emailService = emailService;
         }
 
+        string GenerateClaimCode()
+        {
+            var bytes = new byte[6];
+            using var rng = RandomNumberGenerator.Create();
+            rng.GetBytes(bytes);
+            return BitConverter.ToString(bytes).Replace("-", "");
+        }
+
+
         public void AddOrder(OrderCreateDTO orderCreateDTO)
         {
             decimal totalAmount = 0;
 
-            var user = _context.Users.FirstOrDefault(u => u.userId == orderCreateDTO.UserId);
+            var user = _context.Users.FirstOrDefault(u => u.UserId == orderCreateDTO.UserId);
             if (user == null)
                 throw new Exception("User not found");
-
+            string claimCode = GenerateClaimCode();
             var newOrder = new Orders
             {
                 OrderId = Guid.NewGuid(),
                 UserId = orderCreateDTO.UserId,
                 OrderDate = DateTime.UtcNow,
                 Status = "PENDING",
+                ClaimCode = claimCode,
                 PaymentStatus = orderCreateDTO.PaymentStatus,
                 TotalAmount = 0 
             };
@@ -59,8 +72,17 @@ namespace pustakalaya_online_book_library.Services
 
             _context.SaveChanges();
 
+            var orderedItems = orderCreateDTO.Products.Select(p =>
+            {
+                var book = _context.Books.FirstOrDefault(b => b.Id == p.BookId);
+                return (book.Title, p.Quantity, (decimal)book.Price);
+            }).ToList();
+
+            // 2. Generate PDF
+            var pdfBytes = GenerateInvoicePdf(newOrder, orderedItems);
+
             _emailService.SendEmailAsync(
-                toEmail: user.userEmail,
+                toEmail: user.UserEmail,
                 subject: "Order Confirmation",
                 body: $@"
                     <html>
@@ -106,12 +128,13 @@ namespace pustakalaya_online_book_library.Services
                             🛒 Order Confirmed!
                         </div>
                         <div class='content'>
-                            <p>Dear <strong>{user.userName}</strong>,</p>
+                            <p>Dear <strong>{user.UserName}</strong>,</p>
                             <p>Thank you for your purchase! Your order has been placed successfully.</p>
                             <p><strong>Order Details:</strong></p>
                             <ul>
                                 <li><span class='highlight'>Order ID:</span> {newOrder.OrderId}</li>
-                                <li><span class='highlight'>Total Amount:</span> ${newOrder.TotalAmount}</li>
+                                <li><span class='highlight'>Total Amount:</span> RS. {newOrder.TotalAmount}</li>
+                                <li><span class='highlight'>Claim Code:</span> {newOrder.ClaimCode}</li>
                                 <li><span class='highlight'>Date:</span> {DateTime.UtcNow.ToString("dd MMM yyyy HH:mm")} (UTC)</li>
                             </ul>
                             <p>You will receive another email once your order is shipped.</p>
@@ -123,14 +146,18 @@ namespace pustakalaya_online_book_library.Services
                         </div>
                     </div>
                 </body>
-                </html>"
+                </html>",
+                attachments: new Dictionary<string, byte[]>
+                {
+                    { "invoice.pdf", pdfBytes }
+                }
             );
         }
 
         public void cancleOrder(Guid orderId)
         {
             var order = _context.Orders.FirstOrDefault(order => order.OrderId == orderId);
-            var user = _context.Users.FirstOrDefault(storedUser => storedUser.userId == order.UserId);
+            var user = _context.Users.FirstOrDefault(storedUser => storedUser.UserId == order.UserId);
             if (user == null)
             {
                 throw new Exception("User Not Found");
@@ -145,7 +172,7 @@ namespace pustakalaya_online_book_library.Services
             _context.SaveChanges();
 
             _emailService.SendEmailAsync(
-                toEmail: user.userEmail,
+                toEmail: user.UserEmail,
                 subject: "Order Cancle",
                 body: $@"
                 <html>
@@ -187,7 +214,7 @@ namespace pustakalaya_online_book_library.Services
                             ❌ Order Cancelled
                         </div>
                         <div class='content'>
-                            <p>Dear <strong>{user.userName}</strong>,</p>
+                            <p>Dear <strong>{user.UserName}</strong>,</p>
                             <p>We're sorry to inform you that your order has been <strong>cancelled successfully</strong>.</p>
                             <p>If this was a mistake or you need further assistance, please don't hesitate to contact our support team.</p>
                             <p>We hope to serve you better next time!</p>
@@ -204,7 +231,7 @@ namespace pustakalaya_online_book_library.Services
         public void changeOrderStatus(Guid orderId)
         {
             var order = _context.Orders.FirstOrDefault(order => order.OrderId == orderId);
-            var user = _context.Users.FirstOrDefault(storedUser => storedUser.userId == order.UserId);
+            var user = _context.Users.FirstOrDefault(storedUser => storedUser.UserId == order.UserId);
             if (user == null)
             {
                 throw new Exception("User Not Found");
@@ -219,9 +246,59 @@ namespace pustakalaya_online_book_library.Services
             _context.SaveChanges();
 
             _emailService.SendEmailAsync(
-                toEmail: user.userEmail,
+                toEmail: user.UserEmail,
                 subject: "Order Status",
-                body: $"Dear {user.userName},<br/><br/>Your order has been Placed successfully."
+                body: $@"
+                    <html>
+                        <head>
+                        <style>
+                            .container {{
+                                font-family: Arial, sans-serif;
+                                max-width: 600px;
+                                margin: auto;
+                                padding: 20px;
+                                background-color: #f1fdf5;
+                                border: 1px solid #c6e9d8;
+                                border-radius: 8px;
+                            }}
+                            .header {{
+                                background-color: #198754;
+                                color: white;
+                                padding: 15px;
+                                font-size: 22px;
+                                text-align: center;
+                                border-radius: 8px 8px 0 0;
+                            }}
+                            .content {{
+                                padding: 20px;
+                                font-size: 16px;
+                                color: #333;
+                            }}
+                            .footer {{
+                                text-align: center;
+                                font-size: 13px;
+                                color: #777;
+                                margin-top: 30px;
+                            }}
+                        </style>
+                    </head>
+                    <body>
+                        <div class='container'>
+                            <div class='header'>
+                                ✅ Order Collected Successfully
+                            </div>
+                            <div class='content'>
+                                <p>Dear <strong>{user.UserName}</strong>,</p>
+                                <p>This is to confirm that your order has been <strong>processed and collected successfully</strong>.</p>
+                                <p>We hope you enjoy your books!</p>
+                                <p>Thank you for using <strong>Pustakalaya</strong>. We look forward to serving you again soon.</p>
+                            </div>
+                            <div class='footer'>
+                                &copy; {DateTime.Now.Year} Pustakalaya Online Book Library
+                            </div>
+                        </div>
+                    </body>
+                    </html>"
             );
         }
 
@@ -232,7 +309,7 @@ namespace pustakalaya_online_book_library.Services
 
         public List<Orders> getOrderByUser(Guid userId)
         {
-            var user = _context.Users.FirstOrDefault(user => user.userId == userId);
+            var user = _context.Users.FirstOrDefault(user => user.UserId == userId);
             if(user == null)
             {
                 throw new Exception("User Not Found");
@@ -240,5 +317,61 @@ namespace pustakalaya_online_book_library.Services
 
             return _context.Orders.Where(o => o.UserId == userId).ToList();
         }
+
+        private byte[] GenerateInvoicePdf(Orders order, List<(string Title, int Quantity, decimal Price)> items)
+        {
+            using var stream = new MemoryStream();
+            var document = new PdfDocument();
+            var page = document.AddPage();
+            var gfx = XGraphics.FromPdfPage(page);
+
+            var fontRegular = new XFont("Arial", 12, XFontStyle.Regular);
+            var fontBold = new XFont("Arial", 14, XFontStyle.Bold);
+            var fontHeader = new XFont("Arial", 18, XFontStyle.BoldItalic);
+            double y = 40;
+
+            // Header
+            gfx.DrawString("PUSTAKALAYA INVOICE", fontHeader, XBrushes.DarkSlateBlue, new XRect(0, y, page.Width, 30), XStringFormats.TopCenter);
+            y += 40;
+
+            // Order Info
+            gfx.DrawString("Order Summary", fontBold, XBrushes.Black, 40, y); y += 25;
+            gfx.DrawString($"Order ID: {order.OrderId}", fontRegular, XBrushes.Black, 40, y); y += 20;
+            gfx.DrawString($"Claim Code: {order.ClaimCode}", fontRegular, XBrushes.Black, 40, y); y += 20;
+            gfx.DrawString($"Order Date: {order.OrderDate:dd MMM yyyy hh:mm tt}", fontRegular, XBrushes.Black, 40, y); y += 30;
+
+            // Table Header
+            gfx.DrawString("Book Title", fontBold, XBrushes.Black, 40, y);
+            gfx.DrawString("Quantity", fontBold, XBrushes.Black, 300, y);
+            gfx.DrawString("Price", fontBold, XBrushes.Black, 400, y);
+            y += 20;
+
+            gfx.DrawLine(XPens.Black, 40, y, page.Width - 40, y); y += 10;
+
+            decimal grandTotal = 0;
+
+            foreach (var item in items)
+            {
+                gfx.DrawString(item.Title, fontRegular, XBrushes.Black, 40, y);
+                gfx.DrawString(item.Quantity.ToString(), fontRegular, XBrushes.Black, 300, y);
+                gfx.DrawString($"Rs. {item.Price * item.Quantity:F2}", fontRegular, XBrushes.Black, 400, y);
+                y += 20;
+
+                grandTotal += item.Price * item.Quantity;
+            }
+
+            y += 10;
+            gfx.DrawLine(XPens.Black, 40, y, page.Width - 40, y); y += 20;
+
+            // Total
+            gfx.DrawString($"Total Amount: Rs. {grandTotal:F2}", fontBold, XBrushes.DarkGreen, 40, y); y += 30;
+
+            // Footer
+            gfx.DrawString("Thank you for shopping with Pustakalaya! 📖", fontRegular, XBrushes.Gray, new XRect(0, y, page.Width, page.Height - y), XStringFormats.TopCenter);
+
+            document.Save(stream, false);
+            return stream.ToArray();
+        }
+
     }
 }

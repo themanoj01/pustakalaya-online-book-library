@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using pustakalaya_online_book_library.Data;
@@ -11,9 +12,11 @@ using pustakalaya_online_book_library.Data;
 namespace pustakalaya_online_book_library.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    partial class ApplicationDBContextModelSnapshot : ModelSnapshot
+    [Migration("20250509161056_ClaimCodeData")]
+    partial class ClaimCodeData
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -313,39 +316,36 @@ namespace pustakalaya_online_book_library.Migrations
 
             modelBuilder.Entity("pustakalaya_online_book_library.Entities.Users", b =>
                 {
-                    b.Property<Guid>("UserId")
+                    b.Property<Guid>("userId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<int>("OrderCount")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("ProfileURL")
+                    b.Property<string>("profileURL")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("UserAddress")
+                    b.Property<string>("userAddress")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("UserContact")
+                    b.Property<string>("userContact")
                         .IsRequired()
                         .HasMaxLength(10)
                         .HasColumnType("character varying(10)");
 
-                    b.Property<string>("UserEmail")
+                    b.Property<string>("userEmail")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("UserName")
+                    b.Property<string>("userName")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("UserPassword")
+                    b.Property<string>("userPassword")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.HasKey("UserId");
+                    b.HasKey("userId");
 
                     b.ToTable("Users");
                 });

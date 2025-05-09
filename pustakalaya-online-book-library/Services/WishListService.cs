@@ -15,7 +15,7 @@ namespace pustakalaya_online_book_library.Services
 
         public string ToggleWishList(Guid userId, Guid bookId)
         {
-            var user = _context.Users.FirstOrDefault(u => u.userId == userId);
+            var user = _context.Users.FirstOrDefault(u => u.UserId == userId);
             if (user == null)
                 throw new Exception("User not found");
 

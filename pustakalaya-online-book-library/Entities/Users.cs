@@ -8,26 +8,28 @@ namespace pustakalaya_online_book_library.Entities
     public class Users
     {
         [Key]
-        public Guid userId { get; set; }
+        public Guid UserId { get; set; }
 
         [Required]
-        public string userName { get; set; }
+        public string UserName { get; set; }
         [Required]
-        public string userEmail { get; set; }
+        public string UserEmail { get; set; }
         [Required]
         [JsonIgnore]
-        public string userPassword { get; set; }
+        public string UserPassword { get; set; }
         [Required]
 
 
         public List<Review> Reviews { get; set; } = new List<Review>();
 
         [StringLength(10, MinimumLength = 10)]
-        public string userContact { get; set; }
+        public string UserContact { get; set; }
         [Required]
-        public string userAddress { get; set; }
+        public string UserAddress { get; set; }
 
-        public string profileURL { get; set; }
+        public string ProfileURL { get; set; }
+
+        public int OrderCount { get; set; }
 
         public virtual Cart Cart { get; set; }
 
