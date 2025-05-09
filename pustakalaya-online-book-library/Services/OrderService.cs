@@ -248,57 +248,7 @@ namespace pustakalaya_online_book_library.Services
             _emailService.SendEmailAsync(
                 toEmail: user.UserEmail,
                 subject: "Order Status",
-                body: $@"
-                    <html>
-                        <head>
-                        <style>
-                            .container {{
-                                font-family: Arial, sans-serif;
-                                max-width: 600px;
-                                margin: auto;
-                                padding: 20px;
-                                background-color: #f1fdf5;
-                                border: 1px solid #c6e9d8;
-                                border-radius: 8px;
-                            }}
-                            .header {{
-                                background-color: #198754;
-                                color: white;
-                                padding: 15px;
-                                font-size: 22px;
-                                text-align: center;
-                                border-radius: 8px 8px 0 0;
-                            }}
-                            .content {{
-                                padding: 20px;
-                                font-size: 16px;
-                                color: #333;
-                            }}
-                            .footer {{
-                                text-align: center;
-                                font-size: 13px;
-                                color: #777;
-                                margin-top: 30px;
-                            }}
-                        </style>
-                    </head>
-                    <body>
-                        <div class='container'>
-                            <div class='header'>
-                                ✅ Order Collected Successfully
-                            </div>
-                            <div class='content'>
-                                <p>Dear <strong>{user.UserName}</strong>,</p>
-                                <p>This is to confirm that your order has been <strong>processed and collected successfully</strong>.</p>
-                                <p>We hope you enjoy your books!</p>
-                                <p>Thank you for using <strong>Pustakalaya</strong>. We look forward to serving you again soon.</p>
-                            </div>
-                            <div class='footer'>
-                                &copy; {DateTime.Now.Year} Pustakalaya Online Book Library
-                            </div>
-                        </div>
-                    </body>
-                    </html>"
+                body: $"Dear {user.UserName},<br/><br/>Your order has been Placed successfully."
             );
         }
 

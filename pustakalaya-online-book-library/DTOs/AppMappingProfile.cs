@@ -18,6 +18,9 @@ namespace pustakalaya_online_book_library.DTOs
 
                 CreateMap<AnnouncementCreateDto, Announcement>();
                 CreateMap<AnnouncementUpdateDto, Announcement>();
+
+                CreateMap<CreateDiscountDto, Discount>();
+                CreateMap<UpdateDiscountDto, Discount>();
         }
     }
 }

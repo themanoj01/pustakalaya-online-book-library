@@ -264,7 +264,8 @@ namespace pustakalaya_online_book_library.Services
         public void updatePassword(Guid userId, UserPasswordDTO userPasswordDTO)
         {
             var users = _context.Users.FirstOrDefault(user => user.UserId.Equals(userId));
-            if (users == null) {
+            if (users == null)
+            {
                 throw new BadHttpRequestException("User Not Found");
             }
             if (!BCrypt.Net.BCrypt.Verify(userPasswordDTO.oldPassword, users.UserPassword))
@@ -275,7 +276,7 @@ namespace pustakalaya_online_book_library.Services
             _context.SaveChanges();
         }
 
-        
+
 
         public void UpdateUserDetails(UpdateUserDTO userDTO)
         {

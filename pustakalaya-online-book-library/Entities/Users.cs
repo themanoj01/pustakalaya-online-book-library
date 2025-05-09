@@ -19,7 +19,6 @@ namespace pustakalaya_online_book_library.Entities
         public string UserPassword { get; set; }
         [Required]
 
-
         public List<Review> Reviews { get; set; } = new List<Review>();
 
         [StringLength(10, MinimumLength = 10)]
