@@ -42,7 +42,7 @@ namespace pustakalaya_online_book_library.Controllers
         public IActionResult ChangeOrderStatus([FromQuery] Guid orderId)
         {
             _orderService.changeOrderStatus(orderId);
-            return Ok("Order Cancled Successfully");
+            return Ok("Order Delivered Successfully");
         }
 
         [HttpDelete("/cancel-order")]
