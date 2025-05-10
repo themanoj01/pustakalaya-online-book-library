@@ -1,0 +1,78 @@
+import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
+import BookDetails from '../components/books/BookDetails';
+import BookCard from '../components/books/BookCard';
+import { books } from '../data/books';
+import './BookDetailsPage.css';
+
+const BookDetailsPage = () => {
+  const { id } = useParams();
+  const [book, setBook] = useState(null);
+  const [relatedBooks, setRelatedBooks] = useState([]);
+  const [loading, setLoading] = useState(true);
+  
+  useEffect(() => {
+    // Simulate API call to get book by ID
+    const bookId = parseInt(id);
+    const foundBook = books.find(b => b.id === bookId);
+    
+    if (foundBook) {
+      setBook(foundBook);
+      
+      // Find related books with same genre
+      const genre = foundBook.genre;
+      const related = books
+        .filter(b => b.id !== bookId && b.genre === genre)
+        .slice(0, 4);
+      
+      setRelatedBooks(related);
+    }
+    
+    setLoading(false);
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div className="book-details-page loading">
+        <div className="container">
+          <div className="loading-spinner"></div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!book) {
+    return (
+      <div className="book-details-page not-found">
+        <div className="container">
+          <h2>Book Not Found</h2>
+          <p>Sorry, the book you're looking for doesn't exist or has been removed.</p>
+          <a href="/catalog" className="btn-primary">Browse Books</a>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="book-details-page">
+      <div className="container">
+        <BookDetails book={book} />
+        
+        {relatedBooks.length > 0 && (
+          <div className="related-books">
+            <h2>You May Also Like</h2>
+            <div className="related-books-grid">
+              {relatedBooks.map(book => (
+                <div key={book.id} className="related-book-item">
+                  <BookCard book={book} />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default BookDetailsPage;

@@ -1,0 +1,68 @@
+.banner {
+  padding: var(--space-2) 0;
+  width: 100%;
+  text-align: center;
+  position: relative;
+  z-index: var(--z-index-fixed);
+}
+
+.banner.default {
+  background-color: var(--color-primary-100);
+  color: var(--color-primary-800);
+}
+
+.banner.sale {
+  background-color: var(--color-accent-100);
+  color: var(--color-accent-800);
+}
+
+.banner.new {
+  background-color: var(--color-secondary-100);
+  color: var(--color-secondary-800);
+}
+
+.banner.important {
+  background-color: var(--color-error-100);
+  color: var(--color-error-800);
+}
+
+.banner-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  padding: var(--space-1) var(--space-4);
+}
+
+.banner p {
+  margin: 0;
+  font-weight: 600;
+  font-size: var(--font-size-sm);
+}
+
+.banner-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  position: absolute;
+  right: var(--space-4);
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: currentColor;
+  opacity: 0.7;
+  transition: opacity var(--transition-fast) ease-in-out;
+}
+
+.banner-close:hover {
+  opacity: 1;
+}
+
+@media (max-width: 768px) {
+  .banner p {
+    font-size: var(--font-size-xs);
+    padding-right: var(--space-8);
+  }
+}

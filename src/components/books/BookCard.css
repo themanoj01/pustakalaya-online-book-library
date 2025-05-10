@@ -1,0 +1,223 @@
+.book-card {
+  background-color: white;
+  border-radius: var(--border-radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  transition: transform var(--transition-normal) ease-in-out, box-shadow var(--transition-normal) ease-in-out;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.book-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-md);
+}
+
+.book-card-link {
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.book-card-image {
+  position: relative;
+  height: 260px;
+  overflow: hidden;
+}
+
+.book-card-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform var(--transition-normal) ease-in-out;
+}
+
+.book-card:hover .book-card-image img {
+  transform: scale(1.05);
+}
+
+.book-discount-badge {
+  position: absolute;
+  top: var(--space-2);
+  left: var(--space-2);
+  background-color: var(--color-accent-500);
+  color: white;
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--border-radius);
+  z-index: 1;
+}
+
+.book-badge {
+  position: absolute;
+  top: var(--space-2);
+  right: var(--space-2);
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--border-radius);
+  z-index: 1;
+}
+
+.book-badge.bestseller {
+  background-color: var(--color-primary-600);
+  color: white;
+}
+
+.book-badge.new-release {
+  background-color: var(--color-secondary-600);
+  color: white;
+}
+
+.book-badge.award-winner {
+  background-color: var(--color-warning-500);
+  color: white;
+}
+
+.book-card-content {
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.book-title {
+  font-size: var(--font-size-lg);
+  margin: 0 0 var(--space-2);
+  color: var(--color-neutral-900);
+  font-weight: 700;
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.book-author {
+  font-size: var(--font-size-sm);
+  color: var(--color-neutral-600);
+  margin-bottom: var(--space-2);
+}
+
+.book-rating {
+  display: flex;
+  align-items: center;
+  margin-bottom: var(--space-2);
+}
+
+.stars {
+  display: flex;
+  margin-right: var(--space-1);
+}
+
+.stars .filled {
+  color: var(--color-warning-500);
+}
+
+.stars .empty {
+  color: var(--color-neutral-300);
+}
+
+.rating-value {
+  font-size: var(--font-size-xs);
+  color: var(--color-neutral-600);
+}
+
+.book-price {
+  margin-top: auto;
+  margin-bottom: var(--space-2);
+  display: flex;
+  align-items: center;
+}
+
+.original-price {
+  font-size: var(--font-size-sm);
+  color: var(--color-neutral-500);
+  text-decoration: line-through;
+  margin-right: var(--space-2);
+}
+
+.current-price {
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  color: var(--color-neutral-900);
+}
+
+.book-format {
+  font-size: var(--font-size-xs);
+  color: var(--color-neutral-600);
+  border: 1px solid var(--color-neutral-200);
+  border-radius: var(--border-radius);
+  padding: var(--space-1) var(--space-2);
+  display: inline-block;
+}
+
+.book-card-actions {
+  padding: 0 var(--space-4) var(--space-4);
+  display: flex;
+  gap: var(--space-2);
+}
+
+.cart-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  background-color: var(--color-primary-600);
+  color: white;
+  border: none;
+  border-radius: var(--border-radius);
+  padding: var(--space-2) var(--space-3);
+  font-weight: 600;
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  transition: background-color var(--transition-fast) ease-in-out;
+}
+
+.cart-btn:hover {
+  background-color: var(--color-primary-700);
+}
+
+.bookmark-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: white;
+  color: var(--color-neutral-500);
+  border: 1px solid var(--color-neutral-300);
+  border-radius: var(--border-radius);
+  width: 40px;
+  height: 40px;
+  cursor: pointer;
+  transition: all var(--transition-fast) ease-in-out;
+}
+
+.bookmark-btn:hover {
+  border-color: var(--color-primary-400);
+  color: var(--color-primary-600);
+}
+
+.bookmark-btn.bookmarked {
+  background-color: var(--color-primary-50);
+  border-color: var(--color-primary-400);
+  color: var(--color-primary-600);
+}
+
+@media (max-width: 768px) {
+  .book-card-image {
+    height: 220px;
+  }
+  
+  .book-title {
+    font-size: var(--font-size-base);
+  }
+  
+  .current-price {
+    font-size: var(--font-size-base);
+  }
+}

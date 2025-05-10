@@ -1,0 +1,315 @@
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: var(--z-index-fixed);
+  background-color: transparent;
+  padding: var(--space-4) 0;
+  transition: all var(--transition-normal) ease-in-out;
+}
+
+.header.scrolled {
+  background-color: white;
+  box-shadow: var(--shadow);
+  padding: var(--space-2) 0;
+}
+
+.header-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.header-logo {
+  flex: 0 0 auto;
+}
+
+.header-logo a {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.header-logo h1 {
+  font-size: var(--font-size-2xl);
+  margin: 0;
+  color: var(--color-primary-800);
+  transition: all var(--transition-normal) ease-in-out;
+}
+
+.scrolled .header-logo h1 {
+  font-size: var(--font-size-xl);
+}
+
+.header-search {
+  flex: 1 0 auto;
+  max-width: 500px;
+  margin: 0 var(--space-4);
+  transition: all var(--transition-normal) ease-in-out;
+}
+
+.header-search form {
+  display: flex;
+  position: relative;
+}
+
+.header-search input {
+  flex: 1;
+  padding: var(--space-2) var(--space-4);
+  padding-right: var(--space-10);
+  border: 1px solid var(--color-neutral-300);
+  border-radius: var(--border-radius-lg);
+  font-size: var(--font-size-base);
+  transition: all var(--transition-normal) ease-in-out;
+}
+
+.header-search input:focus {
+  outline: none;
+  border-color: var(--color-primary-400);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.header-search.compact input {
+  padding: 8px var(--space-4);
+  font-size: var(--font-size-sm);
+}
+
+.search-button {
+  position: absolute;
+  right: var(--space-2);
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: var(--color-neutral-500);
+  cursor: pointer;
+  transition: color var(--transition-fast) ease-in-out;
+}
+
+.search-button:hover {
+  color: var(--color-primary-600);
+}
+
+.header-nav {
+  flex: 0 0 auto;
+}
+
+.header-nav ul {
+  display: flex;
+  align-items: center;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.header-nav li {
+  margin-left: var(--space-4);
+  position: relative;
+}
+
+.header-nav a {
+  color: var(--color-neutral-800);
+  text-decoration: none;
+  font-weight: 600;
+  transition: color var(--transition-fast) ease-in-out;
+  font-size: var(--font-size-base);
+}
+
+.header-nav a:hover {
+  color: var(--color-primary-600);
+  text-decoration: none;
+}
+
+.header-cart {
+  position: relative;
+}
+
+.cart-badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background-color: var(--color-accent-500);
+  color: white;
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 50%;
+  min-width: 18px;
+  text-align: center;
+}
+
+.header-user .user-dropdown {
+  position: relative;
+}
+
+.user-dropdown-toggle {
+  display: flex;
+  align-items: center;
+  background: none;
+  border: none;
+  color: var(--color-neutral-800);
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+}
+
+.user-dropdown-toggle span {
+  margin-left: var(--space-2);
+  font-size: var(--font-size-base);
+}
+
+.user-dropdown-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background-color: white;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-lg);
+  padding: var(--space-2) 0;
+  min-width: 200px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(10px);
+  transition: all var(--transition-fast) ease-in-out;
+  z-index: var(--z-index-dropdown);
+}
+
+.user-dropdown:hover .user-dropdown-menu,
+.user-dropdown:focus-within .user-dropdown-menu {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.user-dropdown-menu a,
+.user-dropdown-menu button {
+  display: block;
+  padding: var(--space-2) var(--space-4);
+  color: var(--color-neutral-800);
+  text-decoration: none;
+  font-weight: 400;
+  text-align: left;
+  width: 100%;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: var(--font-size-base);
+}
+
+.user-dropdown-menu a:hover,
+.user-dropdown-menu button:hover {
+  background-color: var(--color-neutral-100);
+  color: var(--color-primary-600);
+}
+
+.auth-links {
+  display: flex;
+  align-items: center;
+}
+
+.auth-links a {
+  margin-left: var(--space-2);
+}
+
+.btn-small {
+  padding: var(--space-1) var(--space-3);
+  background-color: var(--color-primary-600);
+  color: white !important;
+  border-radius: var(--border-radius);
+  transition: background-color var(--transition-fast) ease-in-out;
+}
+
+.btn-small:hover {
+  background-color: var(--color-primary-700);
+  text-decoration: none !important;
+}
+
+.header-mobile-toggle {
+  display: none;
+}
+
+@media (max-width: 992px) {
+  .header-search {
+    order: 3;
+    flex: 1 0 100%;
+    max-width: 100%;
+    margin: var(--space-2) 0 0;
+    display: none;
+  }
+  
+  .scrolled .header-search {
+    margin-top: var(--space-2);
+  }
+  
+  .header-mobile-toggle {
+    display: block;
+  }
+  
+  .header-mobile-toggle button {
+    background: none;
+    border: none;
+    color: var(--color-neutral-800);
+    cursor: pointer;
+  }
+  
+  .header-nav {
+    flex: 1 0 100%;
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition: all var(--transition-normal) ease-in-out;
+    order: 4;
+  }
+  
+  .header-nav.open {
+    max-height: 500px;
+    opacity: 1;
+    margin-top: var(--space-4);
+  }
+  
+  .header-nav ul {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .header-nav li {
+    margin: var(--space-2) 0;
+    width: 100%;
+  }
+  
+  .header-cart, .header-user {
+    margin-top: var(--space-4);
+  }
+  
+  .user-dropdown-menu {
+    position: static;
+    box-shadow: none;
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    padding-left: var(--space-4);
+    background-color: transparent;
+  }
+  
+  .auth-links {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .auth-links a {
+    margin: var(--space-1) 0;
+  }
+}
+
+@media (max-width: 576px) {
+  .header-logo h1 {
+    font-size: var(--font-size-xl);
+  }
+  
+  .scrolled .header-logo h1 {
+    font-size: var(--font-size-lg);
+  }
+}
