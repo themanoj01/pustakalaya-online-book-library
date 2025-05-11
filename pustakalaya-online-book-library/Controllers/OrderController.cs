@@ -49,7 +49,7 @@ namespace pustakalaya_online_book_library.Controllers
         public IActionResult CancleOrder([FromQuery] Guid orderId) 
         {
             _orderService.cancleOrder(orderId);
-            return Ok("Order Cancled");
+            return Ok("Order Cancelled successfully.");
         }
     }
 }
