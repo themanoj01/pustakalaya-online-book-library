@@ -212,7 +212,6 @@ namespace pustakalaya_online_book_library.Services
         }
 
 
-
         public void cancleOrder(Guid orderId)
         {
             var order = _context.Orders.FirstOrDefault(order => order.OrderId == orderId);
@@ -365,22 +364,59 @@ namespace pustakalaya_online_book_library.Services
             );
         }
 
-        public List<Orders> getAllOrders()
+        public List<OrderDTO> getAllOrders()
         {
-            return _context.Orders.ToList();
+            return _context.Orders
+                .Include(o => o.User)
+                .Include(o => o.OrderedProducts)
+                    .ThenInclude(op => op.Book)
+                .Select(o => new OrderDTO
+                {
+                    OrderId = o.OrderId,
+                    OrderDate = o.OrderDate,
+                    Status = o.Status,
+                    TotalAmount = o.TotalAmount,
+                    ClaimCode = o.ClaimCode,
+                    UserId = o.User.UserId,
+                    UserName = o.User.UserName,
+                    OrderedItems = o.OrderedProducts.Select(op => new OrderItemDTO
+                    {
+                        BookTitle = op.Book.Title,
+                        Quantity = op.Quantity
+                    }).ToList()
+                })
+                .ToList();
         }
 
-        public List<Orders> getOrderByUser(Guid userId)
+
+        public List<OrderDTO> getOrderByUser(Guid userId)
         {
-            var user = _context.Users.FirstOrDefault(user => user.UserId == userId);
-            if(user == null)
-            {
+            var user = _context.Users.FirstOrDefault(u => u.UserId == userId);
+            if (user == null)
                 throw new Exception("User Not Found");
-            }
 
-            return _context.Orders.Where(o => o.UserId == userId).ToList();
+            return _context.Orders
+                .Where(o => o.UserId == userId)
+                .Include(o => o.User)
+                .Include(o => o.OrderedProducts)
+                    .ThenInclude(op => op.Book)
+                .Select(o => new OrderDTO
+                {
+                    OrderId = o.OrderId,
+                    OrderDate = o.OrderDate,
+                    Status = o.Status,
+                    TotalAmount = o.TotalAmount,
+                    ClaimCode = o.ClaimCode,
+                    UserId = o.User.UserId,
+                    UserName = o.User.UserName,
+                    OrderedItems = o.OrderedProducts.Select(op => new OrderItemDTO
+                    {
+                        BookTitle = op.Book.Title,
+                        Quantity = op.Quantity
+                    }).ToList()
+                })
+                .ToList();
         }
 
-        
     }
 }
