@@ -33,7 +33,7 @@ namespace pustakalaya_online_book_library.Services
                 Language = dto.Language,
                 Format = dto.Format,
                 Publisher = dto.Publisher,
-                PublicationDate = dto.PublicationDate,
+                PublicationDate = DateTime.SpecifyKind(dto.PublicationDate, DateTimeKind.Utc),
                 Description = dto.Description,
                 BookAuthors = authors.Select(a => new BookAuthor { AuthorId = a.Id }).ToList(),
                 BookGenres = genres.Select(g => new BookGenre { GenreId = g.Id }).ToList()
@@ -178,7 +178,8 @@ namespace pustakalaya_online_book_library.Services
             book.Language = dto.Language;
             book.Format = dto.Format;
             book.Publisher = dto.Publisher;
-            book.PublicationDate = dto.PublicationDate;
+            book.PublicationDate = DateTime.SpecifyKind(dto.PublicationDate, DateTimeKind.Utc);
+
             book.Description = dto.Description;
 
             book.BookAuthors.Clear();

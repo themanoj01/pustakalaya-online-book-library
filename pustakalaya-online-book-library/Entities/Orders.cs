@@ -29,6 +29,8 @@ namespace pustakalaya_online_book_library.Entities
         [ForeignKey("User")]
         public Guid UserId { get; set; }
         public virtual Users User { get; set; }
+        public virtual ICollection<OrderedProducts> OrderedProducts { get; set; }
+
 
     }
 }

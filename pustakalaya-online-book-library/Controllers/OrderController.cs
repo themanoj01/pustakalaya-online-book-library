@@ -7,7 +7,7 @@ using pustakalaya_online_book_library.Services.Interfaces;
 namespace pustakalaya_online_book_library.Controllers
 {
     [ApiController]
-    [Route("/pustakalaya/orders")]
+    [Route("pustakalaya/orders")]
     public class OrderController : Controller
     {
         public IOrderService _orderService;
@@ -17,39 +17,39 @@ namespace pustakalaya_online_book_library.Controllers
             _orderService = orderService;
         }
 
-        [HttpPost("/add-order")]
+        [HttpPost("add-order")]
         public IActionResult AddOrder([FromBody] OrderCreateDTO orderCreateDTO)
         {
             _orderService.AddOrder(orderCreateDTO);
             return Ok("Order Added Successfully");
         }
 
-        [HttpGet("/get-orders")]
+        [HttpGet("get-orders")]
         public IActionResult GetOrders()
         {
             List<Orders> orderList = _orderService.getAllOrders();
             return Ok(orderList);
         }
 
-        [HttpGet("/get-order-by-user")]
+        [HttpGet("get-order-by-user")]
         public IActionResult GetOrderByUserId([FromQuery] Guid userId)
         {
             List<Orders> orderList = _orderService.getOrderByUser(userId);
             return Ok(orderList);
         }
 
-        [HttpPatch("/change-status")]
+        [HttpPatch("change-status")]
         public IActionResult ChangeOrderStatus([FromQuery] Guid orderId)
         {
             _orderService.changeOrderStatus(orderId);
-            return Ok("Order Cancled Successfully");
+            return Ok("Status changed successfully.");
         }
 
-        [HttpDelete("/cancel-order")]
+        [HttpDelete("cancel-order")]
         public IActionResult CancleOrder([FromQuery] Guid orderId) 
         {
             _orderService.cancleOrder(orderId);
-            return Ok("Order Cancled");
+            return Ok("Order Cancelled successfully.");
         }
     }
 }
