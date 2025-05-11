@@ -302,18 +302,26 @@ namespace pustakalaya_online_book_library.Services
             );
         }
 
-        public void changeOrderStatus(Guid orderId)
-        {
-            var order = _context.Orders.FirstOrDefault(order => order.OrderId == orderId);
+        public void changeOrderStatus(Guid orderId) { 
+            var order = _context.Orders
+                .Include(o => o.OrderedProducts)
+                .FirstOrDefault(order => order.OrderId == orderId);
             var user = _context.Users.FirstOrDefault(storedUser => storedUser.UserId == order.UserId);
             if (user == null)
-            {
                 throw new Exception("User Not Found");
-            }
-
             if (order == null)
-            {
                 throw new Exception("Order Not Found");
+   
+            foreach (var item in order.OrderedProducts)
+            {
+                var book = _context.Books.FirstOrDefault(b => b.Id == item.BookId);
+                if (book == null)
+                    throw new Exception($"Book with ID {item.BookId} not found");
+                if (book.Stock < item.Quantity)
+                    throw new Exception($"Insufficient stock for book {book.Title}");
+                book.Stock -= item.Quantity;
+                book.TotalSold += item.Quantity;
+                _context.Books.Update(book);
             }
 
             if(order.Status == "CANCLED")
@@ -330,8 +338,29 @@ namespace pustakalaya_online_book_library.Services
 
             _emailService.SendEmailAsync(
                 toEmail: user.UserEmail,
-                subject: "Order Status",
-                body: $"Dear {user.UserName},<br/><br/>Your order has been Placed successfully."
+                subject: "Order Delivered",
+                body: $@"
+                    <html>
+                    <head>
+                        <style>
+                            .container {{ font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; background-color: #f4f4f4; border-radius: 8px; border: 1px solid #ddd; }}
+                            .header {{ background-color: #3B82F6; color: white; padding: 15px; text-align: center; font-size: 24px; border-radius: 8px 8px 0 0; }}
+                            .content {{ padding: 20px; font-size: 16px; color: #333; }}
+                            .footer {{ margin-top: 30px; text-align: center; font-size: 13px; color: #777; }}
+                        </style>
+                    </head>
+                    <body>
+                        <div class='container'>
+                            <div class='header'>✅ Order Delivered!</div>
+                            <div class='content'>
+                                <p>Dear <strong>{user.UserName}</strong>,</p>
+                                <p>Your order has been successfully delivered.</p>
+                                <p>Thank you for shopping with Pustakalaya!</p>
+                            </div>
+                            <div class='footer'>© {DateTime.Now.Year} Pustakalaya Online Book Library</div>
+                        </div>
+                    </body>
+                    </html>"
             );
         }
 

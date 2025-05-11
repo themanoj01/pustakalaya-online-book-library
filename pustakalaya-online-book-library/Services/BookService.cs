@@ -218,7 +218,8 @@ namespace pustakalaya_online_book_library.Services
             book.Language = dto.Language;
             book.Format = dto.Format;
             book.Publisher = dto.Publisher;
-            book.PublicationDate = dto.PublicationDate;
+            book.PublicationDate = DateTime.SpecifyKind(dto.PublicationDate, DateTimeKind.Utc);
+
             book.Description = dto.Description;
 
             book.BookAuthors.Clear();
