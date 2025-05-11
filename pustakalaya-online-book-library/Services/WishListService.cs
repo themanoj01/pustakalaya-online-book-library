@@ -13,6 +13,14 @@ namespace pustakalaya_online_book_library.Services
             _context = context;
         }
 
+        public List<Guid> GetWishListByUserId(Guid userId)
+        {
+            return _context.WishLists
+                .Where(w => w.UserId == userId)
+                    .Select(w => w.BookId)
+                .ToList();
+        }
+
         public string ToggleWishList(Guid userId, Guid bookId)
         {
             var user = _context.Users.FirstOrDefault(u => u.UserId == userId);

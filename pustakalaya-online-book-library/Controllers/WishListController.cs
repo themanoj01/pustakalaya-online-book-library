@@ -20,5 +20,12 @@ namespace pustakalaya_online_book_library.Controllers
             string response = _wishListService.ToggleWishList(UserId, BookId);
             return Ok(response);
         }
+
+        [HttpGet("{userId}")]
+        public IActionResult GetUserWishlist(Guid userId)
+        {
+            var bookIds = _wishListService.GetWishListByUserId(userId);
+            return Ok(bookIds);
+        }
     }
 }

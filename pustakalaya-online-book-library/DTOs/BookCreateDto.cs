@@ -31,6 +31,8 @@ namespace pustakalaya_online_book_library.DTOs
         [StringLength(1000)]
         public string? Description { get; set; }
 
+        public IFormFile? BookImage { get; set; }
+
         public List<Guid>? AuthorIds { get; set; }
         public List<Guid>? GenreIds { get; set; }
     }

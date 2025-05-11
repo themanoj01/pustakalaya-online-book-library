@@ -7,7 +7,7 @@ using pustakalaya_online_book_library.Services.Interfaces;
 namespace pustakalaya_online_book_library.Controllers
 {
     [ApiController]
-    [Route("/pustakalaya/carts")]
+    [Route("pustakalaya/carts")]
     public class CartController : Controller
     {
         private ICartService _cartService;
@@ -17,35 +17,35 @@ namespace pustakalaya_online_book_library.Controllers
             _cartService = cartService;
         }
 
-        [HttpPost("/add-to-cart")]
+        [HttpPost("add-to-cart")]
         public IActionResult AddToCart([FromBody] CartDTO cart) 
         { 
             _cartService.AddToCart(cart);
             return Ok("Add to Cart");
         }
 
-        [HttpGet("/get-Cart-details")]
+        [HttpGet("get-Cart-details")]
         public IActionResult GetCartByUserId([FromQuery] Guid UserId)
         {
             CartResponseDTO cart = _cartService.getCartByUserId(UserId);
             return Ok(cart);
         }
 
-        [HttpPatch("/increase-item")]
+        [HttpPatch("increase-item")]
         public IActionResult IncreaseItem([FromBody] CartItemQuantity cartItemQuantity)
         {
             _cartService.IncreateItemQuantity(cartItemQuantity);
             return Ok("Item Increased");
         }
 
-        [HttpPatch("/decrease-item")]
+        [HttpPatch("decrease-item")]
         public IActionResult DecreaseItem([FromBody] CartItemQuantity cartItemQuantity)
         {
             _cartService.DecreaseItemQuantity(cartItemQuantity);
             return Ok("Item Decreased");
         }
 
-        [HttpDelete("/delete-item")]
+        [HttpDelete("delete-item")]
         public IActionResult DeleteItemFromCart([FromBody] CartItemQuantity cartItemQuantity)
         {
             _cartService.deleteItem(cartItemQuantity);
