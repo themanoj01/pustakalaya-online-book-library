@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import axios from 'axios';
 import './LoginPage.css';
 
 const LoginPage = () => {
@@ -9,8 +9,8 @@ const LoginPage = () => {
     password: ''
   });
   const [error, setError] = useState('');
-  const { login } = useAuth();
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -23,14 +23,22 @@ const LoginPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-
+    setLoading(true);
     try {
-      const user = await login(formData.email, formData.password);
-      if (user) {
-        navigate('/dashboard');
-      }
+      const response = await axios.post('http://localhost:5198/pustakalaya/users/login', {
+        email: formData.email,
+        password: formData.password
+      });
+
+      const token = response.data.token;
+      localStorage.setItem('JwtToken', token);
+      setLoading(false);
+      navigate('/home');
     } catch (err) {
-      setError('Login failed. Please check your credentials and try again.');
+      setLoading(false)
+      const message =
+        err.response?.data?.message || 'Login failed. Please check your credentials and try again.';
+      setError(message);
     }
   };
 
@@ -74,7 +82,7 @@ const LoginPage = () => {
           </div>
           
           <button type="submit" className="login-button">
-            Sign In
+            {loading? "Processing...": "Sign In"}
           </button>
         </form>
         

@@ -191,7 +191,7 @@
   color: var(--color-neutral-500);
   border: 1px solid var(--color-neutral-300);
   border-radius: var(--border-radius);
-  width: 40px;
+  /* width: 40px; */
   height: 40px;
   cursor: pointer;
   transition: all var(--transition-fast) ease-in-out;
@@ -207,6 +207,30 @@
   border-color: var(--color-primary-400);
   color: var(--color-primary-600);
 }
+
+.bookmark-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 50%;
+  transition: background-color 0.3s;
+  position: relative;
+}
+
+.bookmark-btn:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.bookmark-btn svg {
+  stroke: #333;
+}
+
+.bookmark-btn.bookmarked svg {
+  stroke: #e63946;
+  fill: #e63946;
+}
+
 
 @media (max-width: 768px) {
   .book-card-image {

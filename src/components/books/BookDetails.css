@@ -445,8 +445,6 @@
 
 .write-review {
   margin-top: var(--space-6);
-  padding-top: var(--space-6);
-  border-top: 1px solid var(--color-neutral-200);
 }
 
 .write-review h3 {

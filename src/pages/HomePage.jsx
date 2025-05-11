@@ -1,74 +1,95 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronRight } from 'lucide-react';
+import axios from 'axios';
+
 import Banner from '../components/common/Banner';
 import BookCard from '../components/books/BookCard';
-import { books, categories } from '../data/books';
+import { categories } from '../data/books'; // Still use this if category metadata is static
+
 import './HomePage.css';
 
 const HomePage = () => {
-  const [activeCategory, setActiveCategory] = useState('all');
+  const [allBooks, setAllBooks] = useState([]);
   const [displayBooks, setDisplayBooks] = useState([]);
+  const [activeCategory, setActiveCategory] = useState('all');
   const [currentAnnouncement, setCurrentAnnouncement] = useState(null);
-  
-  // Sample announcements for demonstration
+
   const announcements = [
     { id: 1, message: "Summer Sale: 20% off all books until June 30th!", type: "sale" },
     { id: 2, message: "New releases from bestselling authors now available!", type: "new" },
     { id: 3, message: "Free shipping on orders over $35", type: "default" }
   ];
-  
+
+  // Fetch books from backend
   useEffect(() => {
-    // Set a random announcement
+    axios.get('http://localhost:5198/api/Book/GetAll') // Update to your actual base URL if different
+      .then(response => {
+        setAllBooks(response.data);
+        setDisplayBooks(response.data);
+        console.log(response.data);
+        
+      })
+      .catch(error => {
+        console.error('Error fetching books:', error);
+      });
+  }, []);
+
+  // Rotate announcements
+  useEffect(() => {
     const randomIndex = Math.floor(Math.random() * announcements.length);
     setCurrentAnnouncement(announcements[randomIndex]);
-    
-    // Rotate announcements every 10 seconds
+
     const interval = setInterval(() => {
       const newIndex = Math.floor(Math.random() * announcements.length);
       setCurrentAnnouncement(announcements[newIndex]);
     }, 10000);
-    
+
     return () => clearInterval(interval);
   }, []);
-  
+
+  // Filter books when category changes
   useEffect(() => {
     filterBooks(activeCategory);
-  }, [activeCategory]);
-  
+  }, [activeCategory, allBooks]);
+
   const filterBooks = (category) => {
     let filtered = [];
-    
+
     switch (category) {
       case 'bestsellers':
-        filtered = books.filter(book => book.bestSeller);
+        filtered = allBooks.filter(book => book.totalSold > 100);
         break;
       case 'award-winners':
-        filtered = books.filter(book => book.awardWinner);
+        filtered = allBooks.filter(book => book.rating >= 4.8);
         break;
       case 'new-releases':
-        filtered = books.filter(book => book.newRelease);
+        filtered = allBooks.filter(book => {
+          const pubDate = new Date(book.publicationDate);
+          const now = new Date();
+          return (now - pubDate) / (1000 * 60 * 60 * 24) <= 60;
+        });
         break;
       case 'deals':
-        filtered = books.filter(book => book.discount);
+        filtered = allBooks.filter(book => book.discount !== null);
         break;
       default:
-        filtered = books;
+        filtered = allBooks;
         break;
     }
-    
+
     setDisplayBooks(filtered);
   };
 
   return (
     <div className="home-page">
       {currentAnnouncement && (
-        <Banner 
-          message={currentAnnouncement.message} 
+        <Banner
+          message={currentAnnouncement.message}
           type={currentAnnouncement.type}
         />
       )}
-      
+
       <section className="hero-section">
         <div className="container">
           <div className="hero-content">
@@ -81,7 +102,7 @@ const HomePage = () => {
           </div>
         </div>
       </section>
-      
+
       <section className="categories-section">
         <div className="container">
           <div className="categories-tabs">
@@ -97,7 +118,7 @@ const HomePage = () => {
           </div>
         </div>
       </section>
-      
+
       <section className="featured-books">
         <div className="container">
           <div className="section-header">
@@ -106,7 +127,7 @@ const HomePage = () => {
               View All <ChevronRight size={16} />
             </Link>
           </div>
-          
+
           <div className="books-grid">
             {displayBooks.slice(0, 4).map(book => (
               <div key={book.id} className="book-item">
@@ -116,11 +137,10 @@ const HomePage = () => {
           </div>
         </div>
       </section>
-      
+
       <section className="featured-categories">
         <div className="container">
           <h2>Browse by Category</h2>
-          
           <div className="category-cards">
             <div className="category-card fiction">
               <div className="category-card-content">
@@ -131,7 +151,7 @@ const HomePage = () => {
                 </Link>
               </div>
             </div>
-            
+
             <div className="category-card non-fiction">
               <div className="category-card-content">
                 <h3>Non-Fiction</h3>
@@ -141,7 +161,7 @@ const HomePage = () => {
                 </Link>
               </div>
             </div>
-            
+
             <div className="category-card mystery">
               <div className="category-card-content">
                 <h3>Mystery & Thriller</h3>
@@ -151,7 +171,7 @@ const HomePage = () => {
                 </Link>
               </div>
             </div>
-            
+
             <div className="category-card scifi">
               <div className="category-card-content">
                 <h3>Science Fiction</h3>
@@ -164,11 +184,11 @@ const HomePage = () => {
           </div>
         </div>
       </section>
-      
+
       <section className="membership-section">
         <div className="container">
           <div className="membership-content">
-            <h2>Become a BookHaven Member</h2>
+            <h2>Become a Pustakalaya Member</h2>
             <p>Join our community of book lovers and enjoy exclusive benefits:</p>
             <ul className="membership-benefits">
               <li>Save favorite books to your personal bookshelf</li>
