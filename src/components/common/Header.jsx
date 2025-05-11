@@ -1,15 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Search, ShoppingCart, User, Menu, X } from 'lucide-react';
-import { useAuth } from '../../context/AuthContext';
 import { useCart } from '../../context/CartContext';
+
 import './Header.css';
+import { jwtDecode } from 'jwt-decode';
 
 const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { currentUser, logout } = useAuth();
+  const [userName, setUserName] = useState(null);
+  const [userRole, setUserRole] = useState(null);
+
   const { totalItems } = useCart();
 
   useEffect(() => {
@@ -21,10 +24,27 @@ const Header = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  useEffect(() => {
+    const token = localStorage.getItem('JwtToken');
+    if (token) {
+      try {
+        const decoded = jwtDecode(token);
+        setUserName(decoded.Name);
+        setUserRole(decoded.role || 'member');
+      } catch (err) {
+        console.error('Invalid token', err);
+      }
+    }
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem('JwtToken');
+    window.location.href = '/login';
+  };
+
   const handleSearch = (e) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      // Redirect to search results page
       window.location.href = `/catalog?search=${encodeURIComponent(searchQuery)}`;
     }
   };
@@ -41,7 +61,7 @@ const Header = () => {
             <h1>Pustakalaya</h1>
           </Link>
         </div>
-        
+
         <div className={`header-search ${isScrolled ? 'compact' : ''}`}>
           <form onSubmit={handleSearch}>
             <input
@@ -55,45 +75,41 @@ const Header = () => {
             </button>
           </form>
         </div>
-        
+
         <div className="header-mobile-toggle">
           <button onClick={toggleMenu} aria-label="Toggle menu">
             {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
         </div>
-        
+
         <nav className={`header-nav ${isMenuOpen ? 'open' : ''}`}>
           <ul>
             <li><Link to="/catalog">Books</Link></li>
             <li><Link to="/catalog?category=bestsellers">Bestsellers</Link></li>
             <li><Link to="/catalog?category=new-releases">New Releases</Link></li>
             <li><Link to="/catalog?category=deals">Deals</Link></li>
-            
+
             <li className="header-cart">
               <Link to="/cart">
                 <ShoppingCart size={20} />
                 {totalItems > 0 && <span className="cart-badge">{totalItems}</span>}
               </Link>
             </li>
-            
+
             <li className="header-user">
-              {currentUser ? (
+              {userName ? (
                 <div className="user-dropdown">
                   <button className="user-dropdown-toggle">
                     <User size={20} />
-                    <span>{currentUser.name}</span>
+                    <span>{userName}</span>
                   </button>
                   <div className="user-dropdown-menu">
-                    {currentUser.role === 'admin' && (
-                      <Link to="/admin">Admin Dashboard</Link>
-                    )}
-                    {currentUser.role === 'staff' && (
-                      <Link to="/staff">Staff Portal</Link>
-                    )}
+                    {userRole === 'admin' && <Link to="/admin">Admin Dashboard</Link>}
+                    {userRole === 'staff' && <Link to="/staff">Staff Portal</Link>}
                     <Link to="/dashboard">Dashboard</Link>
                     <Link to="/profile">Profile</Link>
                     <Link to="/orders">Orders</Link>
-                    <button onClick={logout}>Logout</button>
+                    <button onClick={handleLogout}>Logout</button>
                   </div>
                 </div>
               ) : (

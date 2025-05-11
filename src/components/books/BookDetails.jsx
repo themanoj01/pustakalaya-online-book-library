@@ -3,38 +3,39 @@ import { ShoppingCart, Heart, Star, ChevronRight, Check } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
 import { useAuth } from '../../context/AuthContext';
 import './BookDetails.css';
+import AddReviewForm from './AddReviewForm';
 
 const BookDetails = ({ book }) => {
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState('description');
   const { addToCart } = useCart();
   const { currentUser } = useAuth();
-  
+
   if (!book) return null;
-  
-  const isBookmarked = currentUser && 
-    currentUser.bookmarks && 
+
+  const isBookmarked = currentUser &&
+    currentUser.bookmarks &&
     currentUser.bookmarks.includes(book.id);
-  
-  const discountPercentage = book.discount 
-    ? Math.round(((book.originalPrice - book.price) / book.originalPrice) * 100) 
+
+  const discountPercentage = book.discount
+    ? Math.round(((book.originalPrice - book.price) / book.originalPrice) * 100)
     : 0;
-  
+
   const handleAddToCart = () => {
     addToCart(book.id, quantity);
   };
-  
+
   const handleQuantityChange = (e) => {
     const value = parseInt(e.target.value);
     if (value > 0) {
       setQuantity(value);
     }
   };
-  
+
   const incrementQuantity = () => {
     setQuantity(prev => prev + 1);
   };
-  
+
   const decrementQuantity = () => {
     if (quantity > 1) {
       setQuantity(prev => prev - 1);
@@ -52,55 +53,55 @@ const BookDetails = ({ book }) => {
         <ChevronRight size={14} />
         <span>{book.title}</span>
       </div>
-      
+
       <div className="book-details-main">
         <div className="book-details-image">
           <img src={book.coverImage} alt={book.title} />
-          
+
           {book.discount && (
             <div className="book-details-discount-badge">
               {discountPercentage}% OFF
             </div>
           )}
-          
+
           {book.bestSeller && (
             <div className="book-details-badge bestseller">
               Bestseller
             </div>
           )}
-          
+
           {book.newRelease && (
             <div className="book-details-badge new-release">
               New Release
             </div>
           )}
-          
+
           {book.awardWinner && (
             <div className="book-details-badge award-winner">
               Award Winner
             </div>
           )}
         </div>
-        
+
         <div className="book-details-info">
           <h1 className="book-title">{book.title}</h1>
           <p className="book-author">by <a href={`/catalog?author=${book.author}`}>{book.author}</a></p>
-          
+
           <div className="book-rating">
             <div className="stars">
               {[...Array(5)].map((_, i) => (
-                <Star 
-                  key={i} 
-                  size={18} 
+                <Star
+                  key={i}
+                  size={18}
                   className={i < Math.floor(book.rating) ? 'filled' : 'empty'}
-                  fill={i < Math.floor(book.rating) ? 'currentColor' : 'none'} 
+                  fill={i < Math.floor(book.rating) ? 'currentColor' : 'none'}
                 />
               ))}
             </div>
             <span className="rating-value">{book.rating}</span>
             <span className="review-count">({book.reviews ? book.reviews.length : 0} reviews)</span>
           </div>
-          
+
           <div className="book-price-container">
             <div className="book-price">
               {book.discount && (
@@ -108,14 +109,14 @@ const BookDetails = ({ book }) => {
               )}
               <span className="current-price">RS. {book.price.toFixed(2)}</span>
             </div>
-            
+
             {book.discount && (
               <div className="price-savings">
                 You save: RS. {(book.originalPrice - book.price).toFixed(2)} ({discountPercentage}%)
               </div>
             )}
           </div>
-          
+
           <div className="book-meta">
             <div className="meta-item">
               <span className="meta-label">Format:</span>
@@ -142,7 +143,7 @@ const BookDetails = ({ book }) => {
               <span className="meta-value">{book.language}</span>
             </div>
           </div>
-          
+
           <div className="book-availability">
             <div className={`availability-indicator ${book.available ? 'in-stock' : 'out-of-stock'}`}>
               {book.available ? (
@@ -155,44 +156,44 @@ const BookDetails = ({ book }) => {
               )}
             </div>
           </div>
-          
+
           <div className="book-actions">
             <div className="quantity-control">
-              <button 
-                className="quantity-btn" 
+              <button
+                className="quantity-btn"
                 onClick={decrementQuantity}
                 disabled={quantity <= 1}
                 aria-label="Decrease quantity"
               >
                 -
               </button>
-              <input 
-                type="number" 
-                min="1" 
-                value={quantity} 
+              <input
+                type="number"
+                min="1"
+                value={quantity}
                 onChange={handleQuantityChange}
                 className="quantity-input"
                 aria-label="Quantity"
               />
-              <button 
-                className="quantity-btn" 
+              <button
+                className="quantity-btn"
                 onClick={incrementQuantity}
                 aria-label="Increase quantity"
               >
                 +
               </button>
             </div>
-            
-            <button 
-              className="cart-btn" 
+
+            <button
+              className="cart-btn"
               onClick={handleAddToCart}
               disabled={!book.available}
             >
               <ShoppingCart size={18} /> Add to Cart
             </button>
-            
+
             {currentUser && (
-              <button 
+              <button
                 className={`bookmark-btn ${isBookmarked ? 'bookmarked' : ''}`}
                 aria-label={isBookmarked ? 'Remove from bookmarks' : 'Add to bookmarks'}
               >
@@ -203,36 +204,36 @@ const BookDetails = ({ book }) => {
           </div>
         </div>
       </div>
-      
+
       <div className="book-details-tabs">
         <div className="tab-header">
-          <button 
+          <button
             className={`tab-btn ${activeTab === 'description' ? 'active' : ''}`}
             onClick={() => setActiveTab('description')}
           >
             Description
           </button>
-          <button 
+          <button
             className={`tab-btn ${activeTab === 'details' ? 'active' : ''}`}
             onClick={() => setActiveTab('details')}
           >
             Details
           </button>
-          <button 
+          <button
             className={`tab-btn ${activeTab === 'reviews' ? 'active' : ''}`}
             onClick={() => setActiveTab('reviews')}
           >
             Reviews ({book.reviews ? book.reviews.length : 0})
           </button>
         </div>
-        
+
         <div className="tab-content">
           {activeTab === 'description' && (
             <div className="tab-pane description">
               <p>{book.description}</p>
             </div>
           )}
-          
+
           {activeTab === 'details' && (
             <div className="tab-pane details">
               <table className="details-table">
@@ -277,7 +278,7 @@ const BookDetails = ({ book }) => {
               </table>
             </div>
           )}
-          
+
           {activeTab === 'reviews' && (
             <div className="tab-pane reviews">
               {book.reviews && book.reviews.length > 0 ? (
@@ -291,11 +292,11 @@ const BookDetails = ({ book }) => {
                         </div>
                         <div className="review-rating">
                           {[...Array(5)].map((_, i) => (
-                            <Star 
-                              key={i} 
-                              size={16} 
+                            <Star
+                              key={i}
+                              size={16}
                               className={i < review.rating ? 'filled' : 'empty'}
-                              fill={i < review.rating ? 'currentColor' : 'none'} 
+                              fill={i < review.rating ? 'currentColor' : 'none'}
                             />
                           ))}
                         </div>
@@ -303,12 +304,19 @@ const BookDetails = ({ book }) => {
                       </div>
                     ))}
                   </div>
-                  
+
                   {currentUser && (
                     <div className="write-review">
-                      <h3>Write a Review</h3>
-                      <p>You need to have purchased this book to leave a review.</p>
-                      <a href="/reviews/new" className="btn-review">Write a Review</a>
+                      {/* <h3>Write a Review</h3>
+                      <p>You need to have purchased this book to leave a review.</p> */}
+                      <AddReviewForm
+                        bookId={book.id}
+                        onReviewSubmit={(review) => {
+                          // You could POST to API here, or just update local state:
+                          book.reviews.push(review);
+                        }}
+                      />
+
                     </div>
                   )}
                 </>
