@@ -9,6 +9,7 @@
         public string ClaimCode { get; set; }
         public Guid UserId {get; set; }
         public string UserName { get; set; }
+        public string UserEmail { get; set; }
 
         public List<OrderItemDTO> OrderedItems { get; set; }
     }

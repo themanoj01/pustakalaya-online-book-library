@@ -20,14 +20,21 @@ namespace pustakalaya_online_book_library.Controllers
         [HttpPost("add-order")]
         public IActionResult AddOrder([FromBody] OrderCreateDTO orderCreateDTO)
         {
-            _orderService.AddOrder(orderCreateDTO);
-            return Ok("Order Added Successfully");
+            OrderDTO order = _orderService.AddOrder(orderCreateDTO);
+            return Ok(order);
         }
 
         [HttpGet("get-orders")]
         public IActionResult GetOrders()
         {
             List<OrderDTO> orderList = _orderService.getAllOrders();
+            return Ok(orderList);
+        }
+
+        [HttpGet("get-order/{orderId}")]
+        public IActionResult GetOrderByOrderId(Guid orderId)
+        {
+            List<OrderDTO> orderList = _orderService.getOrderByOrderId(orderId);
             return Ok(orderList);
         }
 
