@@ -64,6 +64,7 @@ namespace pustakalaya_online_book_library.Services
                 UserName = userDTO.userName,
                 ProfileURL = imageUrl,
                 UserAddress = userDTO.userAddress,
+                role = "MEMBER",
                 OrderCount = 0,
                 UserContact = userDTO.userContact,
                 UserPassword = BCrypt.Net.BCrypt.HashPassword(userDTO.userPassword)

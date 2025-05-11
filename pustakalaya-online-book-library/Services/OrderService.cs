@@ -32,11 +32,15 @@ namespace pustakalaya_online_book_library.Services
         public void AddOrder(OrderCreateDTO orderCreateDTO)
         {
             decimal totalAmount = 0;
+            int totalBookCount = 0;
+            decimal orderLevelDiscountPercent = 0;
 
             var user = _context.Users.FirstOrDefault(u => u.UserId == orderCreateDTO.UserId);
             if (user == null)
                 throw new Exception("User not found");
+
             string claimCode = GenerateClaimCode();
+
             var newOrder = new Orders
             {
                 OrderId = Guid.NewGuid(),
@@ -44,19 +48,44 @@ namespace pustakalaya_online_book_library.Services
                 OrderDate = DateTime.UtcNow,
                 Status = "PENDING",
                 ClaimCode = claimCode,
-                PaymentStatus = orderCreateDTO.PaymentStatus,
-                TotalAmount = 0 
+                TotalAmount = 0
             };
 
             _context.Orders.Add(newOrder);
 
+            var orderedItems = new List<(string Title, int Quantity, decimal UnitPrice, decimal FinalPrice)>();
+
             foreach (var item in orderCreateDTO.Products)
             {
-                var book = _context.Books.FirstOrDefault(b => b.Id == item.BookId);
+                var book = _context.Books
+                    .Include(b => b.Discount)
+                    .FirstOrDefault(b => b.Id == item.BookId);
+
                 if (book == null)
                     throw new Exception($"Book with ID {item.BookId} not found");
 
-                totalAmount += item.Quantity * (decimal)book.Price;
+                if (book.Stock < item.Quantity)
+                    throw new Exception($"Not enough stock for book '{book.Title}'. Available: {book.Stock}, Requested: {item.Quantity}");
+
+                decimal originalPrice = (decimal)book.Price;
+                decimal finalPrice = originalPrice;
+
+                if (book.Discount != null)
+                {
+                    var now = DateTime.UtcNow;
+                    bool isDiscountValid = (!book.Discount.StartDate.HasValue || book.Discount.StartDate <= now) &&
+                                           (!book.Discount.EndDate.HasValue || book.Discount.EndDate >= now);
+
+                    if (isDiscountValid)
+                    {
+                        finalPrice -= (finalPrice * (decimal)book.Discount.DiscountPercent / 100);
+                    }
+                }
+
+                totalAmount += finalPrice * item.Quantity;
+                totalBookCount += item.Quantity;
+
+                orderedItems.Add((book.Title, item.Quantity, originalPrice, finalPrice));
 
                 var orderedProduct = new OrderedProducts
                 {
@@ -67,20 +96,46 @@ namespace pustakalaya_online_book_library.Services
                 };
 
                 _context.OrderedProducts.Add(orderedProduct);
+
+                book.Stock -= item.Quantity;
+                _context.Books.Update(book);
             }
+
+            if (totalBookCount >= 5)
+                orderLevelDiscountPercent += 5;
+
+            if (user.OrderCount > 0 && user.OrderCount % 10 == 0)
+                orderLevelDiscountPercent += 10;
+
+            if (orderLevelDiscountPercent > 0)
+                totalAmount -= (totalAmount * orderLevelDiscountPercent / 100);
 
             newOrder.TotalAmount = totalAmount;
 
+            user.OrderCount += 1;
+            _context.Users.Update(user);
+
+            var cart = _context.Carts
+                .Include(c => c.CartDetails)
+                .FirstOrDefault(c => c.UserId == orderCreateDTO.UserId);
+
+            if (cart != null)
+            {
+                foreach (var item in orderCreateDTO.Products)
+                {
+                    var cartItem = cart.CartDetails.FirstOrDefault(cd => cd.BookId == item.BookId);
+                    if (cartItem != null)
+                    {
+                        _context.CartDetails.Remove(cartItem);
+                    }
+                }
+            }
+
             _context.SaveChanges();
 
-            var orderedItems = orderCreateDTO.Products.Select(p =>
-            {
-                var book = _context.Books.FirstOrDefault(b => b.Id == p.BookId);
-                return (book.Title, p.Quantity, (decimal)book.Price);
-            }).ToList();
-
-            // 2. Generate PDF
-            var pdfBytes = _emailService.GenerateInvoicePdf(newOrder, orderedItems);
+            var invoiceItems = orderedItems.Select(item =>
+                (item.Title, item.Quantity, item.FinalPrice)).ToList();
+            var pdfBytes = _emailService.GenerateInvoicePdf(newOrder, invoiceItems);
 
             _emailService.SendEmailAsync(
                 toEmail: user.UserEmail,
@@ -134,9 +189,10 @@ namespace pustakalaya_online_book_library.Services
                             <p><strong>Order Details:</strong></p>
                             <ul>
                                 <li><span class='highlight'>Order ID:</span> {newOrder.OrderId}</li>
-                                <li><span class='highlight'>Total Amount:</span> RS. {newOrder.TotalAmount}</li>
+                                <li><span class='highlight'>Total Amount:</span> Rs. {newOrder.TotalAmount:F2}</li>
                                 <li><span class='highlight'>Claim Code:</span> {newOrder.ClaimCode}</li>
-                                <li><span class='highlight'>Date:</span> {DateTime.UtcNow.ToString("dd MMM yyyy HH:mm")} (UTC)</li>
+                                <li><span class='highlight'>Date:</span> {DateTime.UtcNow:dd MMM yyyy HH:mm} (UTC)</li>
+                                <li><span class='highlight'>Order Discount:</span> {orderLevelDiscountPercent}%</li>
                             </ul>
                             <p>You will receive another email once your order is shipped.</p>
                             <p>If you have any questions, feel free to contact us.</p>
@@ -155,30 +211,37 @@ namespace pustakalaya_online_book_library.Services
             );
         }
 
+
+
         public void cancleOrder(Guid orderId)
         {
             var order = _context.Orders.FirstOrDefault(order => order.OrderId == orderId);
+            if (order == null)
+                throw new Exception("Order Not Found");
+
             var user = _context.Users.FirstOrDefault(storedUser => storedUser.UserId == order.UserId);
             if (user == null)
-            {
                 throw new Exception("User Not Found");
-            }
 
-            if (order == null)
-            {
-                throw new Exception("Order Not Found");
-            }
-
-            if(order.Status == "DELIVERED")
-            {
+            if (order.Status == "DELIVERED")
                 throw new BadHttpRequestException("Order has already been delivered.");
-            }
 
             if (order.Status == "CANCLED")
-            {
-                throw new BadHttpRequestException("You cannot change the cancled order Status");
-            }
+                throw new BadHttpRequestException("You cannot change the cancelled order status.");
 
+            var orderedProducts = _context.OrderedProducts
+                .Where(op => op.OrderId == orderId)
+                .ToList();
+
+            foreach (var orderedProduct in orderedProducts)
+            {
+                var book = _context.Books.FirstOrDefault(b => b.Id == orderedProduct.BookId);
+                if (book != null)
+                {
+                    book.Stock += orderedProduct.Quantity;
+                    _context.Books.Update(book);
+                }
+            }
 
             order.Status = "CANCLED";
             _context.SaveChanges();

@@ -29,7 +29,8 @@ namespace pustakalaya_online_book_library.Entities
         public string ProfileURL { get; set; }
 
         public int OrderCount { get; set; }
-
+        
+        public string role { get; set; }
         public virtual Cart Cart { get; set; }
 
         public virtual ICollection<WishLists> WishLists { get; set; }

@@ -81,7 +81,17 @@ builder.Services.AddCors(options =>
     });
 });
 builder.Services.AddAutoMapper(typeof(Program));
+
 var app = builder.Build();
+
+try
+{
+    Seed.SeedAdminUser(app.Services);
+}
+catch (Exception ex)
+{
+    Console.WriteLine($"Seeding failed: {ex.Message}");
+}
 
 if (app.Environment.IsDevelopment())
 {
