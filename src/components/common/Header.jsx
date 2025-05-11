@@ -106,9 +106,9 @@ const Header = () => {
                   <div className="user-dropdown-menu">
                     {userRole === 'admin' && <Link to="/admin">Admin Dashboard</Link>}
                     {userRole === 'staff' && <Link to="/staff">Staff Portal</Link>}
-                    <Link to="/dashboard">Dashboard</Link>
+                    <Link to="/member-dashboard">Dashboard</Link>
                     <Link to="/profile">Profile</Link>
-                    <Link to="/orders">Orders</Link>
+                    {/* <Link to="/orders">Orders</Link> */}
                     <button onClick={handleLogout}>Logout</button>
                   </div>
                 </div>

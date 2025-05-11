@@ -20,6 +20,7 @@ import RegisterPage from './pages/RegisterPage';
 import LoginPage from './pages/LoginPage';
 import AdminDashboard from './pages/AdminDashboard';
 import MemberDashboard from './pages/MemberDashboard/MemberDashboard';
+import OrderConfirmationPage from './pages/OrderConfirmationPage/OrderConfirmationPage';
 import { Toaster } from 'react-hot-toast';
 
 function App() {
@@ -47,6 +48,8 @@ function App() {
                     <Route path="/login" element={<LoginPage />} />
                     <Route path="/admin" element={<AdminDashboard />} />
                     <Route path="/member-dashboard" element={<MemberDashboard />} />
+                    <Route path="/order-confirmation/:orderId" element={<OrderConfirmationPage/>} />
+
                   </Routes>
                 </main>
 
