@@ -29,7 +29,6 @@ namespace pustakalaya_online_book_library.Entities
         public virtual ICollection<OrderedProducts> OrderedProducts { get; set; }
 
 
-        public ICollection<OrderedProducts> OrderedProducts { get; set; }
 
     }
 }
