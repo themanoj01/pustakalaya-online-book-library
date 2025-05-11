@@ -27,14 +27,14 @@ namespace pustakalaya_online_book_library.Controllers
         [HttpGet("get-orders")]
         public IActionResult GetOrders()
         {
-            List<Orders> orderList = _orderService.getAllOrders();
+            List<OrderDTO> orderList = _orderService.getAllOrders();
             return Ok(orderList);
         }
 
         [HttpGet("get-order-by-user")]
         public IActionResult GetOrderByUserId([FromQuery] Guid userId)
         {
-            List<Orders> orderList = _orderService.getOrderByUser(userId);
+            List<OrderDTO> orderList = _orderService.getOrderByUser(userId);
             return Ok(orderList);
         }
 

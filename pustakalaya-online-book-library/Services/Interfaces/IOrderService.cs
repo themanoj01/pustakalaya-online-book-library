@@ -8,7 +8,7 @@ namespace pustakalaya_online_book_library.Services.Interfaces
         void AddOrder(OrderCreateDTO orderCreateDTO);
         void cancleOrder(Guid orderId);
         void changeOrderStatus(Guid orderId);
-        List<Orders> getAllOrders();
-        List<Orders> getOrderByUser(Guid userId);
+        List<OrderDTO> getAllOrders();
+        List<OrderDTO> getOrderByUser(Guid userId);
     }
 }
