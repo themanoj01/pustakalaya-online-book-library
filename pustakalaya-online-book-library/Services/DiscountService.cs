@@ -54,7 +54,7 @@ namespace pustakalaya_online_book_library.Services
 
         public async Task UpdateAsync(Guid id, UpdateDiscountDto discount)
         {
-            var existing = _context.Discounts.FirstOrDefaultAsync(d => d.Id == id);
+            var existing = await _context.Discounts.FirstOrDefaultAsync(d => d.Id == id);
             if (existing == null)
             {
                 throw new KeyNotFoundException($"Discount with id {id} not found.");
