@@ -80,7 +80,7 @@ namespace pustakalaya_online_book_library.Services
             }).ToList();
 
             // 2. Generate PDF
-            var pdfBytes = GenerateInvoicePdf(newOrder, orderedItems);
+            var pdfBytes = _emailService.GenerateInvoicePdf(newOrder, orderedItems);
 
             _emailService.SendEmailAsync(
                 toEmail: user.UserEmail,
@@ -150,7 +150,7 @@ namespace pustakalaya_online_book_library.Services
                 </html>",
                 attachments: new Dictionary<string, byte[]>
                 {
-                    { "invoice.pdf", pdfBytes }
+                    { "Pustakalaya_invoice.pdf", pdfBytes }
                 }
             );
         }
@@ -168,6 +168,17 @@ namespace pustakalaya_online_book_library.Services
             {
                 throw new Exception("Order Not Found");
             }
+
+            if(order.Status == "DELIVERED")
+            {
+                throw new BadHttpRequestException("Order has already been delivered.");
+            }
+
+            if (order.Status == "CANCLED")
+            {
+                throw new BadHttpRequestException("You cannot change the cancled order Status");
+            }
+
 
             order.Status = "CANCLED";
             _context.SaveChanges();
@@ -251,6 +262,15 @@ namespace pustakalaya_online_book_library.Services
                 _context.Books.Update(book);
             }
 
+            if(order.Status == "CANCLED")
+            {
+                throw new BadHttpRequestException("You cannot change the cancled order Status");
+            }
+            if (order.Status == "DELIVERED")
+            {
+                throw new BadHttpRequestException("Order has already been delivered.");
+            }
+
             order.Status = "DELIVERED";
             _context.SaveChanges();
 
@@ -298,60 +318,6 @@ namespace pustakalaya_online_book_library.Services
             return _context.Orders.Where(o => o.UserId == userId).ToList();
         }
 
-        private byte[] GenerateInvoicePdf(Orders order, List<(string Title, int Quantity, decimal Price)> items)
-        {
-            using var stream = new MemoryStream();
-            var document = new PdfDocument();
-            var page = document.AddPage();
-            var gfx = XGraphics.FromPdfPage(page);
-
-            var fontRegular = new XFont("Arial", 12, XFontStyle.Regular);
-            var fontBold = new XFont("Arial", 14, XFontStyle.Bold);
-            var fontHeader = new XFont("Arial", 18, XFontStyle.BoldItalic);
-            double y = 40;
-
-            // Header
-            gfx.DrawString("PUSTAKALAYA INVOICE", fontHeader, XBrushes.DarkSlateBlue, new XRect(0, y, page.Width, 30), XStringFormats.TopCenter);
-            y += 40;
-
-            // Order Info
-            gfx.DrawString("Order Summary", fontBold, XBrushes.Black, 40, y); y += 25;
-            gfx.DrawString($"Order ID: {order.OrderId}", fontRegular, XBrushes.Black, 40, y); y += 20;
-            gfx.DrawString($"Claim Code: {order.ClaimCode}", fontRegular, XBrushes.Black, 40, y); y += 20;
-            gfx.DrawString($"Order Date: {order.OrderDate:dd MMM yyyy hh:mm tt}", fontRegular, XBrushes.Black, 40, y); y += 30;
-
-            // Table Header
-            gfx.DrawString("Book Title", fontBold, XBrushes.Black, 40, y);
-            gfx.DrawString("Quantity", fontBold, XBrushes.Black, 300, y);
-            gfx.DrawString("Price", fontBold, XBrushes.Black, 400, y);
-            y += 20;
-
-            gfx.DrawLine(XPens.Black, 40, y, page.Width - 40, y); y += 10;
-
-            decimal grandTotal = 0;
-
-            foreach (var item in items)
-            {
-                gfx.DrawString(item.Title, fontRegular, XBrushes.Black, 40, y);
-                gfx.DrawString(item.Quantity.ToString(), fontRegular, XBrushes.Black, 300, y);
-                gfx.DrawString($"Rs. {item.Price * item.Quantity:F2}", fontRegular, XBrushes.Black, 400, y);
-                y += 20;
-
-                grandTotal += item.Price * item.Quantity;
-            }
-
-            y += 10;
-            gfx.DrawLine(XPens.Black, 40, y, page.Width - 40, y); y += 20;
-
-            // Total
-            gfx.DrawString($"Total Amount: Rs. {grandTotal:F2}", fontBold, XBrushes.DarkGreen, 40, y); y += 30;
-
-            // Footer
-            gfx.DrawString("Thank you for shopping with Pustakalaya! 📖", fontRegular, XBrushes.Gray, new XRect(0, y, page.Width, page.Height - y), XStringFormats.TopCenter);
-
-            document.Save(stream, false);
-            return stream.ToArray();
-        }
-
+        
     }
 }
