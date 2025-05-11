@@ -13,6 +13,8 @@
         public DateTime PublicationDate { get; set; }
         public string Description { get; set; }
         public double Rating { get; set; }
+
+        public string BookImage { get; set; }
         public int TotalSold { get; set; }
         public List<string> Authors { get; set; }
         public List<string> Genres { get; set; }

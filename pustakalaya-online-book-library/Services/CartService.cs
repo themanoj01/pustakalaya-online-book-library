@@ -71,6 +71,8 @@ namespace pustakalaya_online_book_library.Services
             var cart = _context.Carts
                 .Include(c => c.CartDetails)
                 .ThenInclude(cd => cd.Book)
+                .ThenInclude(b => b.BookAuthors)
+                .ThenInclude(ba => ba.Author)
                 .FirstOrDefault(cart => cart.UserId == userId);
 
             if (cart == null)
@@ -84,6 +86,9 @@ namespace pustakalaya_online_book_library.Services
                 {
                     BookId = cd.BookId,
                     BookTitle = cd.Book.Title,
+                    Author = cd.Book.BookAuthors.FirstOrDefault()?.Author?.Name,
+                    Price = cd.Book.Price,
+                    BookImage = cd.Book.BookImage,
                     Quantity = cd.Quantity
                 }).ToList()
             };

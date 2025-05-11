@@ -28,7 +28,7 @@ namespace pustakalaya_online_book_library.Controllers
             }
         }
         [HttpPost("Add")]
-        public async Task<IActionResult> CreateBook([FromBody] BookCreateDto dto)
+        public async Task<IActionResult> CreateBook([FromForm] BookCreateDto dto)
         {
             try
             {

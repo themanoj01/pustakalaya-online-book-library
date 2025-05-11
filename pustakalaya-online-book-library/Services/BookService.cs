@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using CloudinaryDotNet.Actions;
+using CloudinaryDotNet;
+using Microsoft.EntityFrameworkCore;
 using pustakalaya_online_book_library.Data;
 using pustakalaya_online_book_library.DTOs;
 using pustakalaya_online_book_library.Entities;
@@ -9,9 +11,12 @@ namespace pustakalaya_online_book_library.Services
     public class BookService : IBookService
     {
         private readonly ApplicationDBContext _context;
-        public BookService(ApplicationDBContext context)
+        private Cloudinary _cloudinary;
+
+        public BookService(ApplicationDBContext context, Cloudinary cloudinary)
         {
             _context = context;
+            _cloudinary = cloudinary;
         }
         public async Task<BookReadDto> CreateBookAsync(BookCreateDto dto)
         {
@@ -23,6 +28,31 @@ namespace pustakalaya_online_book_library.Services
             if (!genres.Any())
                 throw new Exception("No valid genres found for the given IDs.");
 
+            string imageUrl = null;
+
+            if (dto.BookImage != null && dto.BookImage.Length > 0)
+            {
+                await using var stream = dto.BookImage.OpenReadStream();
+
+                if (stream == null)
+                    throw new Exception("Image stream is null");
+
+                var uploadParams = new ImageUploadParams
+                {
+                    File = new FileDescription(dto.BookImage.FileName, stream),
+                    Folder = "Pustakalaya/Books"
+                };
+
+                var uploadResult = await _cloudinary.UploadAsync(uploadParams);
+
+                if (uploadResult == null || uploadResult.StatusCode != System.Net.HttpStatusCode.OK)
+                {
+                    throw new Exception("Failed to upload image");
+                }
+
+                imageUrl = uploadResult.SecureUrl?.ToString();
+            }
+
             var book = new Book
             {
                 Id = Guid.NewGuid(),
@@ -33,14 +63,23 @@ namespace pustakalaya_online_book_library.Services
                 Language = dto.Language,
                 Format = dto.Format,
                 Publisher = dto.Publisher,
-                PublicationDate = dto.PublicationDate,
+                BookImage = imageUrl,
+                PublicationDate = DateTime.SpecifyKind(dto.PublicationDate, DateTimeKind.Utc),
                 Description = dto.Description,
                 BookAuthors = authors.Select(a => new BookAuthor { AuthorId = a.Id }).ToList(),
                 BookGenres = genres.Select(g => new BookGenre { GenreId = g.Id }).ToList()
             };
 
             await _context.Books.AddAsync(book);
-            await _context.SaveChangesAsync();
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException dbEx)
+            {
+                Console.WriteLine("DB Error: " + dbEx.InnerException?.Message); // or log it
+                throw new Exception(("DB Error: " + dbEx.InnerException?.Message));
+            }
 
             var created = await GetBookByIdAsync(book.Id);
             if (created == null)
@@ -124,6 +163,7 @@ namespace pustakalaya_online_book_library.Services
                 Publisher = b.Publisher,
                 PublicationDate = b.PublicationDate,
                 Description = b.Description,
+                BookImage = b.BookImage,
                 Rating = b.Rating,
                 TotalSold = b.TotalSold,
                 Authors = b.BookAuthors.Select(ba => ba.Author.Name).ToList(),
