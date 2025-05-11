@@ -29,7 +29,7 @@ namespace pustakalaya_online_book_library.Services
         }
 
 
-        public void AddOrder(OrderCreateDTO orderCreateDTO)
+        public OrderDTO AddOrder(OrderCreateDTO orderCreateDTO)
         {
             decimal totalAmount = 0;
             int totalBookCount = 0;
@@ -209,6 +209,29 @@ namespace pustakalaya_online_book_library.Services
                     { "Pustakalaya_invoice.pdf", pdfBytes }
                 }
             );
+
+            return new OrderDTO
+            {
+                OrderId = newOrder.OrderId,
+                OrderDate = newOrder.OrderDate,
+                Status = newOrder.Status,
+                TotalAmount = newOrder.TotalAmount,
+                ClaimCode = newOrder.ClaimCode,
+                UserId = newOrder.User.UserId,
+                UserName = newOrder.User.UserName,
+                UserEmail = newOrder.User.UserEmail,
+                OrderedItems = _context.OrderedProducts
+                    .Where(op => op.OrderId == newOrder.OrderId)
+                    .Include(op => op.Book)
+                    .Select(op => new OrderItemDTO
+                    {
+                        BookTitle = op.Book.Title,
+                        Quantity = op.Quantity
+             
+                    })
+                    .ToList()
+            };
+
         }
 
 
@@ -379,6 +402,7 @@ namespace pustakalaya_online_book_library.Services
                     ClaimCode = o.ClaimCode,
                     UserId = o.User.UserId,
                     UserName = o.User.UserName,
+                    UserEmail = o.User.UserEmail,
                     OrderedItems = o.OrderedProducts.Select(op => new OrderItemDTO
                     {
                         BookTitle = op.Book.Title,
@@ -409,6 +433,7 @@ namespace pustakalaya_online_book_library.Services
                     ClaimCode = o.ClaimCode,
                     UserId = o.User.UserId,
                     UserName = o.User.UserName,
+                    UserEmail = o.User.UserEmail,
                     OrderedItems = o.OrderedProducts.Select(op => new OrderItemDTO
                     {
                         BookTitle = op.Book.Title,
@@ -418,5 +443,30 @@ namespace pustakalaya_online_book_library.Services
                 .ToList();
         }
 
+        public List<OrderDTO> getOrderByOrderId(Guid orderId)
+        {
+            return _context.Orders
+                 .Where(o => o.OrderId == orderId)
+                 .Include(o => o.User)
+                 .Include(o => o.OrderedProducts)
+                     .ThenInclude(op => op.Book)
+                 .Select(o => new OrderDTO
+                 {
+                     OrderId = o.OrderId,
+                     OrderDate = o.OrderDate,
+                     Status = o.Status,
+                     TotalAmount = o.TotalAmount,
+                     ClaimCode = o.ClaimCode,
+                     UserId = o.User.UserId,
+                     UserName = o.User.UserName,
+                     UserEmail = o.User.UserEmail,
+                     OrderedItems = o.OrderedProducts.Select(op => new OrderItemDTO
+                     {
+                         BookTitle = op.Book.Title,
+                         Quantity = op.Quantity
+                     }).ToList()
+                 })
+                 .ToList();
+        }
     }
 }
