@@ -6,8 +6,9 @@ using pustakalaya_online_book_library.Services.Interfaces;
 
 namespace pustakalaya_online_book_library.Controllers
 {
+    
     [ApiController]
-    [Route("/pustakalaya/users")]  //Request Mapping
+    [Route("pustakalaya/users")]  //Request Mapping
     public class UserController : Controller  //Inherit Controller Class
     {
         private IUserService _userService;
@@ -18,7 +19,8 @@ namespace pustakalaya_online_book_library.Controllers
         }
 
         //Register Method
-        [HttpPost("/register")] //PostMapping
+        //http://localhost:5198/pustakalaya/users/register
+        [HttpPost("register")] //PostMapping
         [Consumes("multipart/form-data")]  //Method Content Type
         public async Task<IActionResult> RegisterUser([FromForm] UserDTO userDTO)
         {
@@ -27,16 +29,15 @@ namespace pustakalaya_online_book_library.Controllers
         }
 
 
-      
-
+     
         //Login Method
-        [HttpPost("/login")]  //PostMapping
+        [HttpPost("login")]  //PostMapping
         public IActionResult LoginUser([FromBody] LoginDTO loginDTO) {
            string token =  _userService.login(loginDTO);
             return Ok(new {token});   // Return jWT Token generate from userService.
         }
 
-        [HttpGet("/getAllUser")]  //GetMapping
+        [HttpGet("getAllUser")]  //GetMapping
         public IActionResult GetAllUsers()
         {
             List<Users> users = _userService.getAllUsers();
@@ -52,13 +53,13 @@ namespace pustakalaya_online_book_library.Controllers
             return Ok(user);
         }
 
-        [HttpPut("/update-user")]   //PutMapping
+        [HttpPut("update-user")]   //PutMapping
         public IActionResult UpdateUser([FromBody] UpdateUserDTO userDTO) {
             _userService.UpdateUserDetails(userDTO);
             return Ok("User Detail Changed Successfully");
         }
 
-        [HttpPatch("/update-password")]   //PatchMapping
+        [HttpPatch("update-password")]   //PatchMapping
         public IActionResult UpdatePassword([FromQuery] Guid userId, [FromBody] UserPasswordDTO userPasswordDTO) {
             if (!userPasswordDTO.newPassword.Equals(userPasswordDTO.confirmPassword)) 
             { 
@@ -68,14 +69,14 @@ namespace pustakalaya_online_book_library.Controllers
             return Ok("Password Update Successfully");
         }
 
-        [HttpPatch("/update-profilePic")] //PatchMapping
+        [HttpPatch("update-profilePic")] //PatchMapping
         public async Task<IActionResult> UpdateProfilePic([FromForm] UserProfilePicDTO userProfilePicDTO)
         {
             await _userService.updateProfilePic(userProfilePicDTO);
             return Ok("Profile Picture Updated Successfully");
         }
 
-        [HttpDelete("/delete-user")]  //Delete Mapping
+        [HttpDelete("delete-user")]  //Delete Mapping
         public IActionResult DeleteUser([FromQuery] Guid userId)
         {
             _userService.deleteUser(userId);

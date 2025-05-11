@@ -9,10 +9,6 @@ namespace pustakalaya_online_book_library.DTOs
 
 
         [Required]
-        [StringLength(10)]
-        public string PaymentStatus { get; set; }
-
-        [Required]
         public decimal TotalAmount { get; set; }
 
         [Required]

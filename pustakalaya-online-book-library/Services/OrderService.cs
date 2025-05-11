@@ -48,7 +48,6 @@ namespace pustakalaya_online_book_library.Services
                 OrderDate = DateTime.UtcNow,
                 Status = "PENDING",
                 ClaimCode = claimCode,
-                PaymentStatus = orderCreateDTO.PaymentStatus,
                 TotalAmount = 0
             };
 
@@ -64,6 +63,9 @@ namespace pustakalaya_online_book_library.Services
 
                 if (book == null)
                     throw new Exception($"Book with ID {item.BookId} not found");
+
+                if (book.Stock < item.Quantity)
+                    throw new Exception($"Not enough stock for book '{book.Title}'. Available: {book.Stock}, Requested: {item.Quantity}");
 
                 decimal originalPrice = (decimal)book.Price;
                 decimal finalPrice = originalPrice;
@@ -94,6 +96,9 @@ namespace pustakalaya_online_book_library.Services
                 };
 
                 _context.OrderedProducts.Add(orderedProduct);
+
+                book.Stock -= item.Quantity;
+                _context.Books.Update(book);
             }
 
             if (totalBookCount >= 5)
@@ -109,6 +114,22 @@ namespace pustakalaya_online_book_library.Services
 
             user.OrderCount += 1;
             _context.Users.Update(user);
+
+            var cart = _context.Carts
+                .Include(c => c.CartDetails)
+                .FirstOrDefault(c => c.UserId == orderCreateDTO.UserId);
+
+            if (cart != null)
+            {
+                foreach (var item in orderCreateDTO.Products)
+                {
+                    var cartItem = cart.CartDetails.FirstOrDefault(cd => cd.BookId == item.BookId);
+                    if (cartItem != null)
+                    {
+                        _context.CartDetails.Remove(cartItem);
+                    }
+                }
+            }
 
             _context.SaveChanges();
 
@@ -195,27 +216,32 @@ namespace pustakalaya_online_book_library.Services
         public void cancleOrder(Guid orderId)
         {
             var order = _context.Orders.FirstOrDefault(order => order.OrderId == orderId);
+            if (order == null)
+                throw new Exception("Order Not Found");
+
             var user = _context.Users.FirstOrDefault(storedUser => storedUser.UserId == order.UserId);
             if (user == null)
-            {
                 throw new Exception("User Not Found");
-            }
 
-            if (order == null)
-            {
-                throw new Exception("Order Not Found");
-            }
-
-            if(order.Status == "DELIVERED")
-            {
+            if (order.Status == "DELIVERED")
                 throw new BadHttpRequestException("Order has already been delivered.");
-            }
 
             if (order.Status == "CANCLED")
-            {
-                throw new BadHttpRequestException("You cannot change the cancled order Status");
-            }
+                throw new BadHttpRequestException("You cannot change the cancelled order status.");
 
+            var orderedProducts = _context.OrderedProducts
+                .Where(op => op.OrderId == orderId)
+                .ToList();
+
+            foreach (var orderedProduct in orderedProducts)
+            {
+                var book = _context.Books.FirstOrDefault(b => b.Id == orderedProduct.BookId);
+                if (book != null)
+                {
+                    book.Stock += orderedProduct.Quantity;
+                    _context.Books.Update(book);
+                }
+            }
 
             order.Status = "CANCLED";
             _context.SaveChanges();

@@ -34,7 +34,7 @@ namespace pustakalaya_online_book_library.Entities
         public DateTime PublicationDate { get; set; }
 
         [StringLength(1000)]
-        public string Description { get; set; }
+        public string? Description { get; set; }
 
         public double Rating { get; set; } = 0.0;
 
@@ -45,9 +45,9 @@ namespace pustakalaya_online_book_library.Entities
         [ForeignKey("DiscountId")]
         public Discount? Discount { get; set; }
 
-        public ICollection<BookAuthor> BookAuthors { get; set; }
-        public ICollection<BookGenre> BookGenres { get; set; }
-        public List<Review> Reviews { get; set; } = new List<Review>();
-        public ICollection<CartDetails> CartDetails { get; set; }
+        public ICollection<BookAuthor>? BookAuthors { get; set; }
+        public ICollection<BookGenre>? BookGenres { get; set; }
+        public List<Review>? Reviews { get; set; } = new List<Review>();
+        public ICollection<CartDetails>? CartDetails { get; set; }
     }
 }

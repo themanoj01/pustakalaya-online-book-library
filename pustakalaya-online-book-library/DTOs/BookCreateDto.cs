@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Diagnostics.CodeAnalysis;
 
 namespace pustakalaya_online_book_library.DTOs
 {
@@ -28,9 +29,9 @@ namespace pustakalaya_online_book_library.DTOs
         public DateTime PublicationDate { get; set; }
 
         [StringLength(1000)]
-        public string Description { get; set; }
+        public string? Description { get; set; }
 
-        public List<Guid> AuthorIds { get; set; }
-        public List<Guid> GenreIds { get; set; }
+        public List<Guid>? AuthorIds { get; set; }
+        public List<Guid>? GenreIds { get; set; }
     }
 }

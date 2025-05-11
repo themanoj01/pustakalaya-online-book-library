@@ -22,9 +22,6 @@ namespace pustakalaya_online_book_library.Entities
         [Required]
         public string ClaimCode { get; set; }
 
-        [Required]
-        [StringLength(10)]
-        public string PaymentStatus { get; set; }
 
         [ForeignKey("User")]
         public Guid UserId { get; set; }
