@@ -10,6 +10,7 @@ const CartPage = () => {
   const [cartItems, setCartItems] = useState([]);
   const [userId, setUserId] = useState(null);
   const [cartId, setCartId] = useState(null);
+  const [loader, setLoader] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -65,7 +66,7 @@ const CartPage = () => {
 
   const placeOrder = async () => {
   if (!userId || cartItems.length === 0) return;
-
+    setLoader(true);
   try {
     const orderPayload = {
       userId: userId,
@@ -79,10 +80,12 @@ const CartPage = () => {
     const response = await axios.post("http://localhost:5198/pustakalaya/orders/add-order", orderPayload);
 
     toast.success("Order placed successfully!");
+    setLoader(false);
     const { orderId } = response.data;
      navigate(`/order-confirmation/${orderId}`);
     fetchCart(userId); // refresh cart to empty it
   } catch (error) {
+    setLoader(false);
     console.error("Failed to place order:", error.response?.data || error.message);
     toast.error("Order failed. Please try again.");
   }
@@ -177,7 +180,7 @@ const CartPage = () => {
             </div>
 
             <button className="checkout-button" onClick={placeOrder}>
-              Proceed to Checkout
+              {loader? "Processing...": "Proceed to Checkout"}
             </button>
 
 

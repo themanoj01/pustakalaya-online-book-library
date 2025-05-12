@@ -1,46 +1,70 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ShoppingCart, Heart, Star, ChevronRight, Check } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
 import { useAuth } from '../../context/AuthContext';
 import './BookDetails.css';
 import AddReviewForm from './AddReviewForm';
+import { jwtDecode } from 'jwt-decode';
+import toast from 'react-hot-toast';
+import axios from 'axios';
 
 const BookDetails = ({ book }) => {
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState('description');
-  const { addToCart } = useCart();
-  const { currentUser } = useAuth();
+  const [currentUser, setCurrentUser] = useState(null);
+  const [isBookmarked, setIsBookmarked] = useState(false);
 
   if (!book) return null;
 
-  const isBookmarked = currentUser &&
-    currentUser.bookmarks &&
-    currentUser.bookmarks.includes(book.id);
+  useEffect(() => {
+    const token = localStorage.getItem('JwtToken');
+    if (token) {
+      try {
+        const decoded = jwtDecode(token);
+        setCurrentUser(decoded);
+        // Optional: Check if book is already bookmarked
+      } catch (err) {
+        console.error('Invalid token:', err);
+      }
+    }
+  }, []);
+
+  const handleAddToCart = async () => {
+    if (!currentUser) {
+      toast.error('Please login to add to cart');
+      return;
+    }
+
+    try {
+      await axios.post('http://localhost:5198/pustakalaya/carts/add-to-cart', {
+        userId: currentUser.userId || currentUser.Id,
+        items: [
+          {
+            bookId: book.id,
+            quantity: quantity,
+          },
+        ],
+      });
+      toast.success('Added to cart!');
+    } catch (err) {
+      console.error('Failed to add to cart', err);
+      toast.error('Failed to add to cart');
+    }
+  };
+
+
+  const handleQuantityChange = (e) => {
+    const value = parseInt(e.target.value);
+    if (value > 0) setQuantity(value);
+  };
+
+  const incrementQuantity = () => setQuantity(prev => prev + 1);
+  const decrementQuantity = () => setQuantity(prev => (prev > 1 ? prev - 1 : 1));
 
   const discountPercentage = book.discount
     ? Math.round(((book.originalPrice - book.price) / book.originalPrice) * 100)
     : 0;
 
-  const handleAddToCart = () => {
-    addToCart(book.id, quantity);
-  };
-
-  const handleQuantityChange = (e) => {
-    const value = parseInt(e.target.value);
-    if (value > 0) {
-      setQuantity(value);
-    }
-  };
-
-  const incrementQuantity = () => {
-    setQuantity(prev => prev + 1);
-  };
-
-  const decrementQuantity = () => {
-    if (quantity > 1) {
-      setQuantity(prev => prev - 1);
-    }
-  };
 
   return (
     <div className="book-details">
@@ -56,7 +80,7 @@ const BookDetails = ({ book }) => {
 
       <div className="book-details-main">
         <div className="book-details-image">
-          <img src={book.coverImage} alt={book.title} />
+          <img src={book.bookImage} alt={book.title} />
 
           {book.discount && (
             <div className="book-details-discount-badge">
@@ -85,7 +109,16 @@ const BookDetails = ({ book }) => {
 
         <div className="book-details-info">
           <h1 className="book-title">{book.title}</h1>
-          <p className="book-author">by <a href={`/catalog?author=${book.author}`}>{book.author}</a></p>
+          <p className="book-author">
+            by{" "}
+            {book.authors.map((author, index) => (
+              <span key={author}>
+                <a href={`/catalog?author=${encodeURIComponent(author)}`}>{author}</a>
+                {index < book.authors.length - 1 && ", "}
+              </span>
+            ))}
+          </p>
+
 
           <div className="book-rating">
             <div className="stars">
@@ -123,16 +156,15 @@ const BookDetails = ({ book }) => {
               <span className="meta-value">{book.format}</span>
             </div>
             <div className="meta-item">
-              <span className="meta-label">Pages:</span>
-              <span className="meta-value">{book.pages}</span>
-            </div>
-            <div className="meta-item">
               <span className="meta-label">ISBN:</span>
               <span className="meta-value">{book.isbn}</span>
             </div>
             <div className="meta-item">
               <span className="meta-label">Publication Date:</span>
-              <span className="meta-value">{book.publishDate}</span>
+              <span className="meta-value">
+                {new Date(book.publicationDate).toLocaleString()}
+              </span>
+
             </div>
             <div className="meta-item">
               <span className="meta-label">Publisher:</span>
@@ -145,8 +177,8 @@ const BookDetails = ({ book }) => {
           </div>
 
           <div className="book-availability">
-            <div className={`availability-indicator ${book.available ? 'in-stock' : 'out-of-stock'}`}>
-              {book.available ? (
+            <div className={`availability-indicator ${book.stock > 0 ? 'in-stock' : 'out-of-stock'}`}>
+              {book.stock > 0 ? (
                 <>
                   <Check size={16} />
                   <span>In Stock</span>
@@ -187,7 +219,7 @@ const BookDetails = ({ book }) => {
             <button
               className="cart-btn"
               onClick={handleAddToCart}
-              disabled={!book.available}
+              disabled={book.stock <1}
             >
               <ShoppingCart size={18} /> Add to Cart
             </button>
@@ -244,7 +276,14 @@ const BookDetails = ({ book }) => {
                   </tr>
                   <tr>
                     <th>Author</th>
-                    <td>{book.author}</td>
+                    <td>
+                      {book.authors.map((author, index) => (
+                        <span key={author}>
+                          {author}
+                          {index < book.authors.length - 1 && ", "}
+                        </span>
+                      ))}
+                    </td>
                   </tr>
                   <tr>
                     <th>ISBN</th>
@@ -255,16 +294,12 @@ const BookDetails = ({ book }) => {
                     <td>{book.format}</td>
                   </tr>
                   <tr>
-                    <th>Pages</th>
-                    <td>{book.pages}</td>
-                  </tr>
-                  <tr>
                     <th>Publisher</th>
                     <td>{book.publisher}</td>
                   </tr>
                   <tr>
                     <th>Publication Date</th>
-                    <td>{book.publishDate}</td>
+                    <td>{new Date(book.publicationDate).toLocaleString()}</td>
                   </tr>
                   <tr>
                     <th>Language</th>
@@ -272,8 +307,16 @@ const BookDetails = ({ book }) => {
                   </tr>
                   <tr>
                     <th>Genre</th>
-                    <td>{book.genre}</td>
+                    <td>
+                      {book.genres.map((genre, index) => (
+                        <span key={genre}>
+                          {genre}
+                          {index < book.genres.length - 1 && ", "}
+                        </span>
+                      ))}
+                    </td>
                   </tr>
+
                 </tbody>
               </table>
             </div>

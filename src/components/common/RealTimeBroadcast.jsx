@@ -1,22 +1,21 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
+import axios from 'axios';
 import { BookOpen } from 'lucide-react';
 import './RealTimeBroadcast.css';
 
 const RealTimeBroadcast = ({ message, onClose, duration = 5000 }) => {
   const [visible, setVisible] = useState(true);
   const [isExiting, setIsExiting] = useState(false);
-  
+
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsExiting(true);
-      
-      // Give time for exit animation before removing from DOM
       setTimeout(() => {
         setVisible(false);
         if (onClose) onClose();
       }, 300);
     }, duration);
-    
+
     return () => clearTimeout(timer);
   }, [duration, onClose]);
 
@@ -33,54 +32,59 @@ const RealTimeBroadcast = ({ message, onClose, duration = 5000 }) => {
 };
 
 const RealTimeBroadcastContainer = () => {
-  const [broadcasts, setBroadcasts] = useState([]);
-  
-  // This would be connected to a real-time service in a real app
-  // For demo purposes, we'll simulate new broadcasts every 20 seconds
+  const [currentBroadcast, setCurrentBroadcast] = useState(null);
+  const broadcastQueue = useRef([]);
+
   useEffect(() => {
-    const simulateBroadcast = () => {
-      const books = [
-        "The Silent Patient",
-        "Educated",
-        "Project Hail Mary",
-        "The Midnight Library",
-        "Klara and the Sun"
-      ];
-      
-      const book = books[Math.floor(Math.random() * books.length)];
-      const newBroadcast = {
-        id: Date.now(),
-        message: `"${book}" was just purchased!`
-      };
-      
-      setBroadcasts(prev => [...prev, newBroadcast]);
+    const fetchAndQueue = async () => {
+      try {
+        const res = await axios.get("http://localhost:5198/pustakalaya/orders/latest-orders");
+        const newBroadcasts = res.data.map(order => {
+          const firstBook = order.orderedItems[0]?.bookTitle;
+          return {
+            id: `${order.orderId}-${Date.now()}`,
+            message: `A user just ordered "${firstBook}"`
+          };
+        });
+        broadcastQueue.current.push(...newBroadcasts);
+        triggerNextBroadcast();
+      } catch (err) {
+        console.error("Failed to fetch broadcast orders", err);
+      }
     };
-    
-    // Initial broadcast after 5 seconds
-    const initialTimer = setTimeout(simulateBroadcast, 5000);
-    
-    // Subsequent broadcasts every 20 seconds
-    const intervalTimer = setInterval(simulateBroadcast, 20000);
-    
+
+    const initialTimer = setTimeout(fetchAndQueue, 5000);
+    const intervalTimer = setInterval(fetchAndQueue, 6000);
+
     return () => {
       clearTimeout(initialTimer);
       clearInterval(intervalTimer);
     };
   }, []);
-  
-  const handleBroadcastClose = (id) => {
-    setBroadcasts(prev => prev.filter(broadcast => broadcast.id !== id));
+
+  const triggerNextBroadcast = () => {
+    if (!currentBroadcast && broadcastQueue.current.length > 0) {
+      const next = broadcastQueue.current.shift();
+      setCurrentBroadcast(next);
+    }
   };
-  
+
+  const handleClose = () => {
+    setCurrentBroadcast(null);
+    setTimeout(() => {
+      triggerNextBroadcast();
+    }, 300); // small delay to allow exit animation
+  };
+
   return (
     <div className="broadcast-container">
-      {broadcasts.map(broadcast => (
+      {currentBroadcast && (
         <RealTimeBroadcast
-          key={broadcast.id}
-          message={broadcast.message}
-          onClose={() => handleBroadcastClose(broadcast.id)}
+          key={currentBroadcast.id}
+          message={currentBroadcast.message}
+          onClose={handleClose}
         />
-      ))}
+      )}
     </div>
   );
 };

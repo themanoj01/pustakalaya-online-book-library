@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import axios from 'axios';
 import BookDetails from '../components/books/BookDetails';
 import BookCard from '../components/books/BookCard';
-import { books } from '../data/books';
 import './BookDetailsPage.css';
 
 const BookDetailsPage = () => {
@@ -10,25 +10,29 @@ const BookDetailsPage = () => {
   const [book, setBook] = useState(null);
   const [relatedBooks, setRelatedBooks] = useState([]);
   const [loading, setLoading] = useState(true);
-  
+
   useEffect(() => {
-    // Simulate API call to get book by ID
-    const bookId = parseInt(id);
-    const foundBook = books.find(b => b.id === bookId);
-    
-    if (foundBook) {
-      setBook(foundBook);
-      
-      // Find related books with same genre
-      const genre = foundBook.genre;
-      const related = books
-        .filter(b => b.id !== bookId && b.genre === genre)
-        .slice(0, 4);
-      
-      setRelatedBooks(related);
-    }
-    
-    setLoading(false);
+    const fetchBook = async () => {
+      setLoading(true);
+      try {
+        const res = await axios.get(`http://localhost:5198/api/Book/${id}`);
+        setBook(res.data);
+        console.log(res.data)
+        // Fetch all books and filter related by genre
+        const allBooksRes = await axios.get("http://localhost:5198/api/Book/GetAll");
+        const related = allBooksRes.data
+          .filter(b => b.id !== id && b.genre === res.data.genre)
+          .slice(0, 4);
+        setRelatedBooks(related);
+      } catch (err) {
+        console.error("Failed to fetch book:", err);
+        setBook(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBook();
   }, [id]);
 
   if (loading) {
@@ -57,14 +61,14 @@ const BookDetailsPage = () => {
     <div className="book-details-page">
       <div className="container">
         <BookDetails book={book} />
-        
+
         {relatedBooks.length > 0 && (
           <div className="related-books">
             <h2>You May Also Like</h2>
             <div className="related-books-grid">
-              {relatedBooks.map(book => (
-                <div key={book.id} className="related-book-item">
-                  <BookCard book={book} />
+              {relatedBooks.map(b => (
+                <div key={b.id} className="related-book-item">
+                  <BookCard book={b} />
                 </div>
               ))}
             </div>

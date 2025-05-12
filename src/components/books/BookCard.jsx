@@ -4,12 +4,12 @@ import { ShoppingCart, Heart, Star } from 'lucide-react';
 import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
 import './BookCard.css';
+import toast from 'react-hot-toast';
 
 const BookCard = ({ book }) => {
   const [userId, setUserId] = useState(null);
   const [isBookmarked, setIsBookmarked] = useState(false);
 
-  // ✅ Decode token and fetch wishlist status
   useEffect(() => {
     const token = localStorage.getItem('JwtToken');
     if (token) {
@@ -19,7 +19,6 @@ const BookCard = ({ book }) => {
         if (id) {
           setUserId(id);
 
-          // ✅ Fetch wishlist for this user
           axios.get(`http://localhost:5198/pustakalaya/WishList/${id}`)
             .then((res) => {
               const wishlistBookIds = res.data;
@@ -32,7 +31,6 @@ const BookCard = ({ book }) => {
     }
   }, [book.id]);
 
-  // ✅ Add to cart using CartDTO structure
   const handleAddToCart = async (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -53,14 +51,12 @@ const BookCard = ({ book }) => {
         ]
       });
 
-      console.log("Book added to cart");
-      // You can add toast.success("Added to cart") here
+      toast.success("Added to cart");
     } catch (error) {
       console.error("Failed to add to cart:", error.response?.data || error.message);
     }
   };
 
-  // ✅ Toggle bookmark
   const handleToggleBookmark = async (e) => {
     e.preventDefault();
     e.stopPropagation();
