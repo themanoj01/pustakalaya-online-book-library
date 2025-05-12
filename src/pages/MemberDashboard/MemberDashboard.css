@@ -19,6 +19,8 @@
     margin: 0 auto;
     padding: 2rem;
     margin-top: 50px;
+    display: flex;
+    flex-direction: column;
   }
   
   .dashboard-header {

@@ -65,7 +65,7 @@ const Footer = () => {
         
         <div className="footer-bottom">
           <div className="footer-copyright">
-            <p>&copy; {currentYear} BookHaven. All rights reserved.</p>
+            <p>&copy; {currentYear} Pustakalaya. All rights reserved.</p>
           </div>
           <div className="footer-legal">
             <Link to="/privacy">Privacy Policy</Link>

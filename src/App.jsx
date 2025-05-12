@@ -10,6 +10,7 @@ import RealTimeBroadcast from "./components/common/RealTimeBroadcast";
 import HomePage from "./pages/HomePage";
 import CatalogPage from "./pages/CatalogPage";
 import BookDetailsPage from "./pages/BookDetailsPage";
+import StaffPortal from "./pages/StaffPortal.jsx"
 
 import AuthContext, { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
@@ -21,12 +22,13 @@ import AdminDashboard from './pages/AdminDashboard';
 import MemberDashboard from './pages/MemberDashboard/MemberDashboard';
 import OrderConfirmationPage from './pages/OrderConfirmationPage/OrderConfirmationPage';
 import { Toaster } from 'react-hot-toast';
+import ProfilePage from "./pages/ProfilePage/ProfilePage.jsx";
 
 function App() {
   return (
     <>
       <Toaster
-        position="top-right"
+        position="top-center"
         reverseOrder={false}
       />
       <Router>
@@ -49,7 +51,7 @@ function App() {
                     <Route path="/staff-portal" element={<StaffPortal />} />
                     <Route path="/member-dashboard" element={<MemberDashboard />} />
                     <Route path="/order-confirmation/:orderId" element={<OrderConfirmationPage/>} />
-
+                    <Route path="/profile" element={<ProfilePage />} />
                   </Routes>
                 </main>
 
