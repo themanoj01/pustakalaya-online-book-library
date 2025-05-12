@@ -1,15 +1,12 @@
-﻿
-using pustakalaya_online_book_library.DTOs;
-using pustakalaya_online_book_library.Entities;
-using System.Collections;
+﻿using pustakalaya_online_book_library.DTOs;
 
 namespace pustakalaya_online_book_library.Services.Interfaces
 
 {
     public interface IReviewService
     {
-        Task CreateReviewAsync(ReviewCreateDto dto);
+        Task<ReviewReadDto> CreateReviewAsync(ReviewCreateDto dto);
         Task<IEnumerable<ReviewReadDto>> GetReviewsByBookIdAsync(Guid bookId);
-
+        Task<bool> CanUserReviewAsync(Guid userId, Guid bookId);
     }
 }
