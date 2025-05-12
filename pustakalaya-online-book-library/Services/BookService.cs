@@ -67,7 +67,8 @@ namespace pustakalaya_online_book_library.Services
                 PublicationDate = DateTime.SpecifyKind(dto.PublicationDate, DateTimeKind.Utc),
                 Description = dto.Description,
                 BookAuthors = authors.Select(a => new BookAuthor { AuthorId = a.Id }).ToList(),
-                BookGenres = genres.Select(g => new BookGenre { GenreId = g.Id }).ToList()
+                BookGenres = genres.Select(g => new BookGenre { GenreId = g.Id }).ToList(),
+                AwardWinner = dto.AwardWinner,
             };
 
             await _context.Books.AddAsync(book);
@@ -102,55 +103,18 @@ namespace pustakalaya_online_book_library.Services
             return true;
         }
 
-        public async Task<IEnumerable<BookReadDto>> GetAllBooksAsync(string? search, string? sortBy, Guid? genreId, Guid? authorId, string? language, string? format, string? publisher, decimal? minPrice, decimal? maxPrice, double? minRating, bool? inStock, int pageNumber, int pageSize)
+        public async Task<IEnumerable<BookReadDto>> GetAllBooksAsync(int pageNumber, int pageSize)
         {
             var query = _context.Books
                 .Include(b => b.BookAuthors).ThenInclude(ba => ba.Author)
                 .Include(b => b.BookGenres).ThenInclude(bg => bg.Genre)
                 .AsQueryable();
-            if(!string.IsNullOrWhiteSpace(search))
-                query = query.Where(b => b.Title.Contains(search) || b.Description.Contains(search) || b.ISBN.Contains(search));
 
-            if (genreId.HasValue)
-                query = query.Where(b => b.BookGenres.Any(bg => bg.GenreId == genreId));
-
-            if (authorId.HasValue)
-                query = query.Where(b => b.BookAuthors.Any(ba => ba.AuthorId == authorId));
-
-            if (!string.IsNullOrWhiteSpace(language))
-                query = query.Where(b => b.Language == language);
-
-            if (!string.IsNullOrWhiteSpace(format))
-                query = query.Where(b => b.Format == format);
-
-            if (!string.IsNullOrWhiteSpace(publisher))
-                query = query.Where(b => b.Publisher == publisher);
-
-            if (minPrice.HasValue)
-                query = query.Where(b => b.Price >= minPrice);
-
-            if (maxPrice.HasValue)
-                query = query.Where(b => b.Price <= maxPrice);
-
-            if (minRating.HasValue)
-                query = query.Where(b => b.Rating >= minRating);
-
-            if (inStock.HasValue)
-                query = query.Where(b => (b.Stock > 0) == inStock);
-
-            query = sortBy switch
-            {
-                "title" => query.OrderBy(b => b.Title),
-                "price" => query.OrderBy(b => b.Price),
-                "publicationDate" => query.OrderBy(b => b.PublicationDate),
-                "popularity" => query.OrderByDescending(b => b.TotalSold),
-                _ => query.OrderBy(b => b.Title)
-            };
-
-            var books = await query.
-                Skip((pageNumber - 1) * pageSize)
+            var books = await query
+                .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
+
             return books.Select(b => new BookReadDto
             {
                 Id = b.Id,
@@ -168,9 +132,104 @@ namespace pustakalaya_online_book_library.Services
                 TotalSold = b.TotalSold,
                 Authors = b.BookAuthors.Select(ba => ba.Author.Name).ToList(),
                 Genres = b.BookGenres.Select(bg => bg.Genre.Name).ToList(),
-
+                AwardWinner = b.AwardWinner,
+                DiscountId = b.DiscountId
             });
         }
+
+        public async Task<(IEnumerable<BookReadDto> Books, int TotalCount)> GetBooksByCategoryAsync(
+                string? category = null, string? search = null, string? sortBy = null, Guid? genreId = null,
+                Guid? authorId = null, string? language = null, string? format = null, string? publisher = null,
+                decimal? minPrice = null, decimal? maxPrice = null, double? minRating = null, bool? inStock = null,
+                int pageNumber = 1, int pageSize = 10)
+                    {
+            var query = _context.Books
+                .Include(b => b.BookAuthors).ThenInclude(ba => ba.Author)
+                .Include(b => b.BookGenres).ThenInclude(bg => bg.Genre)
+                .AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(search))
+                query = query.Where(b => b.Title.Contains(search) || b.Description.Contains(search) || b.ISBN.Contains(search));
+            if (genreId.HasValue)
+                query = query.Where(b => b.BookGenres.Any(bg => bg.GenreId == genreId));
+            if (authorId.HasValue)
+                query = query.Where(b => b.BookAuthors.Any(ba => ba.AuthorId == authorId));
+            if (!string.IsNullOrWhiteSpace(language))
+                query = query.Where(b => b.Language == language);
+            if (!string.IsNullOrWhiteSpace(format))
+                query = query.Where(b => b.Format == format);
+            if (!string.IsNullOrWhiteSpace(publisher))
+                query = query.Where(b => b.Publisher == publisher);
+            if (minPrice.HasValue)
+                query = query.Where(b => b.Price >= minPrice);
+            if (maxPrice.HasValue)
+                query = query.Where(b => b.Price <= maxPrice);
+            if (minRating.HasValue)
+                query = query.Where(b => b.Rating >= minRating);
+            if (inStock.HasValue)
+                query = query.Where(b => (b.Stock > 0) == inStock);
+
+            var now = DateTime.UtcNow;
+            switch (category?.ToLower())
+            {
+                case "bestsellers":
+                    query = query.OrderByDescending(b => b.TotalSold).Take(5);
+                    break;
+                case "award-winners":
+                    query = query.Where(b => b.AwardWinner);
+                    break;
+                case "new-releases":
+                    query = query.Where(b => b.PublicationDate >= now.AddMonths(-3));
+                    break;
+                case "new-arrivals":
+                    query = query.Where(b => b.PublicationDate >= now.AddMonths(-1));
+                    break;
+                case "coming-soon":
+                    query = query.Where(b => b.PublicationDate > now);
+                    break;
+                case "deals":
+                    query = query.Where(b => b.DiscountId.HasValue);
+                    break;
+                default: 
+                    break;
+            }
+
+            query = sortBy switch
+            {
+                "title" => query.OrderBy(b => b.Title),
+                "price" => query.OrderBy(b => b.Price),
+                "publicationDate" => query.OrderBy(b => b.PublicationDate),
+                "popularity" => query.OrderByDescending(b => b.TotalSold),
+                _ => query.OrderBy(b => b.Title)
+            };
+
+            var totalCount = await query.CountAsync();
+            var books = await query
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return (books.Select(b => new BookReadDto
+            {
+                Id = b.Id,
+                Title = b.Title,
+                ISBN = b.ISBN,
+                Price = b.Price,
+                Stock = b.Stock,
+                Language = b.Language,
+                Format = b.Format,
+                Publisher = b.Publisher,
+                PublicationDate = b.PublicationDate,
+                Description = b.Description,
+                BookImage = b.BookImage,
+                Rating = b.Rating,
+                TotalSold = b.TotalSold,
+                Authors = b.BookAuthors.Select(ba => ba.Author.Name).ToList(),
+                Genres = b.BookGenres.Select(bg => bg.Genre.Name).ToList(),
+                AwardWinner = b.AwardWinner
+            }), totalCount);
+        }
+
 
         public async Task<BookReadDto?> GetBookByIdAsync(Guid id)
         {
@@ -197,7 +256,8 @@ namespace pustakalaya_online_book_library.Services
                 Rating = book.Rating,
                 TotalSold = book.TotalSold,
                 Authors = book.BookAuthors.Select(ba => ba.Author.Name).ToList(),
-                Genres = book.BookGenres.Select(bg => bg.Genre.Name).ToList()
+                Genres = book.BookGenres.Select(bg => bg.Genre.Name).ToList(),
+                AwardWinner = book.AwardWinner
             };
         }
 
@@ -219,6 +279,7 @@ namespace pustakalaya_online_book_library.Services
             book.Format = dto.Format;
             book.Publisher = dto.Publisher;
             book.PublicationDate = DateTime.SpecifyKind(dto.PublicationDate, DateTimeKind.Utc);
+            book.AwardWinner = dto.AwardWinner;
 
             book.Description = dto.Description;
 
@@ -235,5 +296,23 @@ namespace pustakalaya_online_book_library.Services
                 throw new Exception("Failed to update book.");
             return true;
         }
+        public async Task<bool> AssignDiscountToBookAsync(Guid bookId, Guid discountId)
+        {
+            var book = await _context.Books.FindAsync(bookId);
+            if (book == null) 
+                throw new Exception("Book Not Found!");
+
+            var discount = await _context.Discounts.FindAsync(discountId);
+            if (discount == null) 
+                throw new Exception("Discount not found.");
+
+            book.DiscountId = discountId;
+            book.Discount = discount;
+
+            _context.Books.Update(book);
+            await _context.SaveChangesAsync();
+            return true;
+        }
     }
+   
 }

@@ -1,13 +1,13 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿
 using Microsoft.AspNetCore.Mvc;
 using pustakalaya_online_book_library.DTOs;
-using pustakalaya_online_book_library.Entities;
 using pustakalaya_online_book_library.Services.Interfaces;
 
 namespace pustakalaya_online_book_library.Controllers
 {
-    [Route("api/[controller]")]
+
     [ApiController]
+    [Route("api/[controller]")]
     public class ReviewController : ControllerBase
     {
         private readonly IReviewService _reviewService;
@@ -16,83 +16,42 @@ namespace pustakalaya_online_book_library.Controllers
         {
             _reviewService = reviewService;
         }
-        [HttpGet("GetAll")]
-        public async Task<IActionResult> GetAll() =>
-        Ok(await _reviewService.GetAllAsync());
 
-        [HttpGet("/{bookId:guid}")]
-        public async Task<IActionResult> GetByBookId(Guid bookId)
+        [HttpPost]
+        public async Task<IActionResult> PostReview([FromBody] ReviewCreateDto dto)
         {
             try
             {
-                var reviews = await _reviewService.GetByBookIdAsync(bookId);
+                await _reviewService.CreateReviewAsync(dto);
+                return Ok("Review submitted successfully.");
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, "An unexpected error occurred.");
+            }
+        }
+
+        [HttpGet("book/{bookId}")]
+        public async Task<IActionResult> GetReviewsByBookId(Guid bookId)
+        {
+            try
+            {
+                var reviews = await _reviewService.GetReviewsByBookIdAsync(bookId);
                 return Ok(reviews);
             }
-            catch (KeyNotFoundException ex)
+            catch (Exception)
             {
-                return NotFound(ex.Message);
-            }
-        }
-        [HttpGet("{id:guid}")]
-        public async Task<IActionResult> GetById(Guid id)
-        {
-            try
-            {
-                var review = await _reviewService.GetByIdAsync(id);
-                return Ok(review);
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(ex.Message);
-            }
-        }
-
-        [HttpPost("Add")]
-        public async Task<IActionResult> Create([FromBody] ReviewCreateDto review)
-        {
-            try
-            {
-                var created = await _reviewService.CreateAsync(review);
-                return Ok(created);
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(ex.Message);
-            }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-        }
-        [HttpPut("{id:guid}")]
-        public async Task<IActionResult> Update(Guid id, [FromBody] ReviewUpdateDto review)
-        {
-            try
-            {
-                await _reviewService.UpdateAsync(id, review);
-                return NoContent();
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(ex.Message);
-            }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-        }
-        [HttpDelete("{id:guid}")]
-        public async Task<IActionResult> Delete(Guid id)
-        {
-            try
-            {
-                await _reviewService.DeleteAsync(id);
-                return NoContent();
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(ex.Message);
+                return StatusCode(500, "Failed to fetch reviews.");
             }
         }
     }
+
 }
