@@ -1,86 +1,93 @@
-import React, { useState } from 'react';
-import { Filter, SlidersHorizontal, ChevronDown, X } from 'lucide-react';
-import { genres } from '../../data/books';
-import './FilterBar.css';
+import React, { useState } from "react";
+import { Filter, SlidersHorizontal, ChevronDown, X } from "lucide-react";
+import { genres } from "../../data/books";
+import "./FilterBar.css";
 
-const FilterBar = ({ 
-  filters, 
-  setFilters, 
-  sortOption, 
-  setSortOption, 
-  applyFilters 
+const FilterBar = ({
+  filters,
+  setFilters,
+  sortOption,
+  setSortOption,
+  applyFilters,
 }) => {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  
+
   const handleFilterChange = (e) => {
     const { name, value, type, checked } = e.target;
-    
-    if (type === 'checkbox') {
-      setFilters(prev => ({
+
+    if (type === "checkbox") {
+      setFilters((prev) => ({
         ...prev,
-        [name]: checked
+        [name]: checked,
       }));
     } else {
-      setFilters(prev => ({
+      setFilters((prev) => ({
         ...prev,
-        [name]: value
+        [name]: value,
       }));
     }
+
+    if (name === "author") {
+      applyFilters();
+    }
   };
-  
+
   const handlePriceChange = (e, field) => {
     const value = e.target.value;
-    setFilters(prev => ({
+    setFilters((prev) => ({
       ...prev,
       priceRange: {
         ...prev.priceRange,
-        [field]: value === '' ? null : parseFloat(value)
-      }
+        [field]: value === "" ? null : parseFloat(value),
+      },
     }));
+    applyFilters();
   };
-  
+
   const handleSortChange = (e) => {
     setSortOption(e.target.value);
+    applyFilters();
   };
-  
+
   const handleApplyFilters = () => {
     applyFilters();
     setIsFilterOpen(false);
   };
-  
+
   const handleClearFilters = () => {
     setFilters({
-      search: filters.search || '',
-      author: '',
-      genre: '',
+      search: filters.search || "",
+      author: "",
+      genre: "",
       availability: true,
       priceRange: { min: null, max: null },
       rating: 0,
-      format: '',
-      publisher: ''
+      format: "",
+      publisher: "",
     });
-    setSortOption('relevance');
+    setSortOption("relevance");
+    applyFilters();
   };
-  
+
   return (
     <div className="filter-bar">
       <div className="filter-bar-main">
         <div className="filter-toggle">
-          <button 
-            className={`filter-toggle-btn ${isFilterOpen ? 'active' : ''}`} 
+          <button
+            className={`filter-toggle-btn ${isFilterOpen ? "active" : ""}`}
             onClick={() => setIsFilterOpen(!isFilterOpen)}
           >
             <Filter size={18} />
             <span>Filter</span>
-            <ChevronDown size={16} className={isFilterOpen ? 'rotated' : ''} />
+            <ChevronDown size={16} className={isFilterOpen ? "rotated" : ""} />
           </button>
         </div>
-        
+
         <div className="sort-control">
           <label htmlFor="sort">Sort by:</label>
-          <select 
-            id="sort" 
-            value={sortOption} 
+          <select
+            id="sort"
+            value={sortOption}
             onChange={handleSortChange}
             className="sort-select"
           >
@@ -94,81 +101,83 @@ const FilterBar = ({
             <option value="date_asc">Oldest First</option>
           </select>
         </div>
-        
+
         <div className="view-controls">
           <SlidersHorizontal size={18} />
         </div>
       </div>
-      
-      <div className={`filter-dropdown ${isFilterOpen ? 'open' : ''}`}>
+
+      <div className={`filter-dropdown ${isFilterOpen ? "open" : ""}`}>
         <div className="filter-header">
           <h3>Filter Options</h3>
-          <button 
-            className="filter-close" 
+          <button
+            className="filter-close"
             onClick={() => setIsFilterOpen(false)}
           >
             <X size={18} />
           </button>
         </div>
-        
+
         <div className="filter-groups">
           <div className="filter-group">
             <h4>Genre</h4>
-            <select 
-              name="genre" 
-              value={filters.genre} 
+            <select
+              name="genre"
+              value={filters.genre}
               onChange={handleFilterChange}
               className="filter-select"
             >
               <option value="">All Genres</option>
               {genres.map((genre, index) => (
-                <option key={index} value={genre}>{genre}</option>
+                <option key={index} value={genre}>
+                  {genre}
+                </option>
               ))}
             </select>
           </div>
-          
+
           <div className="filter-group">
             <h4>Author</h4>
-            <input 
-              type="text" 
-              name="author" 
-              value={filters.author} 
+            <input
+              type="text"
+              name="author"
+              value={filters.author}
               onChange={handleFilterChange}
               placeholder="Author name"
               className="filter-input"
             />
           </div>
-          
+
           <div className="filter-group">
             <h4>Price Range</h4>
             <div className="price-range">
-              <input 
-                type="number" 
-                placeholder="Min" 
-                value={filters.priceRange.min || ''} 
-                onChange={(e) => handlePriceChange(e, 'min')}
+              <input
+                type="number"
+                placeholder="Min"
+                value={filters.priceRange.min || ""}
+                onChange={(e) => handlePriceChange(e, "min")}
                 className="filter-input price-input"
                 min="0"
                 step="0.01"
               />
               <span>to</span>
-              <input 
-                type="number" 
-                placeholder="Max" 
-                value={filters.priceRange.max || ''} 
-                onChange={(e) => handlePriceChange(e, 'max')}
+              <input
+                type="number"
+                placeholder="Max"
+                value={filters.priceRange.max || ""}
+                onChange={(e) => handlePriceChange(e, "max")}
                 className="filter-input price-input"
                 min="0"
                 step="0.01"
               />
             </div>
           </div>
-          
+
           <div className="filter-group">
             <h4>Format</h4>
-            <select 
-              name="format" 
-              value={filters.format} 
+            <select
+              name="format"
+              value={filters.format}
               onChange={handleFilterChange}
               className="filter-select"
             >
@@ -179,40 +188,46 @@ const FilterBar = ({
               <option value="Audiobook">Audiobook</option>
             </select>
           </div>
-          
+
           <div className="filter-group">
             <h4>Rating</h4>
             <div className="rating-filter">
-              <input 
-                type="range" 
-                name="rating" 
-                min="0" 
-                max="5" 
-                step="0.5" 
-                value={filters.rating} 
+              <input
+                type="range"
+                name="rating"
+                min="0"
+                max="5"
+                step="0.5"
+                value={filters.rating}
                 onChange={handleFilterChange}
                 className="rating-slider"
               />
-              <span className="rating-value">{filters.rating > 0 ? `${filters.rating}+ stars` : 'Any rating'}</span>
+              <span className="rating-value">
+                {filters.rating > 0 ? `${filters.rating}+ stars` : "Any rating"}
+              </span>
             </div>
           </div>
-          
+
           <div className="filter-group checkbox-group">
             <label className="filter-checkbox">
-              <input 
-                type="checkbox" 
-                name="availability" 
-                checked={filters.availability} 
+              <input
+                type="checkbox"
+                name="availability"
+                checked={filters.availability}
                 onChange={handleFilterChange}
               />
               <span>In Stock Only</span>
             </label>
           </div>
         </div>
-        
+
         <div className="filter-actions">
-          <button className="btn-clear" onClick={handleClearFilters}>Clear All</button>
-          <button className="btn-apply" onClick={handleApplyFilters}>Apply Filters</button>
+          <button className="btn-clear" onClick={handleClearFilters}>
+            Clear All
+          </button>
+          <button className="btn-apply" onClick={handleApplyFilters}>
+            Apply Filters
+          </button>
         </div>
       </div>
     </div>

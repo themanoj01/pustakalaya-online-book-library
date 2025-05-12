@@ -1,17 +1,17 @@
-import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { ShoppingCart, Heart, Star } from 'lucide-react';
-import axios from 'axios';
-import { jwtDecode } from 'jwt-decode';
-import './BookCard.css';
+import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { ShoppingCart, Heart, Star } from "lucide-react";
+import axios from "axios";
+import { jwtDecode } from "jwt-decode";
+import "./BookCard.css";
 
 const BookCard = ({ book }) => {
+  console.log("BookCard received book:", book); // Debug log
   const [userId, setUserId] = useState(null);
   const [isBookmarked, setIsBookmarked] = useState(false);
 
-  // ✅ Decode token and fetch wishlist status
   useEffect(() => {
-    const token = localStorage.getItem('JwtToken');
+    const token = localStorage.getItem("JwtToken");
     if (token) {
       try {
         const decoded = jwtDecode(token);
@@ -19,20 +19,20 @@ const BookCard = ({ book }) => {
         if (id) {
           setUserId(id);
 
-          // ✅ Fetch wishlist for this user
-          axios.get(`http://localhost:5198/pustakalaya/WishList/${id}`)
+          axios
+            .get(`http://localhost:5198/pustakalaya/WishList/${id}`)
             .then((res) => {
               const wishlistBookIds = res.data;
-              setIsBookmarked(wishlistBookIds.includes(book.id));
-            });
+              setIsBookmarked(wishlistBookIds.includes(book.Id));
+            })
+            .catch((err) => console.error("Error fetching wishlist:", err));
         }
       } catch (err) {
-        console.error('Invalid token', err);
+        console.error("Invalid token", err);
       }
     }
-  }, [book.id]);
+  }, [book.Id]);
 
-  // ✅ Add to cart using CartDTO structure
   const handleAddToCart = async (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -47,92 +47,119 @@ const BookCard = ({ book }) => {
         userId: userId,
         items: [
           {
-            bookId: book.id,
-            quantity: 1
-          }
-        ]
+            bookId: book.Id,
+            quantity: 1,
+          },
+        ],
       });
-
       console.log("Book added to cart");
-      // You can add toast.success("Added to cart") here
     } catch (error) {
-      console.error("Failed to add to cart:", error.response?.data || error.message);
+      console.error(
+        "Failed to add to cart:",
+        error.response?.data || error.message
+      );
     }
   };
 
-  // ✅ Toggle bookmark
   const handleToggleBookmark = async (e) => {
     e.preventDefault();
     e.stopPropagation();
     if (!userId) return;
 
     try {
-      await axios.post(`http://localhost:5198/pustakalaya/wishList/toggle-wishlist`, null, {
-        params: {
-          userId: userId,
-          bookId: book.id,
-        },
-      });
+      await axios.post(
+        `http://localhost:5198/pustakalaya/wishList/toggle-wishlist`,
+        null,
+        {
+          params: {
+            userId: userId,
+            bookId: book.Id,
+          },
+        }
+      );
       setIsBookmarked(!isBookmarked);
     } catch (error) {
       console.error("Failed to toggle bookmark:", error);
     }
   };
 
-  const discountPercentage = book.discount
-    ? Math.round(((book.originalPrice - book.price) / book.originalPrice) * 100)
-    : 0;
+  const displayAuthor = book.Authors?.length
+    ? book.Authors[0]
+    : "Unknown Author";
 
   return (
     <div className="book-card">
-      <Link to={`/book/${book.id}`} className="book-card-link" style={{ textDecoration: "none" }}>
+      <Link
+        to={`/book/${book.Id}`}
+        className="book-card-link"
+        style={{ textDecoration: "none" }}
+      >
         <div className="book-card-image">
-          <img src={book.bookImage} alt={book.title} />
-          {book.discount && <div className="book-discount-badge">{discountPercentage}% OFF</div>}
-          {book.bestSeller && <div className="book-badge bestseller">Bestseller</div>}
-          {book.newRelease && <div className="book-badge new-release">New Release</div>}
-          {book.awardWinner && <div className="book-badge award-winner">Award Winner</div>}
+          <img
+            src={book.BookImage || "/placeholder-image.jpg"}
+            alt={book.Title || "Book Image"}
+          />
+          {book.TotalSold > 0 && (
+            <div className="book-badge bestseller">Bestseller</div>
+          )}
+          {new Date(book.PublicationDate) >
+            new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) && (
+            <div className="book-badge new-release">New Release</div>
+          )}
         </div>
 
         <div className="book-card-content">
-          <h3 className="book-title">{book.title}</h3>
-          <p className="book-author">by {book.authors}</p>
+          <h3 className="book-title">{book.Title}</h3>
+          <p className="book-author">by {displayAuthor}</p>
 
           <div className="book-rating">
             <div className="stars">
               {[...Array(5)].map((_, i) => (
                 <Star
-                  key={i}
+                  key={`star-${i}`}
                   size={16}
-                  className={i < Math.floor(book.rating) ? 'filled' : 'empty'}
-                  fill={i < Math.floor(book.rating) ? 'currentColor' : 'none'}
+                  className={
+                    i < Math.floor(book.Rating || 0) ? "filled" : "empty"
+                  }
+                  fill={
+                    i < Math.floor(book.Rating || 0) ? "currentColor" : "none"
+                  }
                 />
               ))}
             </div>
-            <span className="rating-value">{book.rating}</span>
+            <span className="rating-value">
+              {(Number(book.Rating) || 0).toFixed(1)}
+            </span>
           </div>
 
           <div className="book-price">
-            {book.discount && <span className="original-price">RS. {book.originalPrice.toFixed(2)}</span>}
-            <span className="current-price">RS. {book.price.toFixed(2)}</span>
+            <span className="current-price">
+              RS. {(Number(book.Price) || 0).toFixed(2)}
+            </span>
           </div>
 
-          <div className="book-format">{book.format}</div>
+          <div className="book-format">{book.Format}</div>
         </div>
       </Link>
 
       <div className="book-card-actions">
-        <button className="cart-btn" onClick={handleAddToCart}>
+        <button
+          className="cart-btn"
+          onClick={handleAddToCart}
+          aria-label="Add to Cart"
+        >
           <ShoppingCart size={18} /> Add to Cart
         </button>
 
         {userId && (
           <button
-            className={`bookmark-btn ${isBookmarked ? 'bookmarked' : ''}`}
+            className={`bookmark-btn ${isBookmarked ? "bookmarked" : ""}`}
             onClick={handleToggleBookmark}
-            aria-label={isBookmarked ? 'Remove from bookmarks' : 'Add to bookmarks'}
+            aria-label={
+              isBookmarked ? "Remove from bookmarks" : "Add to bookmarks"
+            }
           >
-            <Heart size={18} fill={isBookmarked ? 'currentColor' : 'none'} />
+            <Heart size={18} fill={isBookmarked ? "currentColor" : "none"} />
           </button>
         )}
       </div>

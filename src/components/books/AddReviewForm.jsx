@@ -1,16 +1,16 @@
-import React, { useState } from 'react';
-import { Star } from 'lucide-react';
-import './AddReviewForm.css';
+import React, { useState } from "react";
+import { Star } from "lucide-react";
+import "./AddReviewForm.css";
 
 const AddReviewForm = ({ bookId, onReviewSubmit }) => {
   const [rating, setRating] = useState(0);
-  const [comment, setComment] = useState('');
+  const [comment, setComment] = useState("");
   const [hoverRating, setHoverRating] = useState(0);
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (rating === 0 || !comment.trim()) {
-      alert('Please add a rating and comment.');
+      alert("Please add a rating and comment.");
       return;
     }
 
@@ -18,13 +18,13 @@ const AddReviewForm = ({ bookId, onReviewSubmit }) => {
       bookId,
       rating,
       comment,
-      date: new Date().toISOString().split('T')[0],
-      userName: 'Current User', // replace with actual user name from auth context
+      date: new Date().toISOString().split("T")[0],
+      userName: "Current User",
     };
 
     onReviewSubmit(newReview);
     setRating(0);
-    setComment('');
+    setComment("");
   };
 
   return (
@@ -37,13 +37,18 @@ const AddReviewForm = ({ bookId, onReviewSubmit }) => {
             <button
               key={index}
               type="button"
-              className={`star-button ${index <= (hoverRating || rating) ? 'filled' : ''}`}
+              className={`star-button ${
+                index <= (hoverRating || rating) ? "filled" : ""
+              }`}
               onClick={() => setRating(index)}
               onMouseEnter={() => setHoverRating(index)}
               onMouseLeave={() => setHoverRating(0)}
               aria-label={`Rate ${index} star`}
             >
-              <Star size={20} fill={index <= (hoverRating || rating) ? '#f59e0b' : 'none'} />
+              <Star
+                size={20}
+                fill={index <= (hoverRating || rating) ? "#f59e0b" : "none"}
+              />
             </button>
           );
         })}
@@ -56,7 +61,9 @@ const AddReviewForm = ({ bookId, onReviewSubmit }) => {
         required
       ></textarea>
 
-      <button type="submit" className="submit-review-btn">Submit Review</button>
+      <button type="submit" className="submit-review-btn">
+        Submit Review
+      </button>
     </form>
   );
 };

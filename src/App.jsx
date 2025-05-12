@@ -10,24 +10,22 @@ import RealTimeBroadcast from "./components/common/RealTimeBroadcast";
 import HomePage from "./pages/HomePage";
 import CatalogPage from "./pages/CatalogPage";
 import BookDetailsPage from "./pages/BookDetailsPage";
-
-import AuthContext, { AuthProvider } from './context/AuthContext';
-import { CartProvider } from './context/CartContext';
-import { NotificationProvider } from './context/NotificationContext';
-import CartPage from './pages/CartPage';
-import RegisterPage from './pages/RegisterPage';
-import LoginPage from './pages/LoginPage';
-import AdminDashboard from './pages/AdminDashboard';
-import MemberDashboard from './pages/MemberDashboard/MemberDashboard';
-import { Toaster } from 'react-hot-toast';
+import StaffPortal from "./pages/StaffPortal";
+import AuthContext, { AuthProvider } from "./context/AuthContext";
+import { CartProvider } from "./context/CartContext";
+import { NotificationProvider } from "./context/NotificationContext";
+import CartPage from "./pages/CartPage";
+import RegisterPage from "./pages/RegisterPage";
+import LoginPage from "./pages/LoginPage";
+import AdminDashboard from "./pages/AdminDashboard";
+import MemberDashboard from "./pages/MemberDashboard/MemberDashboard";
+import { Toaster } from "react-hot-toast";
+import AddReviewForm from "./components/books/AddReviewForm";
 
 function App() {
   return (
     <>
-      <Toaster
-        position="top-right"
-        reverseOrder={false}
-      />
+      <Toaster position="top-right" reverseOrder={false} />
       <Router>
         <AuthProvider>
           <CartProvider>
@@ -46,7 +44,11 @@ function App() {
                     <Route path="/login" element={<LoginPage />} />
                     <Route path="/admin" element={<AdminDashboard />} />
                     <Route path="/staff-portal" element={<StaffPortal />} />
-                    <Route path="/member-dashboard" element={<MemberDashboard />} />
+                    <Route
+                      path="/member-dashboard"
+                      element={<MemberDashboard />}
+                    />
+                    <Route path="/review-book" element={<AddReviewForm />} />
                   </Routes>
                 </main>
 
