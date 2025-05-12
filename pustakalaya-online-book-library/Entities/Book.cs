@@ -47,6 +47,8 @@ namespace pustakalaya_online_book_library.Entities
 
         public String? BookImage {  get; set; }
 
+        public bool AwardWinner { get; set; }
+
         public ICollection<BookAuthor>? BookAuthors { get; set; }
         public ICollection<BookGenre>? BookGenres { get; set; }
         public List<Review>? Reviews { get; set; } = new List<Review>();

@@ -35,5 +35,7 @@ namespace pustakalaya_online_book_library.DTOs
 
         public List<Guid>? AuthorIds { get; set; }
         public List<Guid>? GenreIds { get; set; }
+
+        public bool AwardWinner { get; set; }
     }
 }
