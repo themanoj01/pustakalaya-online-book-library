@@ -32,6 +32,7 @@ namespace pustakalaya_online_book_library.Controllers
         {
             try
             {
+                Console.WriteLine($"Received AwardWinner: {dto.AwardWinner}"); 
                 var createdBook = await _bookService.CreateBookAsync(dto);
                 return Ok(createdBook);
             }
@@ -41,18 +42,11 @@ namespace pustakalaya_online_book_library.Controllers
             }
         }
         [HttpGet("GetAll")]
-        public async Task<IActionResult> GetAllBooks(
-            string? search, string? sortBy, Guid? genreId, Guid? authorId,
-            string? language, string? format, string? publisher,
-            decimal? minPrice, decimal? maxPrice, double? minRating,
-            bool? inStock,
-            int pageNumber = 1, int pageSize = 10)
+        public async Task<IActionResult> GetAllBooks(int pageNumber = 1, int pageSize = 10)
         {
             try
             {
-                var books = await _bookService.GetAllBooksAsync(search, sortBy, genreId, authorId,
-                    language, format, publisher, minPrice, maxPrice, minRating,
-                     inStock, pageNumber, pageSize);
+                var books = await _bookService.GetAllBooksAsync(pageNumber, pageSize);
                 return Ok(books);
             }
             catch (Exception ex)
@@ -60,11 +54,29 @@ namespace pustakalaya_online_book_library.Controllers
                 return StatusCode(500, $"Failed to retrieve books: {ex.Message}");
             }
         }
+
+        [HttpGet("category")]
+        public async Task<IActionResult> GetBooksByCategory(
+                [FromQuery] string? category = null, [FromQuery] string? search = null,
+                [FromQuery] string? sortBy = null, [FromQuery] Guid? genreId = null,
+                [FromQuery] Guid? authorId = null, [FromQuery] string? language = null,
+                [FromQuery] string? format = null, [FromQuery] string? publisher = null,
+                [FromQuery] decimal? minPrice = null, [FromQuery] decimal? maxPrice = null,
+                [FromQuery] double? minRating = null, [FromQuery] bool? inStock = null,
+                [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        {
+            var (books, totalCount) = await _bookService.GetBooksByCategoryAsync(
+                category, search, sortBy, genreId, authorId, language, format, publisher,
+                minPrice, maxPrice, minRating, inStock, pageNumber, pageSize);
+            return Ok(new { books, totalCount });
+        }
+
         [HttpPut("{id:guid}")]
         public async Task<IActionResult> UpdateBook(Guid id, [FromBody] BookUpdateDto dto)
         {
             try
             {
+                Console.WriteLine($"Received AwardWinner: {dto.AwardWinner}"); 
                 var success = await _bookService.UpdateBookAsync(id, dto);
                 return success ? NoContent() : BadRequest("Update failed.");
             }
@@ -86,6 +98,17 @@ namespace pustakalaya_online_book_library.Controllers
                 return StatusCode(500, $"Failed to delete book: {ex.Message}");
             }
         }
+
+        [HttpPost("assign-discount")]
+        public async Task<IActionResult> AssignDiscount([FromBody] AssignDiscountDto dto)
+        {
+            var success = await _bookService.AssignDiscountToBookAsync(dto.BookId, dto.DiscountId);
+            if (!success)
+                return NotFound("Book or Discount not found.");
+
+            return Ok("Discount assigned successfully.");
+        }
+
 
     }
 }
