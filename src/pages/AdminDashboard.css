@@ -124,7 +124,6 @@
 .main-content {
   flex: 1;
   padding: 2.5rem;
-  background-color: var(--gray-lighter);
   position: relative;
 }
 

@@ -21,13 +21,20 @@ const BookDetails = ({ book }) => {
     if (token) {
       try {
         const decoded = jwtDecode(token);
-        setCurrentUser(decoded);
-        // Optional: Check if book is already bookmarked
+        const id = decoded.userId || decoded.Id;
+        setCurrentUser(id);
+
+        // Fetch wishlist to check if book is bookmarked
+        axios.get(`http://localhost:5198/pustakalaya/wishlist/${id}`)
+          .then((res) => {
+            setIsBookmarked(res.data.includes(book.id));
+          });
       } catch (err) {
         console.error('Invalid token:', err);
       }
     }
-  }, []);
+  }, [book.id]);
+
 
   const handleAddToCart = async () => {
     if (!currentUser) {
@@ -52,6 +59,29 @@ const BookDetails = ({ book }) => {
     }
   };
 
+  const handleToggleBookmark = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!currentUser) {
+      toast.error("Please login to bookmark books");
+      return;
+    }
+
+    try {
+      await axios.post(`http://localhost:5198/pustakalaya/wishlist/toggle-wishlist`, null, {
+        params: {
+          userId: currentUser,
+          bookId: book.id,
+        },
+      });
+      setIsBookmarked(prev => !prev);
+      toast.success(isBookmarked ? 'Removed from wishlist' : 'Added to wishlist');
+    } catch (error) {
+      console.error("Failed to toggle bookmark:", error);
+      toast.error("Failed to update wishlist");
+    }
+  };
 
   const handleQuantityChange = (e) => {
     const value = parseInt(e.target.value);
@@ -219,7 +249,7 @@ const BookDetails = ({ book }) => {
             <button
               className="cart-btn"
               onClick={handleAddToCart}
-              disabled={book.stock <1}
+              disabled={book.stock < 1}
             >
               <ShoppingCart size={18} /> Add to Cart
             </button>
@@ -228,11 +258,13 @@ const BookDetails = ({ book }) => {
               <button
                 className={`bookmark-btn ${isBookmarked ? 'bookmarked' : ''}`}
                 aria-label={isBookmarked ? 'Remove from bookmarks' : 'Add to bookmarks'}
+                onClick={handleToggleBookmark}
               >
                 <Heart size={18} fill={isBookmarked ? 'currentColor' : 'none'} />
                 {isBookmarked ? 'Bookmarked' : 'Bookmark'}
               </button>
             )}
+
           </div>
         </div>
       </div>
