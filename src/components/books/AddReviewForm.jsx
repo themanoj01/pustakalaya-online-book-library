@@ -1,70 +1,85 @@
 import React, { useState } from "react";
-import { Star } from "lucide-react";
+import ReactStars from "react-rating-stars-component";
+import { toast } from "react-hot-toast";
+import axios from "axios";
 import "./AddReviewForm.css";
 
-const AddReviewForm = ({ bookId, onReviewSubmit }) => {
+const AddReviewForm = ({ bookId, userId, token, onReviewSubmit }) => {
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
-  const [hoverRating, setHoverRating] = useState(0);
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (rating === 0 || !comment.trim()) {
-      alert("Please add a rating and comment.");
+    if (rating < 1 || rating > 5) {
+      toast.error("Please select a rating between 1 and 5 stars.");
       return;
     }
 
-    const newReview = {
-      bookId,
-      rating,
-      comment,
-      date: new Date().toISOString().split("T")[0],
-      userName: "Current User",
-    };
-
-    onReviewSubmit(newReview);
-    setRating(0);
-    setComment("");
+    setLoading(true);
+    try {
+      const response = await axios.post(
+        "http://localhost:5198/api/Review",
+        {
+          bookId,
+          userId,
+          rating,
+          comment,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      toast.success("Review submitted successfully!");
+      setRating(0);
+      setComment("");
+      onReviewSubmit(response.data);
+    } catch (error) {
+      console.error(
+        "Error submitting review:",
+        error.response?.data || error.message
+      );
+      toast.error(error.response?.data?.message || "Failed to submit review.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <form className="add-review-form" onSubmit={handleSubmit}>
-      <h3>Add Your Review</h3>
-      <div className="star-rating-input">
-        {[...Array(5)].map((_, i) => {
-          const index = i + 1;
-          return (
-            <button
-              key={index}
-              type="button"
-              className={`star-button ${
-                index <= (hoverRating || rating) ? "filled" : ""
-              }`}
-              onClick={() => setRating(index)}
-              onMouseEnter={() => setHoverRating(index)}
-              onMouseLeave={() => setHoverRating(0)}
-              aria-label={`Rate ${index} star`}
-            >
-              <Star
-                size={20}
-                fill={index <= (hoverRating || rating) ? "#f59e0b" : "none"}
-              />
-            </button>
-          );
-        })}
-      </div>
-
-      <textarea
-        placeholder="Write your review here..."
-        value={comment}
-        onChange={(e) => setComment(e.target.value)}
-        required
-      ></textarea>
-
-      <button type="submit" className="submit-review-btn">
-        Submit Review
-      </button>
-    </form>
+    <div className="add-review-form">
+      <h3>Write a Review</h3>
+      <form onSubmit={handleSubmit}>
+        <div className="form-group">
+          <label>Your Rating</label>
+          <ReactStars
+            count={5}
+            value={rating}
+            onChange={setRating}
+            size={24}
+            activeColor="#ffd700"
+            isHalf={false}
+            edit={!loading}
+          />
+        </div>
+        <div className="form-group">
+          <label>Your Review</label>
+          <textarea
+            value={comment}
+            onChange={(e) => setComment(e.target.value)}
+            maxLength="1000"
+            placeholder="Share your thoughts about the book..."
+            disabled={loading}
+            rows="5"
+          />
+        </div>
+        <button type="submit" className="btn btn-primary" disabled={loading}>
+          {loading ? <span className="loader"></span> : "Submit Review"}
+        </button>
+      </form>
+    </div>
   );
 };
 

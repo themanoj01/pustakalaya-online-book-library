@@ -21,9 +21,10 @@
   --transition: all 0.3s ease;
 }
 
-.dashboard-container {
+.dashboard-containers {
   display: flex;
   min-height: 100vh;
+  gap: 20px;
 }
 
 /* Error Container */
@@ -51,7 +52,6 @@
   margin-bottom: 1.5rem;
 }
 
-/* Sidebar Styles */
 .sidebar {
   width: 280px;
   background-color: var(--white);
@@ -928,7 +928,7 @@ td {
   }
 }
 @media (max-width: 992px) {
-  .dashboard-container {
+  .dashboard-containers {
     flex-direction: column;
   }
 
@@ -988,4 +988,13 @@ td {
   .modal-content {
     max-width: 95%;
   }
+}
+.logout-btn {
+  margin-top: auto;
+  color: #ef4444;
+  cursor: pointer;
+}
+
+.logout-btn:hover {
+  background-color: #fee2e2;
 }

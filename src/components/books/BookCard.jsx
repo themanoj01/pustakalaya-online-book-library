@@ -4,16 +4,10 @@ import { ShoppingCart, Heart, Star } from "lucide-react";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 import "./BookCard.css";
-import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import { ShoppingCart, Heart, Star } from "lucide-react";
-import axios from "axios";
-import { jwtDecode } from "jwt-decode";
-import "./BookCard.css";
 import toast from "react-hot-toast";
 
 const BookCard = ({ book }) => {
-  console.log("BookCard received book:", book); // Debug log
+  console.log("BookCard received book:", book);
   const [userId, setUserId] = useState(null);
   const [isBookmarked, setIsBookmarked] = useState(false);
 

@@ -1,7 +1,6 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
-// Layout Components
 import Header from "./components/common/Header";
 import Footer from "./components/common/Footer";
 import RealTimeBroadcast from "./components/common/RealTimeBroadcast";
@@ -10,16 +9,6 @@ import RealTimeBroadcast from "./components/common/RealTimeBroadcast";
 import HomePage from "./pages/HomePage";
 import CatalogPage from "./pages/CatalogPage";
 import BookDetailsPage from "./pages/BookDetailsPage";
-import StaffPortal from "./pages/StaffPortal";
-import AuthContext, { AuthProvider } from "./context/AuthContext";
-import { CartProvider } from "./context/CartContext";
-import { NotificationProvider } from "./context/NotificationContext";
-import CartPage from "./pages/CartPage";
-import RegisterPage from "./pages/RegisterPage";
-import LoginPage from "./pages/LoginPage";
-import AdminDashboard from "./pages/AdminDashboard";
-import MemberDashboard from "./pages/MemberDashboard/MemberDashboard";
-import { Toaster } from "react-hot-toast";
 import AddReviewForm from "./components/books/AddReviewForm";
 import StaffPortal from "./pages/StaffPortal.jsx";
 
@@ -63,7 +52,6 @@ function App() {
                       element={<MemberDashboard />}
                     />
                     <Route path="/review-book" element={<AddReviewForm />} />
-                    =======
                     <Route
                       path="/member-dashboard"
                       element={<MemberDashboard />}

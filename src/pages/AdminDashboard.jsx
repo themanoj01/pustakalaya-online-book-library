@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import Chart from "chart.js/auto";
 import Select from "react-select";
+import { jwtDecode } from "jwt-decode";
 import {
   FiBook,
   FiBell,
@@ -10,10 +11,12 @@ import {
   FiEdit2,
   FiTrash2,
   FiPackage,
+  FiLogOut,
 } from "react-icons/fi";
 import { FaMoneyBillWave } from "react-icons/fa";
 import toast, { Toaster } from "react-hot-toast";
 import "./AdminDashboard.css";
+import { useNavigate } from "react-router-dom";
 
 class ErrorBoundary extends React.Component {
   state = { hasError: false, error: null };
@@ -566,22 +569,19 @@ const Modal = ({ type, item, onClose, onSave, authors, genres, userId }) => {
                   disabled={loading}
                 />
               </div>
-              {isCreate && (
-                <div className="form-group">
-                  <label>User ID</label>
-                  <input
-                    type="text"
-                    name="userId"
-                    value={formData.userId}
-                    onChange={handleChange}
-                    disabled={loading}
-                    placeholder="Enter user ID (GUID)"
-                  />
-                  {errors.userId && (
-                    <span className="error">{errors.userId}</span>
-                  )}
-                </div>
-              )}
+              <div className="form-group">
+                <label>User ID</label>
+                <input
+                  type="text"
+                  name="userId"
+                  value={formData.userId}
+                  disabled
+                  placeholder="User ID (auto-filled)"
+                />
+                {errors.userId && (
+                  <span className="error">{errors.userId}</span>
+                )}
+              </div>
             </div>
           )}
           <div className="modal-actions">
@@ -630,6 +630,19 @@ const StatCard = ({ icon, title, value, color }) => (
 
 // Main AdminDashboard component
 const AdminDashboard = () => {
+  const navigate = useNavigate();
+  const token = localStorage.getItem("JwtToken");
+  let userId = "";
+  try {
+    const decoded = jwtDecode(token);
+    userId = decoded.userId || decoded.UserId || decoded.Id;
+  } catch (error) {
+    console.error("Error decoding JWT:", error);
+    toast.error("Invalid or expired token. Please log in again.");
+    navigate("/login");
+    return null; // Prevent rendering if token is invalid
+  }
+
   const [activeTab, setActiveTab] = useState("dashboard");
   const [books, setBooks] = useState([]);
   const [discounts, setDiscounts] = useState([]);
@@ -658,7 +671,6 @@ const AdminDashboard = () => {
   });
   const salesChartRef = useRef(null);
   const inventoryChartRef = useRef(null);
-  const userId = localStorage.getItem("userId");
 
   const openImageModal = (book) => {
     setSelectedBook(book);
@@ -695,6 +707,11 @@ const AdminDashboard = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("JwtToken");
+    navigate("/login");
   };
 
   useEffect(() => {
@@ -1090,7 +1107,7 @@ const AdminDashboard = () => {
           Title: data.title || "",
           Content: data.content || "",
           ExpiresAt: data.expiresAt || null,
-          UserId: data.userId || userId,
+          UserId: userId,
         };
         await axios.post(`http://localhost:5198/api/${endpoint}/Add`, payload, {
           headers: { "Content-Type": "application/json" },
@@ -1222,8 +1239,8 @@ const AdminDashboard = () => {
 
   return (
     <ErrorBoundary>
-      <div className="dashboard-container">
-        <Toaster position="top-right" toastOptions={{ duration: 3000 }} />
+      <div className="dashboard-containers">
+        <Toaster position="top-right" reverseOrder={false} />
         <div className="sidebar">
           <nav className="sidebar-nav">
             <ul>
@@ -1254,6 +1271,10 @@ const AdminDashboard = () => {
               >
                 <FiBell className="nav-icon" />
                 <span>Announcements</span>
+              </li>
+              <li onClick={handleLogout} className="logout-btn">
+                <FiLogOut className="nav-icon" />
+                <span>Logout</span>
               </li>
             </ul>
           </nav>
@@ -1422,12 +1443,16 @@ const AdminDashboard = () => {
                             </span>
                           </td>
                           <td>
-                            <img
-                              src={book.bookImage}
-                              alt={book.title}
-                              className="book-thumbnail"
-                              onClick={() => openImageModal(book)}
-                            />
+                            {book.bookImage ? (
+                              <img
+                                src={book.bookImage}
+                                alt={book.title}
+                                className="book-thumbnail"
+                                onClick={() => openImageModal(book)}
+                              />
+                            ) : (
+                              <span>No Image</span>
+                            )}
                           </td>
                           <td>
                             {book.stock === 0 ? (
@@ -1637,7 +1662,7 @@ const AdminDashboard = () => {
                         <tr>
                           <th>Book ID</th>
                           <th>Book Name</th>
-                          <th>Discount Id</th>
+                          <th>Discount Name</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -1651,7 +1676,7 @@ const AdminDashboard = () => {
                               <tr key={book.id}>
                                 <td>{book.id}</td>
                                 <td>{book.title}</td>
-                                <td>{book.discountId}</td>
+                                <td>{discount ? discount.name : "Unknown"}</td>
                               </tr>
                             );
                           })}
