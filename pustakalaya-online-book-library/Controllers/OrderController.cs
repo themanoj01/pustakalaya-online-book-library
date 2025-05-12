@@ -58,5 +58,16 @@ namespace pustakalaya_online_book_library.Controllers
             _orderService.cancleOrder(orderId);
             return Ok("Order Cancelled successfully.");
         }
+
+        [HttpGet("latest-orders")]
+        public IActionResult GetLatestOrders()
+        {
+            var orders = _orderService.getAllOrders()
+                .OrderByDescending(o => o.OrderDate)
+                .Take(10)
+                .ToList();
+            return Ok(orders);
+        }
+
     }
 }

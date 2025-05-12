@@ -253,6 +253,7 @@ namespace pustakalaya_online_book_library.Services
                 Publisher = book.Publisher,
                 PublicationDate = book.PublicationDate,
                 Description = book.Description,
+                BookImage = book.BookImage,
                 Rating = book.Rating,
                 TotalSold = book.TotalSold,
                 Authors = book.BookAuthors.Select(ba => ba.Author.Name).ToList(),
