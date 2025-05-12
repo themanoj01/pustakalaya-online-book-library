@@ -1,46 +1,20 @@
 // MemberDashboard.js
 import React, { useState, useEffect } from 'react';
-import { 
-  BookOpen, 
-  ShoppingCart, 
-  Clock, 
-  Tag, 
-  ChevronRight, 
-  Heart, 
-  Trash2, 
-  Plus, 
-  Minus,
-  Book
+import {
+  BookOpen,
+  Clock,
+  Tag,
+  ChevronRight,
+  Heart
 } from 'lucide-react';
 import './MemberDashboard.css';
+import axios from 'axios';
+import { jwtDecode } from 'jwt-decode';
 
-// Sample data
-const bookmarkedBooks = [
-  { id: 1, title: 'The Design of Everyday Things', author: 'Don Norman', image: '/api/placeholder/60/80', price: 24.99 },
-  { id: 2, title: 'Atomic Habits', author: 'James Clear', image: '/api/placeholder/60/80', price: 19.99 },
-  { id: 3, title: 'Designing Data-Intensive Applications', author: 'Martin Kleppmann', image: '/api/placeholder/60/80', price: 39.99 },
-];
-
-const cartItems = [
-  { id: 1, title: 'Clean Code', author: 'Robert C. Martin', image: '/api/placeholder/60/80', price: 29.99, quantity: 1 },
-  { id: 2, title: 'The Pragmatic Programmer', author: 'Andrew Hunt', image: '/api/placeholder/60/80', price: 34.99, quantity: 1 },
-];
-
-const orderHistory = [
-  { id: 'ORD-2025041', date: '2025-05-01', total: 54.98, status: 'Delivered', items: 2, claimCode: 'XDG-4532-FGH' },
-  { id: 'ORD-2025035', date: '2025-04-15', total: 29.99, status: 'Processing', items: 1, claimCode: 'TRP-7823-KLM' },
-  { id: 'ORD-2025029', date: '2025-04-02', total: 74.97, status: 'Processing', items: 3, claimCode: 'QWE-1234-ASD' },
-];
-
-const discounts = [
-  { id: 1, code: 'SPRING25', discount: '25% off', validUntil: '2025-06-30', category: 'Fiction' },
-  { id: 2, code: 'TECH15', discount: '15% off', validUntil: '2025-05-15', category: 'Technical' },
-  { id: 3, code: 'FREESHIP', discount: 'Free Shipping', validUntil: '2025-05-31', category: 'Any purchase' },
-];
 
 // Tab Button Component
 const TabButton = ({ icon, label, active, onClick }) => (
-  <button 
+  <button
     className={`tab-button ${active ? 'active' : ''}`}
     onClick={onClick}
   >
@@ -53,106 +27,136 @@ const TabButton = ({ icon, label, active, onClick }) => (
 const BookmarkItem = ({ book }) => (
   <div className="bookmark-item fade-in">
     <div className="book-image">
-      <img src={book.image} alt={book.title} />
+      <img src={book.bookImage} alt={book.title} />
     </div>
     <div className="book-info">
       <h3>{book.title}</h3>
-      <p className="book-author">{book.author}</p>
-      <p className="book-price">${book.price.toFixed(2)}</p>
+      <p className="book-author">{book.authors}</p>
+      <p className="book-price">Rs. {book.price?.toFixed(2)}</p>
     </div>
     <div className="bookmark-actions">
-      <button className="icon-button add-to-cart">
-        <ShoppingCart size={18} />
-      </button>
+
       <button className="icon-button remove">
-        <Trash2 size={18} />
+        <Heart size={18} style={{ fill: "red", border: "none", outline: 'none' }} />
       </button>
     </div>
   </div>
 );
 
-// CartItem Component
-const CartItem = ({ item, updateQuantity }) => (
-  <div className="cart-item fade-in">
-    <div className="book-image">
-      <img src={item.image} alt={item.title} />
-    </div>
-    <div className="book-info">
-      <h3>{item.title}</h3>
-      <p className="book-author">{item.author}</p>
-      <p className="book-price">${item.price.toFixed(2)}</p>
-    </div>
-    <div className="quantity-control">
-      <button className="quantity-button" onClick={() => updateQuantity(item.id, -1)}>
-        <Minus size={16} />
-      </button>
-      <span className="quantity">{item.quantity}</span>
-      <button className="quantity-button" onClick={() => updateQuantity(item.id, 1)}>
-        <Plus size={16} />
-      </button>
-    </div>
-    <button className="icon-button remove">
-      <Trash2 size={18} />
-    </button>
-  </div>
-);
 
 // OrderItem Component
-const OrderItem = ({ order }) => (
+const OrderItem = ({ order, onViewDetails }) => (
   <div className="order-item fade-in">
     <div className="order-header">
       <div>
-        <h3 className="order-id">{order.id}</h3>
-        <p className="order-date">{order.date}</p>
+        <h3 className="order-id">#{order.orderId}</h3>
+        <p className="order-date">{new Date(order.orderDate).toLocaleDateString()}</p>
       </div>
-      <span className={`order-status ${order.status.toLowerCase()}`}>
+      <span style={{ color: order.status != "CANCLED" ? "green" : "red" }} className={`order-status ${order.status.toLowerCase()}`}>
         {order.status}
       </span>
     </div>
     <div className="order-details">
       <div className="order-info">
-        <p><strong>Items:</strong> {order.items}</p>
-        <p><strong>Total:</strong> ${order.total.toFixed(2)}</p>
+        <p><strong>Items:</strong> {order.orderedItems.length}</p>
+        <p><strong>Total:</strong> Rs. {order.totalAmount.toFixed(2)}</p>
       </div>
       <div className="claim-code">
         <p><strong>Claim Code:</strong></p>
         <span className="code">{order.claimCode}</span>
       </div>
     </div>
-    <button className="details-button">
+    <button className="details-button" onClick={() => onViewDetails(order)}>
       View Details <ChevronRight size={16} />
     </button>
   </div>
 );
 
+
 // DiscountItem Component
 const DiscountItem = ({ discount }) => (
   <div className="discount-item fade-in">
     <div className="discount-code">
-      <span className="code-label">CODE</span>
-      <span className="code">{discount.code}</span>
+      <span className="code-label">NAME</span>
+      <span className="code">{discount.name}</span>
     </div>
     <div className="discount-info">
-      <h3>{discount.discount}</h3>
-      <p className="discount-category">{discount.category}</p>
-      <p className="discount-expiry">Valid until: {discount.validUntil}</p>
+      <h3>{discount.discountPercent}% off</h3>
+      <p className="discount-expiry">
+        Valid: {discount.startDate ? new Date(discount.startDate).toLocaleDateString() : "N/A"} - {discount.endDate ? new Date(discount.endDate).toLocaleDateString() : "N/A"}
+      </p>
     </div>
-    <button className="use-code-button">
-      Use Code
-    </button>
   </div>
 );
+
 
 export default function MemberDashboard() {
   const [activeTab, setActiveTab] = useState('bookmarks');
   const [cartTotal, setCartTotal] = useState(0);
-  
+  const [bookmarkedBooks, setBookmarkedBooks] = useState([]);
+  const [discounts, setDiscounts] = useState([]);
+  const [userId, setUserId] = useState(null);
+  const [orderHistory, setOrderHistory] = useState([]);
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [showOrderModal, setShowOrderModal] = useState(false);
+
+
   useEffect(() => {
-    // Calculate cart total
-    const total = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    setCartTotal(total);
-    
-    // Add staggered animation classes
+    // Fetch discounts from backend
+    axios.get("http://localhost:5198/api/Discount/GetAll")
+      .then(res => setDiscounts(res.data))
+      .catch(err => console.error("Failed to load discounts", err));
+  }, []);
+
+  useEffect(() => {
+    const fetchOrders = async () => {
+      try {
+        const token = localStorage.getItem("JwtToken");
+        const decoded = jwtDecode(token);
+        const userId = decoded.userId || decoded.UserId || decoded.Id;
+
+        const response = await axios.get(`http://localhost:5198/pustakalaya/orders/get-order-by-user`, {
+          params: { userId }
+        });
+        setOrderHistory(response.data);
+      } catch (error) {
+        console.error("Failed to fetch order history:", error);
+      }
+    };
+
+    fetchOrders();
+  }, []);
+
+  useEffect(() => {
+    const token = localStorage.getItem('JwtToken');
+    if (token) {
+      const decoded = jwtDecode(token);
+      const userId = decoded.userId || decoded.Id;
+      setUserId(userId);
+      if (activeTab === "bookmarks" && userId) {
+        fetchWishlist(userId);
+      }
+    }
+  }, [activeTab]);
+
+  const fetchWishlist = async (userId) => {
+    try {
+      const res = await axios.get(`http://localhost:5198/pustakalaya/wishlist/${userId}`);
+      const bookIds = res.data;
+
+      // Assuming you have an API to fetch book details by IDs
+      const books = await Promise.all(
+        bookIds.map(id => axios.get(`http://localhost:5198/api/Book/${id}`))
+      );
+      const bookData = books.map(b => b.data);
+      setBookmarkedBooks(bookData);
+    } catch (error) {
+      console.error("Failed to fetch wishlist", error);
+    }
+  };
+
+  useEffect(() => {
+
     const elements = document.querySelectorAll('.fade-in');
     elements.forEach((el, index) => {
       setTimeout(() => {
@@ -160,42 +164,38 @@ export default function MemberDashboard() {
       }, 100 * (index + 1));
     });
   }, [activeTab]);
-  
-  const updateQuantity = (id, amount) => {
-    // In a real app, this would update the state and recalculate totals
-    console.log(`Update item ${id} quantity by ${amount}`);
-  };
-  
+
+
   return (
     <div className="dashboard-container">
       <header className="dashboard-header">
         <h1>My Dashboard</h1>
         <p>Manage your bookmarks, cart, orders, and discounts</p>
       </header>
-      
+
       {/* Dashboard Tabs */}
       <div className="tabs-container">
-        <TabButton 
-          icon={<BookOpen size={18} />} 
-          label="Bookmarks" 
-          active={activeTab === 'bookmarks'} 
-          onClick={() => setActiveTab('bookmarks')} 
+        <TabButton
+          icon={<BookOpen size={18} />}
+          label="Bookmarks"
+          active={activeTab === 'bookmarks'}
+          onClick={() => setActiveTab('bookmarks')}
         />
-       
-        <TabButton 
-          icon={<Clock size={18} />} 
-          label="Orders" 
-          active={activeTab === 'orders'} 
-          onClick={() => setActiveTab('orders')} 
+
+        <TabButton
+          icon={<Clock size={18} />}
+          label="Orders"
+          active={activeTab === 'orders'}
+          onClick={() => setActiveTab('orders')}
         />
-        <TabButton 
-          icon={<Tag size={18} />} 
-          label="Discounts" 
-          active={activeTab === 'discounts'} 
-          onClick={() => setActiveTab('discounts')} 
+        <TabButton
+          icon={<Tag size={18} />}
+          label="Discounts"
+          active={activeTab === 'discounts'}
+          onClick={() => setActiveTab('discounts')}
         />
       </div>
-      
+
       {/* Content Area */}
       <div className="content-area">
         {/* Bookmarks Tab */}
@@ -212,43 +212,9 @@ export default function MemberDashboard() {
             </div>
           </div>
         )}
-        
-        {/* Cart Tab */}
-        {activeTab === 'cart' && (
-          <div className="cart-container">
-            <div className="section-header">
-              <h2><ShoppingCart size={20} /> Shopping Cart</h2>
-              <span className="count">{cartItems.length} items</span>
-            </div>
-            <div className="cart-items">
-              {cartItems.map(item => (
-                <CartItem 
-                  key={item.id} 
-                  item={item} 
-                  updateQuantity={updateQuantity} 
-                />
-              ))}
-            </div>
-            <div className="cart-summary">
-              <div className="subtotal">
-                <span>Subtotal</span>
-                <span>${cartTotal.toFixed(2)}</span>
-              </div>
-              <div className="shipping">
-                <span>Shipping</span>
-                <span>Free</span>
-              </div>
-              <div className="total">
-                <span>Total</span>
-                <span>${cartTotal.toFixed(2)}</span>
-              </div>
-              <button className="checkout-button">
-                Proceed to Checkout
-              </button>
-            </div>
-          </div>
-        )}
-        
+
+
+
         {/* Orders Tab */}
         {activeTab === 'orders' && (
           <div className="orders-container">
@@ -258,12 +224,20 @@ export default function MemberDashboard() {
             </div>
             <div className="orders-list">
               {orderHistory.map(order => (
-                <OrderItem key={order.id} order={order} />
+                <OrderItem
+                  key={order.orderId || order.id}
+                  order={order}
+                  onViewDetails={(order) => {
+                    setSelectedOrder(order);
+                    setShowOrderModal(true);
+                  }}
+                />
               ))}
+
             </div>
           </div>
         )}
-        
+
         {/* Discounts Tab */}
         {activeTab === 'discounts' && (
           <div className="discounts-container">
@@ -279,6 +253,30 @@ export default function MemberDashboard() {
           </div>
         )}
       </div>
+
+      {showOrderModal && selectedOrder && (
+        <div className="modal-overlay">
+          <div className="modal order-detail-modal">
+            <div className="modal-header">
+              <h3>Order #{selectedOrder.orderId}</h3>
+              <button className="close-btn" onClick={() => setShowOrderModal(false)}>×</button>
+            </div>
+            <div className="modal-body">
+              <p><strong>Date:</strong> {new Date(selectedOrder.orderDate).toLocaleString()}</p>
+              <p><strong>Status:</strong> {selectedOrder.status}</p>
+              <p><strong>Total:</strong> Rs. {selectedOrder.totalAmount.toFixed(2)}</p>
+              <p><strong>Claim Code:</strong> {selectedOrder.claimCode}</p>
+              <h4>Ordered Items:</h4>
+              <ul>
+                {selectedOrder.orderedItems.map((item, idx) => (
+                  <li key={idx}>{item.bookTitle} × {item.quantity}</li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

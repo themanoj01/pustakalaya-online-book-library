@@ -4,6 +4,13 @@ import { ShoppingCart, Heart, Star } from "lucide-react";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 import "./BookCard.css";
+import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { ShoppingCart, Heart, Star } from "lucide-react";
+import axios from "axios";
+import { jwtDecode } from "jwt-decode";
+import "./BookCard.css";
+import toast from "react-hot-toast";
 
 const BookCard = ({ book }) => {
   console.log("BookCard received book:", book); // Debug log
@@ -19,6 +26,7 @@ const BookCard = ({ book }) => {
         if (id) {
           setUserId(id);
 
+          axios.get(`http://localhost:5198/pustakalaya/WishList/${id}`);
           axios
             .get(`http://localhost:5198/pustakalaya/WishList/${id}`)
             .then((res) => {
@@ -53,6 +61,8 @@ const BookCard = ({ book }) => {
         ],
       });
       console.log("Book added to cart");
+
+      toast.success("Added to cart");
     } catch (error) {
       console.error(
         "Failed to add to cart:",

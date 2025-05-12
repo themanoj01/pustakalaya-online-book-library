@@ -1,14 +1,17 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Trash2, ShoppingBag } from 'lucide-react';
 import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
 import './CartPage.css';
+import toast from 'react-hot-toast';
 
 const CartPage = () => {
   const [cartItems, setCartItems] = useState([]);
   const [userId, setUserId] = useState(null);
   const [cartId, setCartId] = useState(null);
+  const [loader, setLoader] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const token = localStorage.getItem('JwtToken');
@@ -60,6 +63,34 @@ const CartPage = () => {
       await removeItem(item.bookId);
     }
   };
+
+  const placeOrder = async () => {
+  if (!userId || cartItems.length === 0) return;
+    setLoader(true);
+  try {
+    const orderPayload = {
+      userId: userId,
+      totalAmount: finalPrice,
+      products: cartItems.map(item => ({
+        bookId: item.bookId,
+        quantity: item.quantity
+      }))
+    };
+
+    const response = await axios.post("http://localhost:5198/pustakalaya/orders/add-order", orderPayload);
+
+    toast.success("Order placed successfully!");
+    setLoader(false);
+    const { orderId } = response.data;
+     navigate(`/order-confirmation/${orderId}`);
+    fetchCart(userId); // refresh cart to empty it
+  } catch (error) {
+    setLoader(false);
+    console.error("Failed to place order:", error.response?.data || error.message);
+    toast.error("Order failed. Please try again.");
+  }
+};
+
 
   const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
   const totalPrice = cartItems.reduce((sum, item) => sum + item.quantity * item.price, 0);
@@ -148,12 +179,10 @@ const CartPage = () => {
               <span>RS. {finalPrice?.toFixed(2)}</span>
             </div>
 
-            <Link
-              to={userId ? "/checkout" : "/login?redirect=checkout"}
-              className="checkout-button"
-            >
-              Proceed to Checkout
-            </Link>
+            <button className="checkout-button" onClick={placeOrder}>
+              {loader? "Processing...": "Proceed to Checkout"}
+            </button>
+
 
             <button className="clear-cart" onClick={clearCart}>
               Clear Cart
