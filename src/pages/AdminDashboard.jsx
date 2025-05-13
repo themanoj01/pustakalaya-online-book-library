@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import Chart from "chart.js/auto";
 import Select from "react-select";
+import { jwtDecode } from "jwt-decode";
 import {
   FiBook,
   FiBell,
@@ -10,10 +11,12 @@ import {
   FiEdit2,
   FiTrash2,
   FiPackage,
+  FiLogOut,
 } from "react-icons/fi";
 import { FaMoneyBillWave } from "react-icons/fa";
 import toast, { Toaster } from "react-hot-toast";
 import "./AdminDashboard.css";
+import { useNavigate } from "react-router-dom";
 
 class ErrorBoundary extends React.Component {
   state = { hasError: false, error: null };
@@ -96,7 +99,7 @@ const Modal = ({ type, item, onClose, onSave, authors, genres, userId }) => {
   const isCreate = type.startsWith("Create");
   const entity = type.replace("Create", "").replace("Edit", "");
   const [formData, setFormData] = useState(
-    item || // Use item directly for edits to preserve prefilled values
+    item ||
       {
         Book: {
           title: "",
@@ -111,6 +114,7 @@ const Modal = ({ type, item, onClose, onSave, authors, genres, userId }) => {
           authorIds: [],
           genreIds: [],
           bookImage: null,
+          awardWinner: false,
         },
         Discount: { name: "", discountPercent: "", startDate: "", endDate: "" },
         Announcement: {
@@ -221,9 +225,12 @@ const Modal = ({ type, item, onClose, onSave, authors, genres, userId }) => {
   };
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-    setErrors({ ...errors, [name]: "" });
+    const { name, value, type, checked } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
+    setErrors((prev) => ({ ...prev, [name]: "" }));
   };
 
   const handleSelectChange = (name, selectedOptions) => {
@@ -374,15 +381,12 @@ const Modal = ({ type, item, onClose, onSave, authors, genres, userId }) => {
                     label: author.name,
                   }))}
                   value={formData.authorIds
-                    .map((id) =>
-                      authors.find((author) => author.id === id)
-                        ? {
-                            value: id,
-                            label: authors.find((author) => author.id === id)
-                              .name,
-                          }
-                        : null
-                    )
+                    .map((id) => {
+                      const author = authors.find((author) => author.id === id);
+                      return author
+                        ? { value: author.id, label: author.name }
+                        : null;
+                    })
                     .filter(Boolean)}
                   onChange={(selected) =>
                     handleSelectChange("authorIds", selected)
@@ -396,6 +400,7 @@ const Modal = ({ type, item, onClose, onSave, authors, genres, userId }) => {
                   <span className="error">{errors.authorIds}</span>
                 )}
               </div>
+
               <div className="form-group full-width">
                 <label>Genres</label>
                 <Select
@@ -406,14 +411,12 @@ const Modal = ({ type, item, onClose, onSave, authors, genres, userId }) => {
                     label: genre.name,
                   }))}
                   value={formData.genreIds
-                    .map((id) =>
-                      genres.find((genre) => genre.id === id)
-                        ? {
-                            value: id,
-                            label: genres.find((genre) => genre.id === id).name,
-                          }
-                        : null
-                    )
+                    .map((id) => {
+                      const genre = genres.find((genre) => genre.id === id);
+                      return genre
+                        ? { value: genre.id, label: genre.name }
+                        : null;
+                    })
                     .filter(Boolean)}
                   onChange={(selected) =>
                     handleSelectChange("genreIds", selected)
@@ -438,6 +441,20 @@ const Modal = ({ type, item, onClose, onSave, authors, genres, userId }) => {
                 />
                 {errors.description && (
                   <span className="error">{errors.description}</span>
+                )}
+              </div>
+              <div className="form-group full-width">
+                <label>Award Winner</label>
+                <input
+                  type="checkbox"
+                  name="awardWinner"
+                  checked={formData.awardWinner || false}
+                  onChange={handleChange}
+                  disabled={loading}
+                />
+                <span className="checkbox-label">Mark as Award Winner</span>
+                {errors.awardWinner && (
+                  <span className="error">{errors.awardWinner}</span>
                 )}
               </div>
               <div className="form-group full-width">
@@ -552,22 +569,19 @@ const Modal = ({ type, item, onClose, onSave, authors, genres, userId }) => {
                   disabled={loading}
                 />
               </div>
-              {isCreate && (
-                <div className="form-group">
-                  <label>User ID</label>
-                  <input
-                    type="text"
-                    name="userId"
-                    value={formData.userId}
-                    onChange={handleChange}
-                    disabled={loading}
-                    placeholder="Enter user ID (GUID)"
-                  />
-                  {errors.userId && (
-                    <span className="error">{errors.userId}</span>
-                  )}
-                </div>
-              )}
+              <div className="form-group">
+                <label>User ID</label>
+                <input
+                  type="text"
+                  name="userId"
+                  value={formData.userId}
+                  disabled
+                  placeholder="User ID (auto-filled)"
+                />
+                {errors.userId && (
+                  <span className="error">{errors.userId}</span>
+                )}
+              </div>
             </div>
           )}
           <div className="modal-actions">
@@ -616,6 +630,19 @@ const StatCard = ({ icon, title, value, color }) => (
 
 // Main AdminDashboard component
 const AdminDashboard = () => {
+  const navigate = useNavigate();
+  const token = localStorage.getItem("JwtToken");
+  let userId = "";
+  try {
+    const decoded = jwtDecode(token);
+    userId = decoded.userId || decoded.UserId || decoded.Id;
+  } catch (error) {
+    console.error("Error decoding JWT:", error);
+    toast.error("Invalid or expired token. Please log in again.");
+    navigate("/login");
+    return null; // Prevent rendering if token is invalid
+  }
+
   const [activeTab, setActiveTab] = useState("dashboard");
   const [books, setBooks] = useState([]);
   const [discounts, setDiscounts] = useState([]);
@@ -638,14 +665,55 @@ const AdminDashboard = () => {
   const [loading, setLoading] = useState(false);
   const [showImageModal, setShowImageModal] = useState(false);
   const [selectedBook, setSelectedBook] = useState(null);
+  const [assignmentForm, setAssignmentForm] = useState({
+    bookId: null,
+    discountId: null,
+  });
   const salesChartRef = useRef(null);
   const inventoryChartRef = useRef(null);
-  const userId = localStorage.getItem("userId");
 
   const openImageModal = (book) => {
     setSelectedBook(book);
     setShowImageModal(true);
   };
+
+  const handleAssignDiscount = async () => {
+    if (!assignmentForm.bookId || !assignmentForm.discountId) {
+      toast.error("Please select both a book and a discount.");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await axios.post(
+        "http://localhost:5198/api/Book/assign-discount",
+        {
+          bookId: assignmentForm.bookId,
+          discountId: assignmentForm.discountId,
+        },
+        { headers: { "Content-Type": "application/json" } }
+      );
+      toast.success("Discount assigned successfully!");
+      setAssignmentForm({ bookId: null, discountId: null });
+      fetchBooks(); // Refresh books to reflect updated discount
+    } catch (error) {
+      console.error(
+        "Error assigning discount:",
+        error.response?.data || error.message
+      );
+      toast.error(
+        error.response?.data?.message || "Failed to assign discount."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("JwtToken");
+    navigate("/login");
+  };
+
   useEffect(() => {
     fetchBooks();
     fetchDiscounts();
@@ -696,7 +764,9 @@ const AdminDashboard = () => {
             authorIds: book.authorIds || book.AuthorIds || [],
             genreIds: book.genreIds || book.GenreIds || [],
             totalSold: parseInt(book.totalSold || book.TotalSold || 0),
-            bookImage: book.bookImage || null, // Ensure bookImage is included
+            bookImage: book.bookImage || null,
+            awardWinner: book.awardWinner || false,
+            discountId: book.discountId || null, // Added to support discount assignment
           }))
         : [];
       setBooks(normalizedBooks);
@@ -1013,6 +1083,7 @@ const AdminDashboard = () => {
           data.publicationDate || new Date().toISOString().split("T")[0]
         );
         payload.append("Description", data.description || "");
+        payload.append("AwardWinner", data.awardWinner || false);
         if (data.bookImage) payload.append("BookImage", data.bookImage);
         if (data.authorIds)
           data.authorIds.forEach((id) => payload.append("AuthorIds", id));
@@ -1036,7 +1107,7 @@ const AdminDashboard = () => {
           Title: data.title || "",
           Content: data.content || "",
           ExpiresAt: data.expiresAt || null,
-          UserId: data.userId || userId,
+          UserId: userId,
         };
         await axios.post(`http://localhost:5198/api/${endpoint}/Add`, payload, {
           headers: { "Content-Type": "application/json" },
@@ -1064,6 +1135,7 @@ const AdminDashboard = () => {
           Language: data.language || "",
           Format: data.format || "",
           Publisher: data.publisher || "",
+          AwardWinner: data.awardWinner || false,
           PublicationDate: data.publicationDate
             ? new Date(data.publicationDate).toISOString()
             : new Date().toISOString(),
@@ -1167,8 +1239,8 @@ const AdminDashboard = () => {
 
   return (
     <ErrorBoundary>
-      <div className="dashboard-container">
-        <Toaster position="top-right" toastOptions={{ duration: 3000 }} />
+      <div className="dashboard-containers">
+        <Toaster position="top-right" reverseOrder={false} />
         <div className="sidebar">
           <nav className="sidebar-nav">
             <ul>
@@ -1199,6 +1271,10 @@ const AdminDashboard = () => {
               >
                 <FiBell className="nav-icon" />
                 <span>Announcements</span>
+              </li>
+              <li onClick={handleLogout} className="logout-btn">
+                <FiLogOut className="nav-icon" />
+                <span>Logout</span>
               </li>
             </ul>
           </nav>
@@ -1367,12 +1443,16 @@ const AdminDashboard = () => {
                             </span>
                           </td>
                           <td>
-                            <img
-                              src={book.bookImage}
-                              alt={book.title}
-                              className="book-thumbnail"
-                              onClick={() => openImageModal(book)}
-                            />
+                            {book.bookImage ? (
+                              <img
+                                src={book.bookImage}
+                                alt={book.title}
+                                className="book-thumbnail"
+                                onClick={() => openImageModal(book)}
+                              />
+                            ) : (
+                              <span>No Image</span>
+                            )}
                           </td>
                           <td>
                             {book.stock === 0 ? (
@@ -1444,7 +1524,7 @@ const AdminDashboard = () => {
                     <thead>
                       <tr>
                         <th>Name</th>
-                        <th>Discount </th>
+                        <th>Discount</th>
                         <th>Start Date</th>
                         <th>End Date</th>
                         <th>Status</th>
@@ -1504,6 +1584,106 @@ const AdminDashboard = () => {
                     </tbody>
                   </table>
                 )}
+              </div>
+
+              <div className="discount-assignment-section">
+                <h3>Assign Discount to Book</h3>
+                <div className="assignment-form">
+                  <div className="form-group">
+                    <label>Select Discount</label>
+                    <Select
+                      name="discountId"
+                      options={discounts.map((discount) => ({
+                        value: discount.id,
+                        label: `${discount.name} (${discount.discountPercent}%)`,
+                      }))}
+                      onChange={(selected) =>
+                        setAssignmentForm({
+                          ...assignmentForm,
+                          discountId: selected ? selected.value : null,
+                        })
+                      }
+                      isDisabled={loading}
+                      placeholder="Select a discount"
+                      className="react-select-container"
+                      classNamePrefix="react-select"
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Select Book</label>
+                    <Select
+                      name="bookId"
+                      options={books.map((book) => ({
+                        value: book.id,
+                        label: book.title,
+                      }))}
+                      onChange={(selected) =>
+                        setAssignmentForm({
+                          ...assignmentForm,
+                          bookId: selected ? selected.value : null,
+                        })
+                      }
+                      isDisabled={loading}
+                      placeholder="Select a book"
+                      className="react-select-container"
+                      classNamePrefix="react-select"
+                    />
+                  </div>
+                  <button
+                    className="btn btn-primary assign-btn"
+                    onClick={handleAssignDiscount}
+                    disabled={
+                      loading ||
+                      !assignmentForm.bookId ||
+                      !assignmentForm.discountId
+                    }
+                  >
+                    {loading ? (
+                      <span className="loader"></span>
+                    ) : (
+                      "Confirm Assign"
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              <div className="assigned-discounts-section">
+                <div className="table-header">
+                  <h3>Assigned Discounts</h3>
+                </div>
+                <div className="table-responsive">
+                  {books.filter((book) => book.discountId).length === 0 ? (
+                    <div className="empty-state">
+                      <p>No discounts assigned to books.</p>
+                    </div>
+                  ) : (
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>Book ID</th>
+                          <th>Book Name</th>
+                          <th>Discount Name</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {books
+                          .filter((book) => book.discountId)
+                          .map((book) => {
+                            const discount = discounts.find(
+                              (d) => d.id === book.discountId
+                            );
+                            return (
+                              <tr key={book.id}>
+                                <td>{book.id}</td>
+                                <td>{book.title}</td>
+                                <td>{discount ? discount.name : "Unknown"}</td>
+                              </tr>
+                            );
+                          })}
+                      </tbody>
+                    </table>
+                  )}
+                </div>
               </div>
             </div>
           )}

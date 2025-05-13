@@ -1,23 +1,24 @@
-import React, { useEffect, useState } from 'react';
-import { ShoppingCart, Heart, Star, ChevronRight, Check } from 'lucide-react';
-import { useCart } from '../../context/CartContext';
-import { useAuth } from '../../context/AuthContext';
-import './BookDetails.css';
-import AddReviewForm from './AddReviewForm';
-import { jwtDecode } from 'jwt-decode';
-import toast from 'react-hot-toast';
-import axios from 'axios';
+import React, { useEffect, useState } from "react";
+import { ShoppingCart, Heart, Star, ChevronRight, Check } from "lucide-react";
+import { jwtDecode } from "jwt-decode";
+import { toast } from "react-hot-toast";
+import axios from "axios";
+import AddReviewForm from "./AddReviewForm";
+import "./BookDetails.css";
 
 const BookDetails = ({ book }) => {
   const [quantity, setQuantity] = useState(1);
-  const [activeTab, setActiveTab] = useState('description');
+  const [activeTab, setActiveTab] = useState("description");
   const [currentUser, setCurrentUser] = useState(null);
   const [isBookmarked, setIsBookmarked] = useState(false);
-
-  if (!book) return null;
+  const [canReview, setCanReview] = useState(false);
+  const [showReviewForm, setShowReviewForm] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [reviews, setReviews] = useState([]); // State for fetched reviews
 
   useEffect(() => {
-    const token = localStorage.getItem('JwtToken');
+    const token = localStorage.getItem("JwtToken");
+    console.log("Token:", token);
     if (token) {
       try {
         const decoded = jwtDecode(token);
@@ -30,20 +31,65 @@ const BookDetails = ({ book }) => {
             setIsBookmarked(res.data.includes(book.id));
           });
       } catch (err) {
-        console.error('Invalid token:', err);
+        console.error("Invalid token:", err);
+        toast.error("Invalid session. Please log in again.");
       }
     }
-  }, [book.id]);
+  }, [book?.id]);
 
+  useEffect(() => {
+    // Fetch reviews when book.id changes
+    if (book?.id) {
+      fetchReviews(book.id);
+    }
+  }, [book?.id]);
+
+  const checkCanReview = async (userId, bookId) => {
+    setLoading(true);
+    try {
+      const response = await axios.get(
+        `http://localhost:5198/api/Review/can-review/${bookId}/${userId}`
+      );
+      console.log("CanReview response:", response.data);
+      setCanReview(response.data.canReview);
+    } catch (error) {
+      console.error(
+        "Error checking review eligibility:",
+        error.response?.data || error.message
+      );
+      setCanReview(false);
+      toast.error("Failed to check review eligibility.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchReviews = async (bookId) => {
+    try {
+      const response = await axios.get(
+        `http://localhost:5198/api/Review/book/${bookId}`
+      );
+      console.log("Fetched reviews:", response.data);
+      setReviews(response.data);
+    } catch (error) {
+      console.error(
+        "Error fetching reviews:",
+        error.response?.data || error.message
+      );
+      setReviews([]);
+      toast.error("Failed to load reviews.");
+    }
+  };
+  }, [book.id]);
 
   const handleAddToCart = async () => {
     if (!currentUser) {
-      toast.error('Please login to add to cart');
+      toast.error("Please login to add to cart");
       return;
     }
 
     try {
-      await axios.post('http://localhost:5198/pustakalaya/carts/add-to-cart', {
+      await axios.post("http://localhost:5198/pustakalaya/carts/add-to-cart", {
         userId: currentUser.userId || currentUser.Id,
         items: [
           {
@@ -52,13 +98,12 @@ const BookDetails = ({ book }) => {
           },
         ],
       });
-      toast.success('Added to cart!');
+      toast.success("Added to cart!");
     } catch (err) {
-      console.error('Failed to add to cart', err);
-      toast.error('Failed to add to cart');
+      console.error("Failed to add to cart", err);
+      toast.error("Failed to add to cart");
     }
   };
-
   const handleToggleBookmark = async (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -88,13 +133,37 @@ const BookDetails = ({ book }) => {
     if (value > 0) setQuantity(value);
   };
 
-  const incrementQuantity = () => setQuantity(prev => prev + 1);
-  const decrementQuantity = () => setQuantity(prev => (prev > 1 ? prev - 1 : 1));
+  const incrementQuantity = () => setQuantity((prev) => prev + 1);
+  const decrementQuantity = () =>
+    setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
+
+  const handleReviewSubmit = (newReview) => {
+    if (newReview) {
+      const updatedBook = {
+        ...book,
+        reviews: [...(book.reviews || []), newReview],
+        rating:
+          [...(book.reviews || []), newReview].reduce(
+            (sum, r) => sum + r.rating,
+            0
+          ) / ([...(book.reviews || []), newReview].length || 1),
+      };
+      // Update reviews state with new review
+      setReviews([...reviews, newReview]);
+      console.log("Updated book with new review:", updatedBook);
+    }
+    setCanReview(false);
+    setShowReviewForm(false);
+  };
+
+  if (!book) {
+    console.warn("Book prop is null or undefined");
+    return <div>Loading book details...</div>;
+  }
 
   const discountPercentage = book.discount
     ? Math.round(((book.originalPrice - book.price) / book.originalPrice) * 100)
     : 0;
-
 
   return (
     <div className="book-details">
@@ -111,29 +180,19 @@ const BookDetails = ({ book }) => {
       <div className="book-details-main">
         <div className="book-details-image">
           <img src={book.bookImage} alt={book.title} />
-
           {book.discount && (
             <div className="book-details-discount-badge">
               {discountPercentage}% OFF
             </div>
           )}
-
           {book.bestSeller && (
-            <div className="book-details-badge bestseller">
-              Bestseller
-            </div>
+            <div className="book-details-badge bestseller">Bestseller</div>
           )}
-
           {book.newRelease && (
-            <div className="book-details-badge new-release">
-              New Release
-            </div>
+            <div className="book-details-badge new-release">New Release</div>
           )}
-
           {book.awardWinner && (
-            <div className="book-details-badge award-winner">
-              Award Winner
-            </div>
+            <div className="book-details-badge award-winner">Award Winner</div>
           )}
         </div>
 
@@ -143,12 +202,13 @@ const BookDetails = ({ book }) => {
             by{" "}
             {book.authors.map((author, index) => (
               <span key={author}>
-                <a href={`/catalog?author=${encodeURIComponent(author)}`}>{author}</a>
+                <a href={`/catalog?author=${encodeURIComponent(author)}`}>
+                  {author}
+                </a>
                 {index < book.authors.length - 1 && ", "}
               </span>
             ))}
           </p>
-
 
           <div className="book-rating">
             <div className="stars">
@@ -156,26 +216,28 @@ const BookDetails = ({ book }) => {
                 <Star
                   key={i}
                   size={18}
-                  className={i < Math.floor(book.rating) ? 'filled' : 'empty'}
-                  fill={i < Math.floor(book.rating) ? 'currentColor' : 'none'}
+                  className={i < Math.floor(book.rating) ? "filled" : "empty"}
+                  fill={i < Math.floor(book.rating) ? "currentColor" : "none"}
                 />
               ))}
             </div>
-            <span className="rating-value">{book.rating}</span>
-            <span className="review-count">({book.reviews ? book.reviews.length : 0} reviews)</span>
+            <span className="rating-value">{book.rating.toFixed(1)}</span>
+            <span className="review-count">({reviews.length} reviews)</span>
           </div>
 
           <div className="book-price-container">
             <div className="book-price">
               {book.discount && (
-                <span className="original-price">RS. {book.originalPrice.toFixed(2)}</span>
+                <span className="original-price">
+                  RS. {book.originalPrice.toFixed(2)}
+                </span>
               )}
               <span className="current-price">RS. {book.price.toFixed(2)}</span>
             </div>
-
             {book.discount && (
               <div className="price-savings">
-                You save: RS. {(book.originalPrice - book.price).toFixed(2)} ({discountPercentage}%)
+                You save: RS. {(book.originalPrice - book.price).toFixed(2)} (
+                {discountPercentage}%)
               </div>
             )}
           </div>
@@ -192,9 +254,8 @@ const BookDetails = ({ book }) => {
             <div className="meta-item">
               <span className="meta-label">Publication Date:</span>
               <span className="meta-value">
-                {new Date(book.publicationDate).toLocaleString()}
+                {new Date(book.publicationDate).toLocaleDateString()}
               </span>
-
             </div>
             <div className="meta-item">
               <span className="meta-label">Publisher:</span>
@@ -207,7 +268,11 @@ const BookDetails = ({ book }) => {
           </div>
 
           <div className="book-availability">
-            <div className={`availability-indicator ${book.stock > 0 ? 'in-stock' : 'out-of-stock'}`}>
+            <div
+              className={`availability-indicator ${
+                book.stock > 0 ? "in-stock" : "out-of-stock"
+              }`}
+            >
               {book.stock > 0 ? (
                 <>
                   <Check size={16} />
@@ -256,12 +321,16 @@ const BookDetails = ({ book }) => {
 
             {currentUser && (
               <button
+
                 className={`bookmark-btn ${isBookmarked ? 'bookmarked' : ''}`}
                 aria-label={isBookmarked ? 'Remove from bookmarks' : 'Add to bookmarks'}
                 onClick={handleToggleBookmark}
               >
-                <Heart size={18} fill={isBookmarked ? 'currentColor' : 'none'} />
-                {isBookmarked ? 'Bookmarked' : 'Bookmark'}
+                <Heart
+                  size={18}
+                  fill={isBookmarked ? "currentColor" : "none"}
+                />
+                {isBookmarked ? "Bookmarked" : "Bookmark"}
               </button>
             )}
 
@@ -272,33 +341,33 @@ const BookDetails = ({ book }) => {
       <div className="book-details-tabs">
         <div className="tab-header">
           <button
-            className={`tab-btn ${activeTab === 'description' ? 'active' : ''}`}
-            onClick={() => setActiveTab('description')}
+            className={`tab-btn ${activeTab === "description" ? "active" : ""}`}
+            onClick={() => setActiveTab("description")}
           >
             Description
           </button>
           <button
-            className={`tab-btn ${activeTab === 'details' ? 'active' : ''}`}
-            onClick={() => setActiveTab('details')}
+            className={`tab-btn ${activeTab === "details" ? "active" : ""}`}
+            onClick={() => setActiveTab("details")}
           >
             Details
           </button>
           <button
-            className={`tab-btn ${activeTab === 'reviews' ? 'active' : ''}`}
-            onClick={() => setActiveTab('reviews')}
+            className={`tab-btn ${activeTab === "reviews" ? "active" : ""}`}
+            onClick={() => setActiveTab("reviews")}
           >
-            Reviews ({book.reviews ? book.reviews.length : 0})
+            Reviews ({reviews.length})
           </button>
         </div>
 
         <div className="tab-content">
-          {activeTab === 'description' && (
+          {activeTab === "description" && (
             <div className="tab-pane description">
               <p>{book.description}</p>
             </div>
           )}
 
-          {activeTab === 'details' && (
+          {activeTab === "details" && (
             <div className="tab-pane details">
               <table className="details-table">
                 <tbody>
@@ -331,7 +400,9 @@ const BookDetails = ({ book }) => {
                   </tr>
                   <tr>
                     <th>Publication Date</th>
-                    <td>{new Date(book.publicationDate).toLocaleString()}</td>
+                    <td>
+                      {new Date(book.publicationDate).toLocaleDateString()}
+                    </td>
                   </tr>
                   <tr>
                     <th>Language</th>
@@ -348,30 +419,34 @@ const BookDetails = ({ book }) => {
                       ))}
                     </td>
                   </tr>
-
                 </tbody>
               </table>
             </div>
           )}
 
-          {activeTab === 'reviews' && (
+          {activeTab === "reviews" && (
             <div className="tab-pane reviews">
-              {book.reviews && book.reviews.length > 0 ? (
+              {reviews.length > 0 ? (
                 <>
                   <div className="reviews-list">
-                    {book.reviews.map(review => (
-                      <div key={review.id} className="review-item">
+                    {reviews.map((review) => (
+                      <div
+                        key={review.userId + review.createdAt}
+                        className="review-item"
+                      >
                         <div className="review-header">
-                          <div className="review-user">{review.userName}</div>
-                          <div className="review-date">{review.date}</div>
+                          <div className="review-user">{review.username}</div>
+                          <div className="review-date">
+                            {new Date(review.createdAt).toLocaleDateString()}
+                          </div>
                         </div>
                         <div className="review-rating">
                           {[...Array(5)].map((_, i) => (
                             <Star
                               key={i}
                               size={16}
-                              className={i < review.rating ? 'filled' : 'empty'}
-                              fill={i < review.rating ? 'currentColor' : 'none'}
+                              className={i < review.rating ? "filled" : "empty"}
+                              fill={i < review.rating ? "currentColor" : "none"}
                             />
                           ))}
                         </div>
@@ -380,29 +455,74 @@ const BookDetails = ({ book }) => {
                     ))}
                   </div>
 
-                  {currentUser && (
-                    <div className="write-review">
-                      {/* <h3>Write a Review</h3>
-                      <p>You need to have purchased this book to leave a review.</p> */}
-                      <AddReviewForm
-                        bookId={book.id}
-                        onReviewSubmit={(review) => {
-                          // You could POST to API here, or just update local state:
-                          book.reviews.push(review);
-                        }}
-                      />
-
-                    </div>
+                  {currentUser ? (
+                    loading ? (
+                      <p>Loading review eligibility...</p>
+                    ) : canReview ? (
+                      <div className="write-review">
+                        {!showReviewForm ? (
+                          <button
+                            className="add-review-btn"
+                            onClick={() => setShowReviewForm(true)}
+                          >
+                            Add Review
+                          </button>
+                        ) : (
+                          <AddReviewForm
+                            bookId={book.id}
+                            userId={currentUser.userId || currentUser.Id}
+                            token={localStorage.getItem("JwtToken")}
+                            onReviewSubmit={handleReviewSubmit}
+                          />
+                        )}
+                      </div>
+                    ) : (
+                      <p className="no-review-eligible">
+                        You can only review this book if you have purchased it
+                        and haven’t reviewed it before.
+                      </p>
+                    )
+                  ) : (
+                    <p className="no-review-eligible">
+                      Please log in to write a review.
+                    </p>
                   )}
                 </>
               ) : (
                 <div className="no-reviews">
                   <p>There are no reviews yet for this book.</p>
-                  {currentUser && (
-                    <>
-                      <p>Be the first to review this book!</p>
-                      <a href="/reviews/new" className="btn-review">Write a Review</a>
-                    </>
+                  {currentUser ? (
+                    loading ? (
+                      <p>Loading review eligibility...</p>
+                    ) : canReview ? (
+                      <div className="write-review">
+                        <p>Be the first to review this book!</p>
+                        {!showReviewForm ? (
+                          <button
+                            className="add-review-btn"
+                            onClick={() => setShowReviewForm(true)}
+                          >
+                            Add Review
+                          </button>
+                        ) : (
+                          <AddReviewForm
+                            bookId={book.id}
+                            userId={currentUser.userId || currentUser.Id}
+                            token={localStorage.getItem("JwtToken")}
+                            onReviewSubmit={handleReviewSubmit}
+                          />
+                        )}
+                      </div>
+                    ) : (
+                      <p className="no-review-eligible">
+                        You can only review this book if you have purchased it
+                        and haven’t reviewed it before.
+                      </p>
+                    )
+                  ) : (
+                    <p className="no-review-eligible">
+                      Please log in to write a review.
+                    </p>
                   )}
                 </div>
               )}
