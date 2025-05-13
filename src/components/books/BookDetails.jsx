@@ -26,7 +26,8 @@ const BookDetails = ({ book }) => {
         setCurrentUser(id);
 
         // Fetch wishlist to check if book is bookmarked
-        axios.get(`http://localhost:5198/pustakalaya/wishlist/${id}`)
+        axios
+          .get(`http://localhost:5198/pustakalaya/wishlist/${id}`)
           .then((res) => {
             setIsBookmarked(res.data.includes(book.id));
           });
@@ -80,8 +81,6 @@ const BookDetails = ({ book }) => {
       toast.error("Failed to load reviews.");
     }
   };
-  }, [book.id]);
-
   const handleAddToCart = async () => {
     if (!currentUser) {
       toast.error("Please login to add to cart");
@@ -114,14 +113,20 @@ const BookDetails = ({ book }) => {
     }
 
     try {
-      await axios.post(`http://localhost:5198/pustakalaya/wishlist/toggle-wishlist`, null, {
-        params: {
-          userId: currentUser,
-          bookId: book.id,
-        },
-      });
-      setIsBookmarked(prev => !prev);
-      toast.success(isBookmarked ? 'Removed from wishlist' : 'Added to wishlist');
+      await axios.post(
+        `http://localhost:5198/pustakalaya/wishlist/toggle-wishlist`,
+        null,
+        {
+          params: {
+            userId: currentUser,
+            bookId: book.id,
+          },
+        }
+      );
+      setIsBookmarked((prev) => !prev);
+      toast.success(
+        isBookmarked ? "Removed from wishlist" : "Added to wishlist"
+      );
     } catch (error) {
       console.error("Failed to toggle bookmark:", error);
       toast.error("Failed to update wishlist");
@@ -321,9 +326,10 @@ const BookDetails = ({ book }) => {
 
             {currentUser && (
               <button
-
-                className={`bookmark-btn ${isBookmarked ? 'bookmarked' : ''}`}
-                aria-label={isBookmarked ? 'Remove from bookmarks' : 'Add to bookmarks'}
+                className={`bookmark-btn ${isBookmarked ? "bookmarked" : ""}`}
+                aria-label={
+                  isBookmarked ? "Remove from bookmarks" : "Add to bookmarks"
+                }
                 onClick={handleToggleBookmark}
               >
                 <Heart
@@ -333,7 +339,6 @@ const BookDetails = ({ book }) => {
                 {isBookmarked ? "Bookmarked" : "Bookmark"}
               </button>
             )}
-
           </div>
         </div>
       </div>
