@@ -11,75 +11,63 @@ namespace pustakalaya_online_book_library.Services
     public class ReviewService : IReviewService
     {
         private readonly ApplicationDBContext _context;
-        private readonly IMapper _mapper;
-        public ReviewService(ApplicationDBContext context, IMapper mapper)
+
+        public ReviewService(ApplicationDBContext context)
         {
             _context = context;
-            _mapper = mapper;
         }
-        public async Task<Review> CreateAsync(ReviewCreateDto reviewDto)
+
+        public async Task CreateReviewAsync(ReviewCreateDto dto)
         {
-            if(!await _context.Books.AnyAsync(b => b.Id == reviewDto.BookId))
+            var bookExists = await _context.Books.AnyAsync(b => b.Id == dto.BookId);
+            if (!bookExists)
+                throw new KeyNotFoundException("Book not found.");
+
+            var userExists = await _context.Users.AnyAsync(u => u.UserId == dto.UserId);
+            if (!userExists)
+                throw new KeyNotFoundException("User not found.");
+
+            var hasPurchased = await _context.OrderedProducts
+                .Include(op => op.Orders)
+                .AnyAsync(op => op.BookId == dto.BookId && op.Orders.UserId == dto.UserId && op.Orders.Status == "DELIVERED");
+            if (!hasPurchased)
+                throw new InvalidOperationException("User has not purchased this book.");
+
+            var alreadyReviewed = await _context.Reviews.AnyAsync(r => r.BookId == dto.BookId && r.UserId == dto.UserId);
+            if (alreadyReviewed)
+                throw new InvalidOperationException("You have already reviewed this book.");
+
+            var review = new Review
             {
-                throw new KeyNotFoundException($"Book with ID {reviewDto.BookId} not found.");
-            }
-            if (!await _context.Users.AnyAsync(u => u.UserId == reviewDto.UserId))
-                throw new KeyNotFoundException($"User with ID {reviewDto.UserId} not found.");
-            if (await _context.Reviews.AnyAsync(r => r.BookId == reviewDto.BookId && r.UserId == reviewDto.UserId))
-                throw new InvalidOperationException($"User {reviewDto.UserId} has already reviewed Book {reviewDto.BookId}.");
-            var review = _mapper.Map<Review>(reviewDto);
+                BookId = dto.BookId,
+                UserId = dto.UserId,
+                Rating = dto.Rating,
+                Comment = dto.Comment,
+                CreatedAt = DateTime.UtcNow
+            };
+
             _context.Reviews.Add(review);
             await _context.SaveChangesAsync();
-           return review;
         }
 
-        public async Task DeleteAsync(Guid id)
+        public async Task<IEnumerable<ReviewReadDto>> GetReviewsByBookIdAsync(Guid bookId)
         {
-            var review = await _context.Reviews.FirstOrDefaultAsync(r => r.Id == id);
-            if (review == null)
-                throw new KeyNotFoundException($"Review with ID {id} not found.");
-            _context.Reviews.Remove(review);
-            await _context.SaveChangesAsync();
-        }
-
-        public async Task<IEnumerable<Review>> GetAllAsync() =>
-            await _context.Reviews
-           .Include(r => r.Book)
-           .Include(r => r.User)
-           .ToListAsync();
-
-
-        public async Task<IEnumerable<Review>> GetByBookIdAsync(Guid bookId)
-        {
-            if (!await _context.Books.AnyAsync(b => b.Id == bookId))
-                throw new KeyNotFoundException($"Book with ID {bookId} not found.");
-            return await _context.Reviews
-                .Include(r => r.Book)
-                .Include(r => r.User)
+            var reviews = await _context.Reviews
                 .Where(r => r.BookId == bookId)
-                .ToListAsync();
-        }
-
-        public async Task<Review> GetByIdAsync(Guid id)
-        {
-            var review = await _context.Reviews
-                .Include(r => r.Book)
                 .Include(r => r.User)
-                .FirstOrDefaultAsync(r => r.Id == id);
-            if (review == null)
-                throw new KeyNotFoundException($"Review with ID {id} not found.");
-            return review;
-        }
+                .OrderByDescending(r => r.CreatedAt)
+                .Select(r => new ReviewReadDto
+                {
+                    UserId = r.UserId,
+                    Username = r.User.UserName,
+                    Rating = r.Rating,
+                    Comment = r.Comment,
+                    CreatedAt = r.CreatedAt
+                })
+                .ToListAsync();
 
-        public async Task UpdateAsync(Guid id, ReviewUpdateDto reviewDto)
-        {
-            var existingReview = await _context.Reviews.FirstOrDefaultAsync(r => r.Id == id);
-            if(existingReview == null)
-            {
-                throw new KeyNotFoundException($"Review with ID {id} not found.");
-            }
-            _mapper.Map(reviewDto, existingReview);
-            await _context.SaveChangesAsync();
+            return reviews;
         }
     }
+
 }
