@@ -22,22 +22,14 @@ const BookDetails = ({ book }) => {
     if (token) {
       try {
         const decoded = jwtDecode(token);
-        console.log("Decoded JWT:", decoded);
-        setCurrentUser(decoded);
-        if (book?.id && (decoded.userId || decoded.Id)) {
-          console.log(
-            "Checking review eligibility for bookId:",
-            book.id,
-            "userId:",
-            decoded.userId || decoded.Id
-          );
-          checkCanReview(decoded.userId || decoded.Id, book.id);
-        } else {
-          console.warn("Skipping checkCanReview: book.id or userId missing", {
-            bookId: book?.id,
-            userId: decoded.userId || decoded.Id,
+        const id = decoded.userId || decoded.Id;
+        setCurrentUser(id);
+
+        // Fetch wishlist to check if book is bookmarked
+        axios.get(`http://localhost:5198/pustakalaya/wishlist/${id}`)
+          .then((res) => {
+            setIsBookmarked(res.data.includes(book.id));
           });
-        }
       } catch (err) {
         console.error("Invalid token:", err);
         toast.error("Invalid session. Please log in again.");
@@ -88,6 +80,7 @@ const BookDetails = ({ book }) => {
       toast.error("Failed to load reviews.");
     }
   };
+  }, [book.id]);
 
   const handleAddToCart = async () => {
     if (!currentUser) {
@@ -109,6 +102,29 @@ const BookDetails = ({ book }) => {
     } catch (err) {
       console.error("Failed to add to cart", err);
       toast.error("Failed to add to cart");
+    }
+  };
+  const handleToggleBookmark = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!currentUser) {
+      toast.error("Please login to bookmark books");
+      return;
+    }
+
+    try {
+      await axios.post(`http://localhost:5198/pustakalaya/wishlist/toggle-wishlist`, null, {
+        params: {
+          userId: currentUser,
+          bookId: book.id,
+        },
+      });
+      setIsBookmarked(prev => !prev);
+      toast.success(isBookmarked ? 'Removed from wishlist' : 'Added to wishlist');
+    } catch (error) {
+      console.error("Failed to toggle bookmark:", error);
+      toast.error("Failed to update wishlist");
     }
   };
 
@@ -305,11 +321,10 @@ const BookDetails = ({ book }) => {
 
             {currentUser && (
               <button
-                className={`bookmark-btn ${isBookmarked ? "bookmarked" : ""}`}
-                onClick={() => setIsBookmarked(!isBookmarked)}
-                aria-label={
-                  isBookmarked ? "Remove from bookmarks" : "Add to bookmarks"
-                }
+
+                className={`bookmark-btn ${isBookmarked ? 'bookmarked' : ''}`}
+                aria-label={isBookmarked ? 'Remove from bookmarks' : 'Add to bookmarks'}
+                onClick={handleToggleBookmark}
               >
                 <Heart
                   size={18}
@@ -318,6 +333,7 @@ const BookDetails = ({ book }) => {
                 {isBookmarked ? "Bookmarked" : "Bookmark"}
               </button>
             )}
+
           </div>
         </div>
       </div>

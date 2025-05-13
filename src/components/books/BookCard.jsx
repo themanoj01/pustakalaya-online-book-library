@@ -16,13 +16,10 @@ const BookCard = ({ book }) => {
     if (token) {
       try {
         const decoded = jwtDecode(token);
-        const id = decoded.Id || decoded.id || decoded.UserId || decoded.userId;
+        const id = decoded.userId || decoded.Id || decoded.UserId || decoded.id;
         if (id) {
           setUserId(id);
-
-          axios.get(`http://localhost:5198/pustakalaya/WishList/${id}`);
-          axios
-            .get(`http://localhost:5198/pustakalaya/WishList/${id}`)
+          axios.get(`http://localhost:5198/pustakalaya/wishlist/${id}`)
             .then((res) => {
               const wishlistBookIds = res.data;
               setIsBookmarked(wishlistBookIds.includes(book.Id));
@@ -43,6 +40,7 @@ const BookCard = ({ book }) => {
       console.warn("User not logged in.");
       return;
     }
+
 
     try {
       await axios.post("http://localhost:5198/pustakalaya/carts/add-to-cart", {
@@ -70,26 +68,25 @@ const BookCard = ({ book }) => {
     e.stopPropagation();
     if (!userId) return;
 
+    console.log("Toggling bookmark for", book.id);
     try {
-      await axios.post(
-        `http://localhost:5198/pustakalaya/wishList/toggle-wishlist`,
-        null,
-        {
-          params: {
-            userId: userId,
-            bookId: book.Id,
-          },
-        }
-      );
-      setIsBookmarked(!isBookmarked);
+      await axios.post(`http://localhost:5198/pustakalaya/wishlist/toggle-wishlist`, null, {
+        params: {
+          userId: userId,
+          bookId: book.id,
+        },
+      });
+      setIsBookmarked(prev => !prev);
     } catch (error) {
-      console.error("Failed to toggle bookmark:", error);
+      console.error("Toggle failed", error);
     }
   };
 
-  const displayAuthor = book.Authors?.length
-    ? book.Authors[0]
-    : "Unknown Author";
+
+
+  const discountPercentage = book.discount
+    ? Math.round(((book.originalPrice - book.price) / book.originalPrice) * 100)
+    : 0;
 
   return (
     <div className="book-card">
@@ -157,15 +154,15 @@ const BookCard = ({ book }) => {
 
         {userId && (
           <button
-            className={`bookmark-btn ${isBookmarked ? "bookmarked" : ""}`}
+
+            className={`bookmark-btn ${isBookmarked ? 'bookmarked' : ''}`}
+            aria-label={isBookmarked ? 'Remove from bookmarks' : 'Add to bookmarks'}
             onClick={handleToggleBookmark}
-            aria-label={
-              isBookmarked ? "Remove from bookmarks" : "Add to bookmarks"
-            }
           >
             <Heart size={18} fill={isBookmarked ? "currentColor" : "none"} />
           </button>
         )}
+
       </div>
     </div>
   );

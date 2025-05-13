@@ -76,17 +76,23 @@ const ProfilePage = () => {
   };
 
   const updateDetails = async () => {
+    const { userName, userEmail, userContact, userAddress } = formData;
+
+    if (!userName || !userEmail || !userContact || !userAddress) {
+      toast.error("All fields are required");
+      return;
+    }
     try {
       setUpdating(true);
       await axios.put(`http://localhost:5198/pustakalaya/users/update-user`, formData);
-      
+
       if (profilePic) {
         const data = new FormData();
         data.append("userId", userId);
         data.append("profilePic", profilePic);
         await axios.patch(`http://localhost:5198/pustakalaya/users/update-profilePic`, data);
       }
-      
+
       toast.success("Profile updated successfully");
       setUpdating(false);
     } catch (error) {
@@ -98,15 +104,15 @@ const ProfilePage = () => {
 
   const updatePassword = async () => {
     if (!validatePassword()) return;
-    
+
     try {
       setUpdating(true);
       await axios.patch(
-        `http://localhost:5198/pustakalaya/users/update-password`, 
-        passwordData, 
+        `http://localhost:5198/pustakalaya/users/update-password`,
+        passwordData,
         { params: { userId } }
       );
-      
+
       toast.success("Password updated successfully");
       setPasswordData({
         oldPassword: "",
@@ -147,10 +153,10 @@ const ProfilePage = () => {
             <label htmlFor="profile-upload" className="upload-btn">
               <i className="upload-icon">📷</i>
             </label>
-            <input 
-              type="file" 
-              id="profile-upload" 
-              onChange={handleProfilePicChange} 
+            <input
+              type="file"
+              id="profile-upload"
+              onChange={handleProfilePicChange}
               className="hidden-input"
               accept="image/*"
             />
@@ -161,14 +167,14 @@ const ProfilePage = () => {
 
       <div className="tab-container">
         <div className="profile-tabs">
-          <button 
-            className={`tab-btn ${activeTab === "details" ? "active" : ""}`} 
+          <button
+            className={`tab-btn ${activeTab === "details" ? "active" : ""}`}
             onClick={() => setActiveTab("details")}
           >
             <i className="tab-icon">👤</i> User Details
           </button>
-          <button 
-            className={`tab-btn ${activeTab === "password" ? "active" : ""}`} 
+          <button
+            className={`tab-btn ${activeTab === "password" ? "active" : ""}`}
             onClick={() => setActiveTab("password")}
           >
             <i className="tab-icon">🔒</i> Change Password
@@ -180,52 +186,56 @@ const ProfilePage = () => {
             <div className="profile-form animate-fade">
               <div className="form-group">
                 <label>Full Name</label>
-                <input 
-                  type="text" 
-                  name="userName" 
-                  value={formData.userName || ''} 
-                  onChange={handleInputChange} 
+                <input
+                  type="text"
+                  name="userName"
+                  value={formData.userName || ''}
+                  onChange={handleInputChange}
                   placeholder="Your full name"
+                  required
                 />
               </div>
-              
+
               <div className="form-group">
                 <label>Email Address</label>
-                <input 
-                  type="email" 
-                  name="userEmail" 
-                  value={formData.userEmail || ''} 
-                  onChange={handleInputChange} 
+                <input
+                  type="email"
+                  name="userEmail"
+                  value={formData.userEmail || ''}
+                  onChange={handleInputChange}
                   placeholder="your.email@example.com"
+                  required
                 />
               </div>
-              
+
               <div className="form-row">
                 <div className="form-group">
                   <label>Contact Number</label>
-                  <input 
-                    type="text" 
-                    name="userContact" 
-                    value={formData.userContact || ''} 
-                    onChange={handleInputChange} 
+                  <input
+                    type="text"
+                    name="userContact"
+                    value={formData.userContact || ''}
+                    onChange={handleInputChange}
                     placeholder="Phone number"
+                    required
                   />
                 </div>
-                
+
                 <div className="form-group">
                   <label>Address</label>
-                  <input 
-                    type="text" 
-                    name="userAddress" 
-                    value={formData.userAddress || ''} 
-                    onChange={handleInputChange} 
+                  <input
+                    type="text"
+                    name="userAddress"
+                    value={formData.userAddress || ''}
+                    onChange={handleInputChange}
                     placeholder="Your address"
+                    required
                   />
                 </div>
               </div>
 
-              <button 
-                className="update-btn" 
+              <button
+                className="update-btn"
                 onClick={updateDetails}
                 disabled={updating}
               >
@@ -238,43 +248,46 @@ const ProfilePage = () => {
             <div className="profile-form animate-fade">
               <div className="form-group">
                 <label>Current Password</label>
-                <input 
-                  type="password" 
-                  name="oldPassword" 
-                  value={passwordData.oldPassword} 
-                  onChange={handlePasswordChange} 
+                <input
+                  type="password"
+                  name="oldPassword"
+                  value={passwordData.oldPassword}
+                  onChange={handlePasswordChange}
                   placeholder="Enter your current password"
+                  required
                 />
               </div>
-              
+
               <div className="form-group">
                 <label>New Password</label>
-                <input 
-                  type="password" 
-                  name="newPassword" 
-                  value={passwordData.newPassword} 
-                  onChange={handlePasswordChange} 
+                <input
+                  type="password"
+                  name="newPassword"
+                  value={passwordData.newPassword}
+                  onChange={handlePasswordChange}
                   placeholder="Enter new password"
+                  required
                 />
               </div>
-              
+
               <div className="form-group">
                 <label>Confirm New Password</label>
-                <input 
-                  type="password" 
-                  name="confirmPassword" 
-                  value={passwordData.confirmPassword} 
-                  onChange={handlePasswordChange} 
+                <input
+                  type="password"
+                  name="confirmPassword"
+                  value={passwordData.confirmPassword}
+                  onChange={handlePasswordChange}
                   placeholder="Confirm new password"
+                  required
                 />
               </div>
 
               <div className="password-requirements">
                 <p>Password must be at least 6 characters long</p>
               </div>
-              
-              <button 
-                className="update-btn" 
+
+              <button
+                className="update-btn"
                 onClick={updatePassword}
                 disabled={updating}
               >
