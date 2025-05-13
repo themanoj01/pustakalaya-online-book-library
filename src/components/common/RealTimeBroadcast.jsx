@@ -1,7 +1,7 @@
-import React, { useEffect, useState, useRef } from "react";
-import axios from "axios";
-import { BookOpen } from "lucide-react";
-import "./RealTimeBroadcast.css";
+import React, { useEffect, useState, useRef } from 'react';
+import axios from 'axios';
+import { BookOpen } from 'lucide-react';
+import './RealTimeBroadcast.css';
 
 const RealTimeBroadcast = ({ message, onClose, duration = 5000 }) => {
   const [visible, setVisible] = useState(true);
@@ -22,7 +22,7 @@ const RealTimeBroadcast = ({ message, onClose, duration = 5000 }) => {
   if (!visible) return null;
 
   return (
-    <div className={`broadcast ${isExiting ? "exiting" : ""}`}>
+    <div className={`broadcast ${isExiting ? 'exiting' : ''}`}>
       <div className="broadcast-icon">
         <BookOpen size={18} />
       </div>
@@ -38,14 +38,12 @@ const RealTimeBroadcastContainer = () => {
   useEffect(() => {
     const fetchAndQueue = async () => {
       try {
-        const res = await axios.get(
-          "http://localhost:5198/pustakalaya/orders/latest-orders"
-        );
-        const newBroadcasts = res.data.map((order) => {
+        const res = await axios.get("http://localhost:5198/pustakalaya/orders/latest-orders");
+        const newBroadcasts = res.data.map(order => {
           const firstBook = order.orderedItems[0]?.bookTitle;
           return {
             id: `${order.orderId}-${Date.now()}`,
-            message: `A user just ordered "${firstBook}"`,
+            message: `A user just ordered "${firstBook}"`
           };
         });
         broadcastQueue.current.push(...newBroadcasts);

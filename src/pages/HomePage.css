@@ -5,7 +5,7 @@
 /* Hero Section */
 .hero-section {
   background-color: var(--color-primary-900);
-  background-image: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.5)),
+  background-image: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.5)), 
     url("https://images.pexels.com/photos/1370295/pexels-photo-1370295.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1");
   background-size: cover;
   background-position: center;
@@ -52,11 +52,10 @@
 }
 
 .btn-primary:hover {
-  background-color: #1d4ed8;
-  color: white;
+  background-color: var(--color-primary-700);
   text-decoration: none;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
+
 .btn-outline {
   display: inline-block;
   padding: var(--space-3) var(--space-6);
@@ -74,10 +73,12 @@
   text-decoration: none;
 }
 
+/* Categories Section */
 .categories-section {
   background-color: white;
   border-bottom: 1px solid var(--color-neutral-200);
   position: sticky;
+  /* top: 80px; Height of header */
   z-index: var(--z-index-sticky);
 }
 
@@ -113,7 +114,7 @@
 }
 
 .category-tab.active::after {
-  content: "";
+  content: '';
   position: absolute;
   bottom: 0;
   left: var(--space-3);
@@ -194,22 +195,22 @@
 }
 
 .category-card.fiction {
-  background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
+  background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), 
     url("https://images.pexels.com/photos/4170629/pexels-photo-4170629.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1");
 }
 
 .category-card.non-fiction {
-  background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
+  background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), 
     url("https://images.pexels.com/photos/4241242/pexels-photo-4241242.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1");
 }
 
 .category-card.mystery {
-  background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
+  background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), 
     url("https://images.pexels.com/photos/6373305/pexels-photo-6373305.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1");
 }
 
 .category-card.scifi {
-  background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
+  background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), 
     url("https://images.pexels.com/photos/2694037/pexels-photo-2694037.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1");
 }
 
@@ -292,7 +293,7 @@
 }
 
 .membership-benefits li::before {
-  content: "✓";
+  content: '✓';
   position: absolute;
   left: 0;
   color: var(--color-accent-400);
@@ -333,27 +334,26 @@
   .hero-content h1 {
     font-size: var(--font-size-3xl);
   }
-
+  
   .hero-content p {
     font-size: var(--font-size-lg);
   }
-
+  
   .books-grid {
     grid-template-columns: repeat(2, 1fr);
   }
-
+  
   .category-cards {
     grid-template-columns: 1fr;
   }
-
+  
   .hero-cta {
     flex-direction: column;
     align-items: center;
     gap: var(--space-3);
   }
-
-  .btn-primary,
-  .btn-outline {
+  
+  .btn-primary, .btn-outline {
     width: 100%;
     max-width: 300px;
     text-align: center;
@@ -364,11 +364,11 @@
   .hero-section {
     padding: var(--space-8) 0;
   }
-
+  
   .books-grid {
     grid-template-columns: 1fr;
   }
-
+  
   .category-card {
     height: 200px;
   }

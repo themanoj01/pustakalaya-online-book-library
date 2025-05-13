@@ -88,6 +88,7 @@
   margin: 0 0 var(--space-2);
   color: var(--color-neutral-900);
   line-height: 1.2;
+  /* min-height: 73px; */
 }
 
 .book-author {
@@ -119,7 +120,7 @@
 }
 
 .stars .filled {
-  color: var(--color-warning-500); /* Yellow for filled stars */
+  color: var(--color-warning-500);
 }
 
 .stars .empty {
@@ -266,26 +267,21 @@
   outline: none;
 }
 
-.cart-btn,
-.bookmark-btn,
-.add-review-btn {
+.cart-btn {
+  flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: var(--space-2);
+  background-color: var(--color-primary-600);
+  color: white;
   border: none;
   border-radius: var(--border-radius);
   padding: var(--space-3) var(--space-6);
   font-weight: 600;
   font-size: var(--font-size-base);
   cursor: pointer;
-  transition: all var(--transition-fast) ease-in-out;
-}
-
-.cart-btn {
-  flex: 1;
-  background-color: var(--color-primary-600);
-  color: white;
+  transition: background-color var(--transition-fast) ease-in-out;
   height: 50px;
 }
 
@@ -299,10 +295,19 @@
 }
 
 .bookmark-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
   background-color: white;
   color: var(--color-neutral-600);
   border: 1px solid var(--color-neutral-300);
+  border-radius: var(--border-radius);
   padding: var(--space-3) var(--space-4);
+  font-weight: 600;
+  font-size: var(--font-size-base);
+  cursor: pointer;
+  transition: all var(--transition-fast) ease-in-out;
   height: 50px;
 }
 
@@ -315,30 +320,6 @@
   background-color: var(--color-primary-50);
   border-color: var(--color-primary-400);
   color: var(--color-primary-600);
-}
-
-.add-review-btn {
-  background-color: var(--color-primary-600);
-  color: white;
-  padding: var(--space-2) var(--space-4);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border: none;
-  border-radius: var(--border-radius);
-  font-weight: 600;
-  font-size: var(--font-size-base);
-  cursor: pointer;
-  transition: all var(--transition-fast) ease-in-out;
-}
-
-.add-review-btn:hover:not(:disabled) {
-  background-color: var(--color-primary-700);
-}
-
-.add-review-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
 }
 
 .book-details-tabs {
@@ -370,7 +351,7 @@
 }
 
 .tab-btn.active::after {
-  content: "";
+  content: '';
   position: absolute;
   bottom: -1px;
   left: 0;
@@ -434,18 +415,15 @@
   border: 1px solid var(--color-neutral-200);
   border-radius: var(--border-radius);
   margin-bottom: var(--space-4);
-  background-color: var(--color-neutral-50);
 }
 
 .review-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  margin-bottom: var(--space-3);
+  margin-bottom: var(--space-2);
 }
 
 .review-user {
-  font-size: var(--font-size-base);
   font-weight: 600;
   color: var(--color-neutral-900);
 }
@@ -457,77 +435,51 @@
 
 .review-rating {
   display: flex;
-  gap: var(--space-1);
-  margin-bottom: var(--space-3);
-}
-
-.review-rating .filled {
-  color: var(--color-warning-500);
-}
-
-.review-rating .empty {
-  color: var(--color-neutral-300);
+  margin-bottom: var(--space-2);
 }
 
 .review-comment {
-  font-size: var(--font-size-base);
   line-height: 1.6;
   color: var(--color-neutral-800);
 }
 
 .write-review {
   margin-top: var(--space-6);
-  padding: var(--space-4);
-  border: 1px solid var(--color-neutral-200);
-  border-radius: var(--border-radius);
-  background-color: var(--color-neutral-50);
-  display: flex;
-  justify-content: center;
 }
 
 .write-review h3 {
-  font-size: var(--font-size-lg);
-  margin-bottom: var(--space-3);
-  color: var(--color-neutral-900);
+  margin-bottom: var(--space-2);
+}
+
+.write-review p {
+  margin-bottom: var(--space-4);
+  color: var(--color-neutral-600);
+}
+
+.btn-review {
+  display: inline-block;
+  padding: var(--space-2) var(--space-4);
+  background-color: var(--color-primary-600);
+  color: white;
+  border-radius: var(--border-radius);
+  font-weight: 600;
+  text-decoration: none;
+  transition: background-color var(--transition-fast) ease-in-out;
+}
+
+.btn-review:hover {
+  background-color: var(--color-primary-700);
+  text-decoration: none;
 }
 
 .no-reviews {
   text-align: center;
   padding: var(--space-6);
   color: var(--color-neutral-600);
-  background-color: var(--color-neutral-50);
-  border: 1px solid var(--color-neutral-200);
-  border-radius: var(--border-radius);
 }
 
 .no-reviews p {
-  font-size: var(--font-size-base);
-  margin-bottom: var(--space-4);
-}
-
-.write-review {
-  margin-top: var(--space-6);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-3);
-}
-
-.no-review-eligible {
-  font-size: var(--font-size-sm);
-  color: var(--color-neutral-600);
-  font-style: italic;
-  margin-top: var(--space-4);
-  text-align: center;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  margin-bottom: var(--space-3);
 }
 
 @media (max-width: 992px) {
@@ -535,13 +487,13 @@
     flex-direction: column;
     gap: var(--space-6);
   }
-
+  
   .book-details-image {
     flex: 0 0 auto;
     max-width: 300px;
     margin: 0 auto;
   }
-
+  
   .book-meta {
     grid-template-columns: 1fr;
   }
@@ -552,31 +504,30 @@
     flex-direction: column;
     align-items: stretch;
   }
-
+  
   .cart-btn,
-  .bookmark-btn,
-  .add-review-btn {
+  .bookmark-btn {
     width: 100%;
   }
-
+  
   .quantity-control {
     width: 100%;
     margin-bottom: var(--space-3);
   }
-
+  
   .quantity-input {
     flex: 1;
   }
-
+  
   .tab-btn {
     padding: var(--space-2) var(--space-3);
     font-size: var(--font-size-sm);
   }
-
+  
   .tab-content {
     padding: var(--space-4);
   }
-
+  
   .details-table th {
     width: 120px;
   }

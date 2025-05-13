@@ -49,37 +49,49 @@ const CatalogPage = () => {
   }, [filters, sortOption, activeTab, allBooks]);
 
   const fetchAllBooks = async () => {
-    setLoading(true);
-    try {
-      const response = await axios.get("http://localhost:5198/api/Book/GetAll");
-      const normalized = (response.data || []).map((book) => ({
-        Id: book.id ?? `temp-id-${Math.random()}`,
-        Title: book.title ?? "Unknown Title",
-        Authors: book.authors ?? ["Unknown Author"],
-        ISBN: book.isbn ?? "",
-        Price: Number(book.price) ?? 0,
-        Stock: Number(book.stock) ?? 0,
-        Language: book.language ?? "Unknown Language",
-        Format: book.format ?? "Unknown Format",
-        Publisher: book.publisher ?? "Unknown Publisher",
-        PublicationDate: book.publicationDate ?? new Date().toISOString(),
-        Description: book.description ?? "No description available.",
-        Rating: Number(book.rating) ?? 0,
-        BookImage: book.bookImage ?? "/placeholder-image.jpg",
-        TotalSold: Number(book.totalSold) ?? 0,
-        Genres: book.genres ?? ["Unknown Genre"],
-        AwardWinner: book.awardWinner ?? false,
-        Category: book.category ?? "all-books",
-        DiscountId: book.discountId ?? null,
-      }));
-      setAllBooks(normalized);
-    } catch (error) {
-      console.error("Error fetching books:", error);
-      setAllBooks([]);
-    } finally {
-      setLoading(false);
-    }
-  };
+  setLoading(true);
+  try {
+    const response = await axios.get("http://localhost:5198/api/Book/GetAll");
+    const threeMonthsAgo = new Date();
+    threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+
+    const normalized = (response.data || []).map((book) => ({
+      id: book.id ?? `temp-id-${Math.random()}`,
+      title: book.title ?? "Unknown Title",
+      authors: Array.isArray(book.authors)
+        ? book.authors
+        : ["Unknown Author"],
+      isbn: book.isbn ?? "",
+      price: isNaN(Number(book.price)) ? 0 : Number(book.price),
+      originalPrice: isNaN(Number(book.originalPrice))
+        ? Number(book.price) || 0
+        : Number(book.originalPrice),
+      stock: isNaN(Number(book.stock)) ? 0 : Number(book.stock),
+      language: book.language ?? "Unknown Language",
+      format: book.format ?? "Unknown Format",
+      publisher: book.publisher ?? "Unknown Publisher",
+      publicationDate: book.publicationDate ?? new Date().toISOString(),
+      description: book.description ?? "No description available.",
+      rating: isNaN(Number(book.rating)) ? 0 : Number(book.rating),
+      bookImage: book.bookImage ?? "/placeholder-image.jpg",
+      totalSold: isNaN(Number(book.totalSold)) ? 0 : Number(book.totalSold),
+      genres: Array.isArray(book.genres) ? book.genres : ["Unknown Genre"],
+      awardWinner: book.awardWinner ?? false,
+      category: book.category ?? "all-books",
+      discount: !!book.discountId,
+      bestSeller: Number(book.totalSold) > 100,
+      newRelease: new Date(book.publicationDate) >= threeMonthsAgo,
+    }));
+
+    setAllBooks(normalized);
+  } catch (error) {
+    console.error("Error fetching books:", error);
+    setAllBooks([]);
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   const applyFrontendFilters = () => {
     let result = [...allBooks];
@@ -87,30 +99,30 @@ const CatalogPage = () => {
 
     switch (activeTab?.toLowerCase()) {
       case "bestsellers":
-        result = result.sort((a, b) => b.TotalSold - a.TotalSold).slice(0, 5);
+        result = result.sort((a, b) => b.totalSold - a.totalSold).slice(0, 5);
         break;
       case "award-winners":
-        result = result.filter((b) => b.AwardWinner);
+        result = result.filter((b) => b.awardWinner);
         break;
       case "new-releases":
         result = result.filter(
           (b) =>
-            new Date(b.PublicationDate) >=
+            new Date(b.publicationDate) >=
             new Date(now.setMonth(now.getMonth() - 3))
         );
         break;
       case "new-arrivals":
         result = result.filter(
           (b) =>
-            new Date(b.PublicationDate) >=
+            new Date(b.publicationDate) >=
             new Date(now.setMonth(now.getMonth() - 1))
         );
         break;
       case "coming-soon":
-        result = result.filter((b) => new Date(b.PublicationDate) > new Date());
+        result = result.filter((b) => new Date(b.publicationDate) > new Date());
         break;
       case "deals":
-        result = result.filter((b) => b.DiscountId);
+        result = result.filter((b) => b.discount);
         break;
       default:
         break;
@@ -120,45 +132,45 @@ const CatalogPage = () => {
       const searchLower = filters.search.toLowerCase();
       result = result.filter(
         (book) =>
-          book.Title.toLowerCase().includes(searchLower) ||
-          book.Authors.join(" ").toLowerCase().includes(searchLower)
+          book.title.toLowerCase().includes(searchLower) ||
+          book.authors.join(" ").toLowerCase().includes(searchLower)
       );
     }
 
     if (filters.author) {
       const authorLower = filters.author.toLowerCase();
       result = result.filter((book) =>
-        book.Authors.some((author) =>
+        book.authors.some((author) =>
           author.toLowerCase().includes(authorLower)
         )
       );
     }
 
     if (filters.genre) {
-      result = result.filter((book) => book.Genres.includes(filters.genre));
+      result = result.filter((book) => book.genres.includes(filters.genre));
     }
 
     if (filters.availability) {
-      result = result.filter((book) => book.Stock > 0);
+      result = result.filter((book) => book.stock > 0);
     }
 
     if (filters.priceRange.min !== null) {
-      result = result.filter((book) => book.Price >= filters.priceRange.min);
+      result = result.filter((book) => book.price >= filters.priceRange.min);
     }
     if (filters.priceRange.max !== null) {
-      result = result.filter((book) => book.Price <= filters.priceRange.max);
+      result = result.filter((book) => book.price <= filters.priceRange.max);
     }
 
     if (filters.rating > 0) {
-      result = result.filter((book) => book.Rating >= filters.rating);
+      result = result.filter((book) => book.rating >= filters.rating);
     }
 
     if (filters.format) {
-      result = result.filter((book) => book.Format === filters.format);
+      result = result.filter((book) => book.format === filters.format);
     }
 
     if (filters.publisher) {
-      result = result.filter((book) => book.Publisher === filters.publisher);
+      result = result.filter((book) => book.publisher === filters.publisher);
     }
 
     result = sortBooks(result, sortOption);
@@ -170,25 +182,25 @@ const CatalogPage = () => {
     const sorted = [...books];
     switch (option) {
       case "price_asc":
-        return sorted.sort((a, b) => a.Price - b.Price);
+        return sorted.sort((a, b) => a.price - b.price);
       case "price_desc":
-        return sorted.sort((a, b) => b.Price - a.Price);
+        return sorted.sort((a, b) => b.price - a.price);
       case "title_asc":
-        return sorted.sort((a, b) => a.Title.localeCompare(b.Title));
+        return sorted.sort((a, b) => a.title.localeCompare(b.title));
       case "title_desc":
-        return sorted.sort((a, b) => b.Title.localeCompare(a.Title));
+        return sorted.sort((a, b) => b.title.localeCompare(a.title));
       case "rating_desc":
-        return sorted.sort((a, b) => b.Rating - a.Rating);
+        return sorted.sort((a, b) => b.rating - a.rating);
       case "date_desc":
         return sorted.sort(
-          (a, b) => new Date(b.PublicationDate) - new Date(a.PublicationDate)
+          (a, b) => new Date(b.publicationDate) - new Date(a.publicationDate)
         );
       case "date_asc":
         return sorted.sort(
-          (a, b) => new Date(a.PublicationDate) - new Date(b.PublicationDate)
+          (a, b) => new Date(a.publicationDate) - new Date(b.publicationDate)
         );
       case "popularity":
-        return sorted.sort((a, b) => b.TotalSold - a.TotalSold);
+        return sorted.sort((a, b) => b.totalSold - a.totalSold);
       default:
         return sorted;
     }
@@ -266,7 +278,7 @@ const CatalogPage = () => {
           <>
             <div className="catalog-grid">
               {currentBooks.map((book) => (
-                <div key={book.Id} className="catalog-book-item">
+                <div key={book.id} className="catalog-book-item">
                   <BookCard book={book} />
                 </div>
               ))}

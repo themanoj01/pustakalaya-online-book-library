@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import axios from "axios";
-import BookDetails from "../components/books/BookDetails";
-import BookCard from "../components/books/BookCard";
-import "./BookDetailsPage.css";
+import React, { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
+import axios from 'axios';
+import BookDetails from '../components/books/BookDetails';
+import BookCard from '../components/books/BookCard';
+import './BookDetailsPage.css';
 
 const BookDetailsPage = () => {
   const { id } = useParams();
@@ -17,12 +17,11 @@ const BookDetailsPage = () => {
       try {
         const res = await axios.get(`http://localhost:5198/api/Book/${id}`);
         setBook(res.data);
-        console.log(res.data);
-        const allBooksRes = await axios.get(
-          "http://localhost:5198/api/Book/GetAll"
-        );
+        console.log(res.data)
+        // Fetch all books and filter related by genre
+        const allBooksRes = await axios.get("http://localhost:5198/api/Book/GetAll");
         const related = allBooksRes.data
-          .filter((b) => b.id !== id && b.genre === res.data.genre)
+          .filter(b => b.id !== id && b.genre === res.data.genre)
           .slice(0, 4);
         setRelatedBooks(related);
       } catch (err) {
@@ -51,13 +50,8 @@ const BookDetailsPage = () => {
       <div className="book-details-page not-found">
         <div className="container">
           <h2>Book Not Found</h2>
-          <p>
-            Sorry, the book you're looking for doesn't exist or has been
-            removed.
-          </p>
-          <a href="/catalog" className="btn-primary">
-            Browse Books
-          </a>
+          <p>Sorry, the book you're looking for doesn't exist or has been removed.</p>
+          <a href="/catalog" className="btn-primary">Browse Books</a>
         </div>
       </div>
     );
@@ -72,7 +66,7 @@ const BookDetailsPage = () => {
           <div className="related-books">
             <h2>You May Also Like</h2>
             <div className="related-books-grid">
-              {relatedBooks.map((b) => (
+              {relatedBooks.map(b => (
                 <div key={b.id} className="related-book-item">
                   <BookCard book={b} />
                 </div>

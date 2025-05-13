@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { Trash2, ShoppingBag } from "lucide-react";
-import axios from "axios";
-import { jwtDecode } from "jwt-decode";
-import "./CartPage.css";
-import toast from "react-hot-toast";
+import React, { useEffect, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Trash2, ShoppingBag } from 'lucide-react';
+import axios from 'axios';
+import { jwtDecode } from 'jwt-decode';
+import './CartPage.css';
+import toast from 'react-hot-toast';
 
 const CartPage = () => {
   const [cartItems, setCartItems] = useState([]);
@@ -14,24 +14,21 @@ const CartPage = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const token = localStorage.getItem("JwtToken");
+    const token = localStorage.getItem('JwtToken');
     if (token) {
       const decoded = jwtDecode(token);
-      setUserId(decoded.userId || decoded.Id);
+      setUserId(decoded.userId || decoded.Id); // match field in your token
       fetchCart(decoded.userId || decoded.Id);
     }
   }, []);
 
   const fetchCart = async (userId) => {
     try {
-      const response = await axios.get(
-        `http://localhost:5198/pustakalaya/carts/get-Cart-details`,
-        {
-          params: { UserId: userId },
-        }
-      );
+      const response = await axios.get(`http://localhost:5198/pustakalaya/carts/get-Cart-details`, {
+        params: { UserId: userId }
+      });
       setCartItems(response.data.items || []);
-      setCartId(response.data.cartId);
+      setCartId(response.data.cartId)
     } catch (error) {
       console.error("Failed to load cart", error);
     }
@@ -52,12 +49,9 @@ const CartPage = () => {
 
   const removeItem = async (bookId) => {
     try {
-      await axios.delete(
-        "http://localhost:5198/pustakalaya/carts/delete-item",
-        {
-          data: { cartId, bookId },
-        }
-      );
+      await axios.delete("http://localhost:5198/pustakalaya/carts/delete-item", {
+        data: { cartId, bookId }
+      });
       fetchCart(userId);
     } catch (error) {
       console.error("Remove item failed", error);
@@ -71,43 +65,35 @@ const CartPage = () => {
   };
 
   const placeOrder = async () => {
-    if (!userId || cartItems.length === 0) return;
+  if (!userId || cartItems.length === 0) return;
     setLoader(true);
-    try {
-      const orderPayload = {
-        userId: userId,
-        totalAmount: finalPrice,
-        products: cartItems.map((item) => ({
-          bookId: item.bookId,
-          quantity: item.quantity,
-        })),
-      };
+  try {
+    const orderPayload = {
+      userId: userId,
+      totalAmount: finalPrice,
+      products: cartItems.map(item => ({
+        bookId: item.bookId,
+        quantity: item.quantity
+      }))
+    };
 
-      const response = await axios.post(
-        "http://localhost:5198/pustakalaya/orders/add-order",
-        orderPayload
-      );
+    const response = await axios.post("http://localhost:5198/pustakalaya/orders/add-order", orderPayload);
 
-      toast.success("Order placed successfully!");
-      setLoader(false);
-      const { orderId } = response.data;
-      navigate(`/order-confirmation/${orderId}`);
-      fetchCart(userId);
-    } catch (error) {
-      setLoader(false);
-      console.error(
-        "Failed to place order:",
-        error.response?.data || error.message
-      );
-      toast.error("Order failed. Please try again.");
-    }
-  };
+    toast.success("Order placed successfully!");
+    setLoader(false);
+    const { orderId } = response.data;
+     navigate(`/order-confirmation/${orderId}`);
+    fetchCart(userId); // refresh cart to empty it
+  } catch (error) {
+    setLoader(false);
+    console.error("Failed to place order:", error.response?.data || error.message);
+    toast.error("Order failed. Please try again.");
+  }
+};
+
 
   const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
-  const totalPrice = cartItems.reduce(
-    (sum, item) => sum + item.quantity * item.price,
-    0
-  );
+  const totalPrice = cartItems.reduce((sum, item) => sum + item.quantity * item.price, 0);
   const discount = totalItems >= 5 ? totalPrice * 0.05 : 0;
   const finalPrice = totalPrice - discount;
 
@@ -119,9 +105,7 @@ const CartPage = () => {
             <ShoppingBag size={48} />
             <h2>Your cart is empty</h2>
             <p>Looks like you haven't added any books to your cart yet.</p>
-            <Link to="/catalog" className="btn-primary">
-              Browse Books
-            </Link>
+            <Link to="/catalog" className="btn-primary">Browse Books</Link>
           </div>
         </div>
       </div>
@@ -134,13 +118,10 @@ const CartPage = () => {
         <h1>Shopping Cart</h1>
         <div className="cart-content">
           <div className="cart-items">
-            {cartItems.map((item) => (
+            {cartItems.map(item => (
               <div key={item.bookId} className="cart-item">
                 <div className="item-image">
-                  <img
-                    src={item.coverImage || item.bookImage}
-                    alt={item.title}
-                  />
+                  <img src={item.coverImage || item.bookImage} alt={item.title} />
                 </div>
 
                 <div className="item-details">
@@ -157,7 +138,9 @@ const CartPage = () => {
                     -
                   </button>
                   <span>{item.quantity}</span>
-                  <button onClick={() => updateQuantity(item.bookId, 1)}>
+                  <button
+                    onClick={() => updateQuantity(item.bookId, 1)}
+                  >
                     +
                   </button>
                 </div>
@@ -197,8 +180,9 @@ const CartPage = () => {
             </div>
 
             <button className="checkout-button" onClick={placeOrder}>
-              {loader ? "Processing..." : "Proceed to Checkout"}
+              {loader? "Processing...": "Proceed to Checkout"}
             </button>
+
 
             <button className="clear-cart" onClick={clearCart}>
               Clear Cart

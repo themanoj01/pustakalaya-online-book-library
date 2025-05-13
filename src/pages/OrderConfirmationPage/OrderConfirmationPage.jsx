@@ -1,14 +1,9 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
+import React from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import {
-  CheckCircle,
-  Mail,
-  MapPin,
-  Calendar,
-  Copy,
-  AlertTriangle,
-  Download,
+  CheckCircle, Mail, MapPin, Calendar, Copy, AlertTriangle, Download
 } from "lucide-react";
 import "./OrderConfirmationPage.css";
 
@@ -27,7 +22,7 @@ export default function OrderConfirmationPage() {
       .then((res) => {
         const data = res.data;
         if (Array.isArray(data) && data.length > 0) {
-          setOrderDetails(data[0]);
+          setOrderDetails(data[0]); 
           setStatus(orderDetails.status);
         } else {
           console.error("Order not found.");
@@ -50,11 +45,7 @@ export default function OrderConfirmationPage() {
   }, [cancelRequested]);
 
   if (!orderDetails) {
-    return (
-      <div className="order-confirmation-page container">
-        <p>Loading order details...</p>
-      </div>
-    );
+    return <div className="order-confirmation-page container"><p>Loading order details...</p></div>;
   }
 
   const claimCode = orderDetails.claimCode;
@@ -66,22 +57,21 @@ export default function OrderConfirmationPage() {
     });
   };
 
+
+
   const handleCancelRequest = () => setCancelRequested(true);
 
   const confirmCancel = async () => {
     setIsCancelling(true);
     try {
-      await axios.delete(
-        "http://localhost:5198/pustakalaya/orders/cancel-order",
-        {
-          params: { orderId },
-        }
-      );
+      await axios.delete("http://localhost:5198/pustakalaya/orders/cancel-order", {
+        params: { orderId }
+      });
 
       // Update the status locally to reflect cancellation
-      setOrderDetails((prev) => ({
+      setOrderDetails(prev => ({
         ...prev,
-        status: "CANCELLED",
+        status: "CANCELLED"
       }));
 
       setCancelRequested(false);
@@ -98,18 +88,16 @@ export default function OrderConfirmationPage() {
   return (
     <div className="order-confirmation-page">
       <main className="main-content container">
-        {status != "CANCLED" && (
-          <div className="success-banner">
-            <CheckCircle size={40} className="success-icon" />
-            <div className="success-message">
-              <h2>Order Placed Successfully!</h2>
-              <p>
-                Thank you for your order. An email confirmation has been sent to{" "}
-                {orderDetails.userEmail}
-              </p>
-            </div>
+        {status != "CANCLED" && <div className="success-banner">
+          <CheckCircle size={40} className="success-icon" />
+          <div className="success-message">
+            <h2>Order Placed Successfully!</h2>
+            <p>
+              Thank you for your order. An email confirmation has been sent to{" "}
+              {orderDetails.userEmail}
+            </p>
           </div>
-        )}
+        </div>}
 
         <div className="confirmation-grid">
           <div className="order-details-section">
@@ -122,16 +110,11 @@ export default function OrderConfirmationPage() {
               <div className="order-info">
                 <div className="info-row">
                   <span className="label">Date:</span>
-                  <span className="value">
-                    {new Date(orderDetails.orderDate)?.toLocaleString()}
-                  </span>
+                  <span className="value">{new Date(orderDetails.orderDate)?.toLocaleString()}</span>
                 </div>
                 <div className="info-row">
                   <span className="label">Status:</span>
-                  <span
-                    style={{ color: status == "CANCLED" ? "red" : "green" }}
-                    className={`value status ${orderDetails.status?.toLowerCase()}`}
-                  >
+                  <span style={{color: status == "CANCLED"? "red": "green"}} className={`value status ${orderDetails.status?.toLowerCase()}`}>
                     {orderDetails.status}
                   </span>
                 </div>
@@ -142,6 +125,7 @@ export default function OrderConfirmationPage() {
                 <div className="items-list">
                   {orderDetails.orderedItems?.map((item, index) => (
                     <div key={index} className="order-item">
+
                       <div className="item-details">
                         <div>
                           <h5>{item.bookTitle}</h5>
@@ -209,57 +193,41 @@ export default function OrderConfirmationPage() {
                   <MapPin size={20} className="instruction-icon" />
                   <div>
                     <h4>Visit Our Department</h4>
-                    <p>
-                      Pickup is available within 24 hours of order placement.
-                    </p>
+                    <p>Pickup is available within 24 hours of order placement.</p>
                   </div>
                 </div>
                 <div className="instruction">
                   <Mail size={20} className="instruction-icon" />
                   <div>
                     <h4>Bring Your Email Receipt</h4>
-                    <p>
-                      Show the confirmation email sent to{" "}
-                      {orderDetails.userEmail}.
-                    </p>
+                    <p>Show the confirmation email sent to {orderDetails.userEmail}.</p>
                   </div>
                 </div>
                 <div className="instruction">
                   <Download size={20} className="instruction-icon" />
                   <div>
                     <h4>Download Receipt</h4>
-                    <p>
-                      Download your Receipt in email sent to{" "}
-                      {orderDetails.userEmail}
-                    </p>
+                    <p>Download your Receipt in email sent to {orderDetails.userEmail}</p>
                   </div>
                 </div>
               </div>
             </div>
 
-            {status != "CANCLED" && (
-              <div className="confirmation-card cancel-order-card">
-                <div className="card-header">
-                  <h3>Need to Cancel?</h3>
-                </div>
-                <div className="cancel-order-content">
-                  <p>You can cancel within 24 hours of placing the order.</p>
-                  <button
-                    className={`cancel-button ${
-                      orderDetails.status === "Cancellation Pending"
-                        ? "disabled"
-                        : ""
-                    }`}
-                    onClick={handleCancelRequest}
-                    disabled={orderDetails.status === "Cancellation Pending"}
-                  >
-                    {orderDetails.status === "Cancellation Pending"
-                      ? "Cancellation In Process"
-                      : "Cancel Order"}
-                  </button>
-                </div>
+            {status != "CANCLED" && <div className="confirmation-card cancel-order-card">
+              <div className="card-header">
+                <h3>Need to Cancel?</h3>
               </div>
-            )}
+              <div className="cancel-order-content">
+                <p>You can cancel within 24 hours of placing the order.</p>
+                <button
+                  className={`cancel-button ${orderDetails.status === "Cancellation Pending" ? "disabled" : ""}`}
+                  onClick={handleCancelRequest}
+                  disabled={orderDetails.status === "Cancellation Pending"}
+                >
+                  {orderDetails.status === "Cancellation Pending" ? "Cancellation In Process" : "Cancel Order"}
+                </button>
+              </div>
+            </div>}
           </div>
         </div>
       </main>
@@ -276,18 +244,10 @@ export default function OrderConfirmationPage() {
               <p>Are you sure you want to cancel your order?</p>
             </div>
             <div className="modal-footer">
-              <button
-                className="secondary-button"
-                onClick={cancelCancellation}
-                disabled={isCancelling}
-              >
+              <button className="secondary-button" onClick={cancelCancellation} disabled={isCancelling}>
                 Keep Order
               </button>
-              <button
-                className="primary-button danger"
-                onClick={confirmCancel}
-                disabled={isCancelling}
-              >
+              <button className="primary-button danger" onClick={confirmCancel} disabled={isCancelling}>
                 {isCancelling ? "Processing..." : `Yes, Cancel (${countdown})`}
               </button>
             </div>

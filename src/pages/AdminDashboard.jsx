@@ -100,30 +100,30 @@ const Modal = ({ type, item, onClose, onSave, authors, genres, userId }) => {
   const entity = type.replace("Create", "").replace("Edit", "");
   const [formData, setFormData] = useState(
     item ||
-      {
-        Book: {
-          title: "",
-          isbn: "",
-          price: "",
-          stock: "",
-          language: "",
-          format: "",
-          publisher: "",
-          publicationDate: "",
-          description: "",
-          authorIds: [],
-          genreIds: [],
-          bookImage: null,
-          awardWinner: false,
-        },
-        Discount: { name: "", discountPercent: "", startDate: "", endDate: "" },
-        Announcement: {
-          title: "",
-          content: "",
-          expiresAt: "",
-          userId: userId || "",
-        },
-      }[entity]
+    {
+      Book: {
+        title: "",
+        isbn: "",
+        price: "",
+        stock: "",
+        language: "",
+        format: "",
+        publisher: "",
+        publicationDate: "",
+        description: "",
+        authorIds: [],
+        genreIds: [],
+        bookImage: null,
+        awardWinner: false,
+      },
+      Discount: { name: "", discountPercent: "", startDate: "", endDate: "" },
+      Announcement: {
+        title: "",
+        content: "",
+        expiresAt: "",
+        userId: userId || "",
+      },
+    }[entity]
   );
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
@@ -207,17 +207,17 @@ const Modal = ({ type, item, onClose, onSave, authors, genres, userId }) => {
     try {
       await onSave(formData, isCreate);
       toast.success(
-        `${entity} ${isCreate ? "created" : "updated"} successfully!`
+        `${ entity } ${ isCreate? "created": "updated" } successfully!`
       );
       onClose();
     } catch (error) {
       console.error(
-        `Error ${isCreate ? "creating" : "updating"} ${entity}:`,
+        `Error ${ isCreate? "creating": "updating" } ${ entity }:`,
         error.response?.data || error.message
       );
       toast.error(
         error.response?.data?.message ||
-          `Failed to ${isCreate ? "create" : "update"} ${entity}.`
+        `Failed to ${ isCreate? "create": "update" } ${ entity }.`
       );
     } finally {
       setLoading(false);
@@ -751,23 +751,23 @@ const AdminDashboard = () => {
       const response = await axios.get("http://localhost:5198/api/Book/GetAll");
       const normalizedBooks = Array.isArray(response.data)
         ? response.data.map((book) => ({
-            id: book.id || book.Id,
-            title: book.title || book.Title || "",
-            isbn: book.isbn || book.ISBN || "",
-            price: parseFloat(book.price || book.Price || 0),
-            stock: parseInt(book.stock || book.Stock || 0),
-            language: book.language || book.Language || "",
-            format: book.format || book.Format || "",
-            publisher: book.publisher || book.Publisher || "",
-            publicationDate: book.publicationDate || book.PublicationDate || "",
-            description: book.description || book.Description || "",
-            authorIds: book.authorIds || book.AuthorIds || [],
-            genreIds: book.genreIds || book.GenreIds || [],
-            totalSold: parseInt(book.totalSold || book.TotalSold || 0),
-            bookImage: book.bookImage || null,
-            awardWinner: book.awardWinner || false,
-            discountId: book.discountId || null, // Added to support discount assignment
-          }))
+          id: book.id || book.Id,
+          title: book.title || book.Title || "",
+          isbn: book.isbn || book.ISBN || "",
+          price: parseFloat(book.price || book.Price || 0),
+          stock: parseInt(book.stock || book.Stock || 0),
+          language: book.language || book.Language || "",
+          format: book.format || book.Format || "",
+          publisher: book.publisher || book.Publisher || "",
+          publicationDate: book.publicationDate || book.PublicationDate || "",
+          description: book.description || book.Description || "",
+          authorIds: book.authorIds || book.AuthorIds || [],
+          genreIds: book.genreIds || book.GenreIds || [],
+          totalSold: parseInt(book.totalSold || book.TotalSold || 0),
+          bookImage: book.bookImage || null,
+          awardWinner: book.awardWinner || false,
+          discountId: book.discountId || null, // Added to support discount assignment
+        }))
         : [];
       setBooks(normalizedBooks);
     } catch (error) {
@@ -790,14 +790,14 @@ const AdminDashboard = () => {
       );
       const normalizedDiscounts = Array.isArray(response.data)
         ? response.data.map((discount) => ({
-            id: discount.id || discount.Id,
-            name: discount.name || discount.Name || "",
-            discountPercent: parseFloat(
-              discount.discountPercent || discount.DiscountPercent || 0
-            ),
-            startDate: discount.startDate || discount.StartDate || "",
-            endDate: discount.endDate || discount.EndDate || "",
-          }))
+          id: discount.id || discount.Id,
+          name: discount.name || discount.Name || "",
+          discountPercent: parseFloat(
+            discount.discountPercent || discount.DiscountPercent || 0
+          ),
+          startDate: discount.startDate || discount.StartDate || "",
+          endDate: discount.endDate || discount.EndDate || "",
+        }))
         : [];
       setDiscounts(normalizedDiscounts);
     } catch (error) {
@@ -820,12 +820,12 @@ const AdminDashboard = () => {
       );
       const normalizedAnnouncements = Array.isArray(response.data)
         ? response.data.map((announcement) => ({
-            id: announcement.id || announcement.Id,
-            title: announcement.title || announcement.Title || "",
-            content: announcement.content || announcement.Content || "",
-            expiresAt: announcement.expiresAt || announcement.ExpiresAt || "",
-            userId: announcement.userId || announcement.UserId || "",
-          }))
+          id: announcement.id || announcement.Id,
+          title: announcement.title || announcement.Title || "",
+          content: announcement.content || announcement.Content || "",
+          expiresAt: announcement.expiresAt || announcement.ExpiresAt || "",
+          userId: announcement.userId || announcement.UserId || "",
+        }))
         : [];
       setAnnouncements(normalizedAnnouncements);
     } catch (error) {
@@ -849,9 +849,9 @@ const AdminDashboard = () => {
       );
       const normalizedAuthors = Array.isArray(response.data)
         ? response.data.map((author) => ({
-            id: author.id || author.Id,
-            name: author.name || author.Name || "",
-          }))
+          id: author.id || author.Id,
+          name: author.name || author.Name || "",
+        }))
         : [];
       setAuthors(normalizedAuthors);
     } catch (error) {
@@ -871,9 +871,9 @@ const AdminDashboard = () => {
       );
       const normalizedGenres = Array.isArray(response.data)
         ? response.data.map((genre) => ({
-            id: genre.id || genre.Id,
-            name: genre.name || genre.Name || "",
-          }))
+          id: genre.id || genre.Id,
+          name: genre.name || genre.Name || "",
+        }))
         : [];
       setGenres(normalizedGenres);
     } catch (error) {
@@ -962,525 +962,614 @@ const AdminDashboard = () => {
               usePointStyle: true,
               callbacks: {
                 label: (context) =>
-                  `${context.dataset.label}: ${context.parsed.y} units`,
+                  `${ context.dataset.label }: ${ context.parsed.y } units`,
               },
-            },
-          },
-          scales: {
-            y: {
-              beginAtZero: true,
-              title: {
-                display: true,
-                text: "Units Sold",
-                font: { size: 12, weight: "bold" },
-                color: "#1E293B",
-              },
-              grid: {
-                drawBorder: false,
-                color: "#E2E8F0",
-              },
-              ticks: {
-                stepSize: 1,
-                font: { size: 12 },
-                color: "#64748B",
-              },
-            },
-            x: {
-              title: {
-                display: true,
-                text: "Books",
-                font: { size: 12, weight: "bold" },
-                color: "#1E293B",
-              },
-              grid: {
-                display: false,
-                drawBorder: false,
-              },
-              ticks: {
-                font: { size: 12 },
-                color: "#64748B",
-                maxRotation: 45,
-                minRotation: 45,
-              },
-            },
-          },
+  },
+},
+  scales: {
+    y: {
+      beginAtZero: true,
+      title: {
+        display: true,
+        text: "Units Sold",
+        font: { size: 12, weight: "bold" },
+        color: "#1E293B",
+      },
+      grid: {
+        drawBorder: false,
+        color: "#E2E8F0",
+      },
+      ticks: {
+        stepSize: 1,
+        font: { size: 12 },
+        color: "#64748B",
+      },
+    },
+    x: {
+      title: {
+        display: true,
+        text: "Books",
+        font: { size: 12, weight: "bold" },
+        color: "#1E293B",
+      },
+      grid: {
+        display: false,
+        drawBorder: false,
+      },
+      ticks: {
+        font: { size: 12 },
+        color: "#64748B",
+        maxRotation: 45,
+        minRotation: 45,
+      },
+    },
+  },
         },
       });
     }
 
-    const inventoryCtx = document
-      .getElementById("inventoryChart")
-      ?.getContext("2d");
-    if (inventoryCtx) {
-      inventoryChartRef.current = new Chart(inventoryCtx, {
-        type: "bar",
-        data: {
-          labels: books
+const inventoryCtx = document
+  .getElementById("inventoryChart")
+  ?.getContext("2d");
+if (inventoryCtx) {
+  inventoryChartRef.current = new Chart(inventoryCtx, {
+    type: "bar",
+    data: {
+      labels: books
+        .slice(0, 8)
+        .map(
+          (b) =>
+            b.title?.substring(0, 15) + (b.title?.length > 15 ? "..." : "")
+        ),
+      datasets: [
+        {
+          label: "Current Stock",
+          data: books.slice(0, 8).map((b) => b.stock),
+          backgroundColor: books
             .slice(0, 8)
-            .map(
-              (b) =>
-                b.title?.substring(0, 15) + (b.title?.length > 15 ? "..." : "")
+            .map((b) =>
+              b.stock === 0
+                ? "#EF4444"
+                : b.stock < 10
+                  ? "#F59E0B"
+                  : "#6366F1"
             ),
-          datasets: [
-            {
-              label: "Current Stock",
-              data: books.slice(0, 8).map((b) => b.stock),
-              backgroundColor: books
-                .slice(0, 8)
-                .map((b) =>
-                  b.stock === 0
-                    ? "#EF4444"
-                    : b.stock < 10
-                    ? "#F59E0B"
-                    : "#6366F1"
-                ),
-              borderRadius: 6,
-              borderSkipped: false,
-            },
-          ],
+          borderRadius: 6,
+          borderSkipped: false,
         },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: { display: false },
-            tooltip: {
-              backgroundColor: "#1E293B",
-              titleFont: { size: 14, weight: "bold" },
-              bodyFont: { size: 12 },
-              padding: 12,
-              usePointStyle: true,
-            },
-          },
-          scales: {
-            y: {
-              beginAtZero: true,
-              grid: { drawBorder: false, color: "#E2E8F0" },
-              ticks: {
-                stepSize: Math.max(...books.map((b) => b.stock)) > 20 ? 10 : 5,
-              },
-            },
-            x: { grid: { display: false, drawBorder: false } },
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: "#1E293B",
+          titleFont: { size: 14, weight: "bold" },
+          bodyFont: { size: 12 },
+          padding: 12,
+          usePointStyle: true,
+        },
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          grid: { drawBorder: false, color: "#E2E8F0" },
+          ticks: {
+            stepSize: Math.max(...books.map((b) => b.stock)) > 20 ? 10 : 5,
           },
         },
-      });
-    }
+        x: { grid: { display: false, drawBorder: false } },
+      },
+    },
+  });
+}
   };
 
-  const handleCreate = async (data, endpoint) => {
-    try {
-      if (endpoint === "Book") {
-        let payload = new FormData();
-        payload.append("Title", data.title || "");
-        payload.append("ISBN", data.isbn || "");
-        payload.append("Price", parseFloat(data.price) || 0);
-        payload.append("Stock", parseInt(data.stock) || 0);
-        payload.append("Language", data.language || "");
-        payload.append("Format", data.format || "");
-        payload.append("Publisher", data.publisher || "");
-        payload.append(
-          "PublicationDate",
-          data.publicationDate || new Date().toISOString().split("T")[0]
-        );
-        payload.append("Description", data.description || "");
-        payload.append("AwardWinner", data.awardWinner || false);
-        if (data.bookImage) payload.append("BookImage", data.bookImage);
-        if (data.authorIds)
-          data.authorIds.forEach((id) => payload.append("AuthorIds", id));
-        if (data.genreIds)
-          data.genreIds.forEach((id) => payload.append("GenreIds", id));
-        await axios.post(`http://localhost:5198/api/${endpoint}/Add`, payload, {
-          headers: { "Content-Type": "multipart/form-data" },
+const handleCreate = async (data, endpoint) => {
+  try {
+    if (endpoint === "Book") {
+      let payload = new FormData();
+      payload.append("Title", data.title || "");
+      payload.append("ISBN", data.isbn || "");
+      payload.append("Price", parseFloat(data.price) || 0);
+      payload.append("Stock", parseInt(data.stock) || 0);
+      payload.append("Language", data.language || "");
+      payload.append("Format", data.format || "");
+      payload.append("Publisher", data.publisher || "");
+      payload.append(
+        "PublicationDate",
+        data.publicationDate || new Date().toISOString().split("T")[0]
+      );
+      payload.append("Description", data.description || "");
+      payload.append("AwardWinner", data.awardWinner || false);
+      if (data.bookImage) payload.append("BookImage", data.bookImage);
+      if (data.authorIds)
+        data.authorIds.forEach((id) => payload.append("AuthorIds", id));
+      if (data.genreIds)
+        data.genreIds.forEach((id) => payload.append("GenreIds", id));
+      await axios.post(`http://localhost:5198/api/${endpoint}/Add, payload`, {
+        headers: { "Content-Type": "multipart/form-data" },
         });
-      } else if (endpoint === "Discount") {
-        const payload = {
-          Name: data.name || "",
-          DiscountPercent: parseFloat(data.discountPercent) || 0,
-          StartDate: data.startDate || null,
-          EndDate: data.endDate || null,
-        };
-        await axios.post(`http://localhost:5198/api/${endpoint}/Add`, payload, {
-          headers: { "Content-Type": "application/json" },
+  } else if (endpoint === "Discount") {
+    const payload = {
+      Name: data.name || "",
+      DiscountPercent: parseFloat(data.discountPercent) || 0,
+      StartDate: data.startDate || null,
+      EndDate: data.endDate || null,
+    };
+    await axios.post(`http://localhost:5198/api/${endpoint}/Add`, payload, {
+      headers: { "Content-Type": "application/json" },
         });
-      } else if (endpoint === "Announcement") {
-        const payload = {
-          Title: data.title || "",
-          Content: data.content || "",
-          ExpiresAt: data.expiresAt || null,
-          UserId: userId,
-        };
-        await axios.post(`http://localhost:5198/api/${endpoint}/Add`, payload, {
-          headers: { "Content-Type": "application/json" },
+} else if (endpoint === "Announcement") {
+  const payload = {
+    Title: data.title || "",
+    Content: data.content || "",
+    ExpiresAt: data.expiresAt || null,
+    UserId: userId,
+  };
+  await axios.post(`http://localhost:5198/api/${endpoint}/Add`, payload, {
+    headers: { "Content-Type": "application/json" },
         });
       }
-      refreshData(endpoint);
+refreshData(endpoint);
     } catch (error) {
-      console.error(
-        `Error creating ${endpoint}:`,
-        error.response?.data || error.message
+  console.error(
+    `Error creating ${ endpoint }:`,
+    error.response?.data || error.message
+  );
+  throw error;
+}
+  };
+
+const handleUpdate = async (data, endpoint) => {
+  try {
+    if (endpoint === "Book") {
+      const payload = {
+        id: data.id,
+        Title: data.title || "",
+        ISBN: data.isbn || "",
+        Price: parseFloat(data.price) || 0,
+        Stock: parseInt(data.stock) || 0,
+        Language: data.language || "",
+        Format: data.format || "",
+        Publisher: data.publisher || "",
+        AwardWinner: data.awardWinner || false,
+        PublicationDate: data.publicationDate
+          ? new Date(data.publicationDate).toISOString()
+          : new Date().toISOString(),
+        Description: data.description || "",
+        AuthorIds: data.authorIds || [],
+        GenreIds: data.genreIds || [],
+      };
+      await axios.put(
+        `http://localhost:5198/api/${endpoint}/${data.id}`,
+        payload,
+        { headers: { "Content-Type": "application/json" } }
       );
-      throw error;
-    }
-  };
-
-  const handleUpdate = async (data, endpoint) => {
-    try {
-      if (endpoint === "Book") {
-        const payload = {
-          id: data.id,
-          Title: data.title || "",
-          ISBN: data.isbn || "",
-          Price: parseFloat(data.price) || 0,
-          Stock: parseInt(data.stock) || 0,
-          Language: data.language || "",
-          Format: data.format || "",
-          Publisher: data.publisher || "",
-          AwardWinner: data.awardWinner || false,
-          PublicationDate: data.publicationDate
-            ? new Date(data.publicationDate).toISOString()
-            : new Date().toISOString(),
-          Description: data.description || "",
-          AuthorIds: data.authorIds || [],
-          GenreIds: data.genreIds || [],
-        };
-        await axios.put(
-          `http://localhost:5198/api/${endpoint}/${data.id}`,
-          payload,
-          { headers: { "Content-Type": "application/json" } }
-        );
-      } else if (endpoint === "Discount") {
-        const payload = {
-          id: data.id,
-          Name: data.name || "",
-          DiscountPercent: parseFloat(data.discountPercent) || 0,
-          StartDate: data.startDate
-            ? new Date(data.startDate).toISOString()
-            : null,
-          EndDate: data.endDate ? new Date(data.endDate).toISOString() : null,
-        };
-        await axios.put(
-          `http://localhost:5198/api/${endpoint}/${data.id}`,
-          payload,
-          { headers: { "Content-Type": "application/json" } }
-        );
-      } else if (endpoint === "Announcement") {
-        const payload = {
-          id: data.id,
-          Title: data.title || "",
-          Content: data.content || "",
-          ExpiresAt: data.expiresAt
-            ? new Date(data.expiresAt).toISOString()
-            : null,
-        };
-        await axios.put(
-          `http://localhost:5198/api/${endpoint}/${data.id}`,
-          payload,
-          { headers: { "Content-Type": "application/json" } }
-        );
-      }
-      refreshData(endpoint);
-    } catch (error) {
-      console.error(
-        `Error updating ${endpoint}:`,
-        error.response?.data || error.message
+    } else if (endpoint === "Discount") {
+      const payload = {
+        id: data.id,
+        Name: data.name || "",
+        DiscountPercent: parseFloat(data.discountPercent) || 0,
+        StartDate: data.startDate
+          ? new Date(data.startDate).toISOString()
+          : null,
+        EndDate: data.endDate ? new Date(data.endDate).toISOString() : null,
+      };
+      await axios.put(
+        `http://localhost:5198/api/${endpoint}/${data.id}`,
+        payload,
+        { headers: { "Content-Type": "application/json" } }
       );
-      throw error;
-    }
-  };
-
-  const handleDelete = async (id, endpoint) => {
-    setLoading(true);
-    try {
-      await axios.delete(`http://localhost:5198/api/${endpoint}/${id}`);
-      toast.success(`${endpoint} deleted successfully!`);
-      refreshData(endpoint);
-    } catch (error) {
-      console.error(
-        `Error deleting ${endpoint}:`,
-        error.response?.data || error.message
+    } else if (endpoint === "Announcement") {
+      const payload = {
+        id: data.id,
+        Title: data.title || "",
+        Content: data.content || "",
+        ExpiresAt: data.expiresAt
+          ? new Date(data.expiresAt).toISOString()
+          : null,
+      };
+      await axios.put(
+        `http://localhost:5198/api/${endpoint}/${data.id}`,
+        payload,
+        { headers: { "Content-Type": "application/json" } }
       );
-      toast.error(
-        error.response?.data?.message || `Failed to delete ${endpoint}.`
+    }
+    refreshData(endpoint);
+  } catch (error) {
+    console.error(
+      `Error updating ${ endpoint }:`,
+      error.response?.data || error.message
+    );
+    throw error;
+  }
+};
+
+const handleDelete = async (id, endpoint) => {
+  setLoading(true);
+  try {
+    await axios.delete(`http://localhost:5198/api/${endpoint}/${id}`);
+      toast.success(`${ endpoint } deleted successfully!`);
+    refreshData(endpoint);
+  } catch (error) {
+    console.error(
+      `Error deleting ${ endpoint }:`,
+      error.response?.data || error.message
+    );
+    toast.error(
+      error.response?.data?.message || `Failed to delete ${ endpoint }.`
       );
-    } finally {
-      setLoading(false);
-      setShowDeleteModal(false);
-      setDeleteItem(null);
-      setDeleteEntity("");
-    }
-  };
+  } finally {
+    setLoading(false);
+    setShowDeleteModal(false);
+    setDeleteItem(null);
+    setDeleteEntity("");
+  }
+};
 
-  const handleSave = async (data, isCreate) => {
-    const endpoint = modalType.replace("Create", "").replace("Edit", "");
-    if (isCreate) {
-      await handleCreate(data, endpoint);
-    } else {
-      await handleUpdate(data, endpoint);
-    }
-  };
+const handleSave = async (data, isCreate) => {
+  const endpoint = modalType.replace("Create", "").replace("Edit", "");
+  if (isCreate) {
+    await handleCreate(data, endpoint);
+  } else {
+    await handleUpdate(data, endpoint);
+  }
+};
 
-  const refreshData = (endpoint) => {
-    if (endpoint === "Book") fetchBooks();
-    else if (endpoint === "Discount") fetchDiscounts();
-    else if (endpoint === "Announcement") fetchAnnouncements();
-  };
+const refreshData = (endpoint) => {
+  if (endpoint === "Book") fetchBooks();
+  else if (endpoint === "Discount") fetchDiscounts();
+  else if (endpoint === "Announcement") fetchAnnouncements();
+};
 
-  const openModal = (type, item = null) => {
-    setModalType(type);
-    setCurrentItem(item);
-    setShowModal(true);
-  };
+const openModal = (type, item = null) => {
+  setModalType(type);
+  setCurrentItem(item);
+  setShowModal(true);
+};
 
-  const openDeleteModal = (id, entity) => {
-    setDeleteItem({ id });
-    setDeleteEntity(entity);
-    setShowDeleteModal(true);
-  };
+const openDeleteModal = (id, entity) => {
+  setDeleteItem({ id });
+  setDeleteEntity(entity);
+  setShowDeleteModal(true);
+};
 
-  return (
-    <ErrorBoundary>
-      <div className="dashboard-containers">
-        <Toaster position="top-right" reverseOrder={false} />
-        <div className="sidebar">
-          <nav className="sidebar-nav">
-            <ul>
-              <li
-                className={activeTab === "dashboard" ? "active" : ""}
-                onClick={() => setActiveTab("dashboard")}
+return (
+  <ErrorBoundary>
+    <div className="dashboard-containers">
+      <Toaster position="top-right" reverseOrder={false} />
+      <div className="sidebar">
+        <nav className="sidebar-nav">
+          <ul>
+            <li
+              className={activeTab === "dashboard" ? "active" : ""}
+              onClick={() => setActiveTab("dashboard")}
+            >
+              <FiHome className="nav-icon" />
+              <span>Dashboard</span>
+            </li>
+            <li
+              className={activeTab === "books" ? "active" : ""}
+              onClick={() => setActiveTab("books")}
+            >
+              <FiBook className="nav-icon" />
+              <span>Books</span>
+            </li>
+            <li
+              className={activeTab === "discounts" ? "active" : ""}
+              onClick={() => setActiveTab("discounts")}
+            >
+              <FaMoneyBillWave className="nav-icon" />
+              <span>Discounts</span>
+            </li>
+            <li
+              className={activeTab === "announcements" ? "active" : ""}
+              onClick={() => setActiveTab("announcements")}
+            >
+              <FiBell className="nav-icon" />
+              <span>Announcements</span>
+            </li>
+            <li onClick={handleLogout} className="logout-btn">
+              <FiLogOut className="nav-icon" />
+              <span>Logout</span>
+            </li>
+          </ul>
+        </nav>
+      </div>
+
+      <div className="main-content">
+        {loading && (
+          <div className="loader-overlay">
+            <span className="loader"></span>
+          </div>
+        )}
+        {activeTab === "dashboard" && (
+          <>
+            <h2 className="tab-title">Dashboard</h2>
+            {books.length === 0 && !loading ? (
+              <div className="empty-state">
+                <p>No data available. Add books to see stats and charts.</p>
+                <button
+                  className="btn btn-primary"
+                  onClick={() => setActiveTab("books")}
+                >
+                  Add Books
+                </button>
+              </div>
+            ) : (
+              <>
+                <div className="stats-grid">
+                  <StatCard
+                    icon={<FiBook size={20} />}
+                    title="Total Books"
+                    value={stats.totalBooks}
+                    color="#6366F1"
+                  />
+                  <StatCard
+                    icon={<FiPackage size={20} />}
+                    title="Low Stock"
+                    value={stats.lowStock}
+                    color="#F59E0B"
+                  />
+                  <StatCard
+                    icon={<FaMoneyBillWave size={20} />}
+                    title="Total Revenue"
+                    value={stats.totalRevenue}
+                    color="#818CF8"
+                  />
+                  <StatCard
+                    icon={<FiBell size={20} />}
+                    title="Announcements"
+                    value={stats.activeAnnouncements}
+                    color="#4F46E5"
+                  />
+                </div>
+                <div className="charts-container">
+                  <div className="chart-card large">
+                    <div className="chart-header">
+                      <h3>Top Books by Sales</h3>
+                      <div className="chart-legend">
+                        <div className="legend-item">
+                          <span
+                            className="legend-color"
+                            style={{ backgroundColor: "#6366F1" }}
+                          ></span>
+                          <span>Units Sold</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="chart-container">
+                      <canvas id="salesChart"></canvas>
+                    </div>
+                  </div>
+                  <div className="chart-card large">
+                    <div className="chart-header">
+                      <h3>Inventory Levels</h3>
+                      <div className="chart-legend">
+                        <div className="legend-item">
+                          <span
+                            className="legend-color"
+                            style={{ backgroundColor: "#6366F1" }}
+                          ></span>
+                          <span>In Stock</span>
+                        </div>
+                        <div className="legend-item">
+                          <span
+                            className="legend-color"
+                            style={{ backgroundColor: "#F59E0B" }}
+                          ></span>
+                          <span>Low Stock</span>
+                        </div>
+                        <div className="legend-item">
+                          <span
+                            className="legend-color"
+                            style={{ backgroundColor: "#EF4444" }}
+                          ></span>
+                          <span>Out of Stock</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="chart-container">
+                      <canvas id="inventoryChart"></canvas>
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
+          </>
+        )}
+
+        {activeTab === "books" && (
+          <div className="data-table-container">
+            <div className="table-header">
+              <h3>Books Inventory</h3>
+              <button
+                className="btn btn-primary"
+                onClick={() => openModal("CreateBook")}
+                disabled={loading}
               >
-                <FiHome className="nav-icon" />
-                <span>Dashboard</span>
-              </li>
-              <li
-                className={activeTab === "books" ? "active" : ""}
-                onClick={() => setActiveTab("books")}
-              >
-                <FiBook className="nav-icon" />
-                <span>Books</span>
-              </li>
-              <li
-                className={activeTab === "discounts" ? "active" : ""}
-                onClick={() => setActiveTab("discounts")}
-              >
-                <FaMoneyBillWave className="nav-icon" />
-                <span>Discounts</span>
-              </li>
-              <li
-                className={activeTab === "announcements" ? "active" : ""}
-                onClick={() => setActiveTab("announcements")}
-              >
-                <FiBell className="nav-icon" />
-                <span>Announcements</span>
-              </li>
-              <li onClick={handleLogout} className="logout-btn">
-                <FiLogOut className="nav-icon" />
-                <span>Logout</span>
-              </li>
-            </ul>
-          </nav>
-        </div>
-
-        <div className="main-content">
-          {loading && (
-            <div className="loader-overlay">
-              <span className="loader"></span>
+                <FiPlus size={16} /> Add Book
+              </button>
             </div>
-          )}
-          {activeTab === "dashboard" && (
-            <>
-              <h2 className="tab-title">Dashboard</h2>
-              {books.length === 0 && !loading ? (
+            <div className="table-responsive">
+              {books.length === 0 ? (
                 <div className="empty-state">
-                  <p>No data available. Add books to see stats and charts.</p>
+                  <p>No books available.</p>
                   <button
                     className="btn btn-primary"
-                    onClick={() => setActiveTab("books")}
+                    onClick={() => openModal("CreateBook")}
                   >
-                    Add Books
+                    Add Book
                   </button>
                 </div>
               ) : (
-                <>
-                  <div className="stats-grid">
-                    <StatCard
-                      icon={<FiBook size={20} />}
-                      title="Total Books"
-                      value={stats.totalBooks}
-                      color="#6366F1"
-                    />
-                    <StatCard
-                      icon={<FiPackage size={20} />}
-                      title="Low Stock"
-                      value={stats.lowStock}
-                      color="#F59E0B"
-                    />
-                    <StatCard
-                      icon={<FaMoneyBillWave size={20} />}
-                      title="Total Revenue"
-                      value={stats.totalRevenue}
-                      color="#818CF8"
-                    />
-                    <StatCard
-                      icon={<FiBell size={20} />}
-                      title="Announcements"
-                      value={stats.activeAnnouncements}
-                      color="#4F46E5"
-                    />
-                  </div>
-                  <div className="charts-container">
-                    <div className="chart-card large">
-                      <div className="chart-header">
-                        <h3>Top Books by Sales</h3>
-                        <div className="chart-legend">
-                          <div className="legend-item">
-                            <span
-                              className="legend-color"
-                              style={{ backgroundColor: "#6366F1" }}
-                            ></span>
-                            <span>Units Sold</span>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Title</th>
+                      <th>ISBN</th>
+                      <th>Price</th>
+                      <th>Stock</th>
+                      <th>Image</th>
+                      <th>Status</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {books.map((book) => (
+                      <tr key={book.id}>
+                        <td>
+                          <div className="book-title">
+                            <strong>{book.title}</strong>
+                            <span>{book.publisher}</span>
                           </div>
-                        </div>
-                      </div>
-                      <div className="chart-container">
-                        <canvas id="salesChart"></canvas>
-                      </div>
-                    </div>
-                    <div className="chart-card large">
-                      <div className="chart-header">
-                        <h3>Inventory Levels</h3>
-                        <div className="chart-legend">
-                          <div className="legend-item">
-                            <span
-                              className="legend-color"
-                              style={{ backgroundColor: "#6366F1" }}
-                            ></span>
-                            <span>In Stock</span>
-                          </div>
-                          <div className="legend-item">
-                            <span
-                              className="legend-color"
-                              style={{ backgroundColor: "#F59E0B" }}
-                            ></span>
-                            <span>Low Stock</span>
-                          </div>
-                          <div className="legend-item">
-                            <span
-                              className="legend-color"
-                              style={{ backgroundColor: "#EF4444" }}
-                            ></span>
-                            <span>Out of Stock</span>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="chart-container">
-                        <canvas id="inventoryChart"></canvas>
-                      </div>
-                    </div>
-                  </div>
-                </>
-              )}
-            </>
-          )}
-
-          {activeTab === "books" && (
-            <div className="data-table-container">
-              <div className="table-header">
-                <h3>Books Inventory</h3>
-                <button
-                  className="btn btn-primary"
-                  onClick={() => openModal("CreateBook")}
-                  disabled={loading}
-                >
-                  <FiPlus size={16} /> Add Book
-                </button>
-              </div>
-              <div className="table-responsive">
-                {books.length === 0 ? (
-                  <div className="empty-state">
-                    <p>No books available.</p>
-                    <button
-                      className="btn btn-primary"
-                      onClick={() => openModal("CreateBook")}
-                    >
-                      Add Book
-                    </button>
-                  </div>
-                ) : (
-                  <table>
-                    <thead>
-                      <tr>
-                        <th>Title</th>
-                        <th>ISBN</th>
-                        <th>Price</th>
-                        <th>Stock</th>
-                        <th>Image</th>
-                        <th>Status</th>
-                        <th>Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {books.map((book) => (
-                        <tr key={book.id}>
-                          <td>
-                            <div className="book-title">
-                              <strong>{book.title}</strong>
-                              <span>{book.publisher}</span>
-                            </div>
-                          </td>
-                          <td>{book.isbn}</td>
-                          <td>RS {book.price.toFixed(2)}</td>
-                          <td>
-                            <span
-                              className={`stock-badge ${
-                                book.stock === 0
-                                  ? "out"
-                                  : book.stock < 10
+                        </td>
+                        <td>{book.isbn}</td>
+                        <td>RS {book.price.toFixed(2)}</td>
+                        <td>
+                          <span
+                            className={`stock-badge ${book.stock === 0
+                                ? "out"
+                                : book.stock < 10
                                   ? "low"
                                   : ""
                               }`}
-                            >
-                              {book.stock}
+                          >
+                            {book.stock}
+                          </span>
+                        </td>
+                        <td>
+                          {book.bookImage ? (
+                            <img
+                              src={book.bookImage}
+                              alt={book.title}
+                              className="book-thumbnail"
+                              onClick={() => openImageModal(book)}
+                            />
+                          ) : (
+                            <span>No Image</span>
+                          )}
+                        </td>
+                        <td>
+                          {book.stock === 0 ? (
+                            <span className="status-badge danger">
+                              Out of Stock
                             </span>
+                          ) : book.stock < 10 ? (
+                            <span className="status-badge warning">
+                              Low Stock
+                            </span>
+                          ) : (
+                            <span className="status-badge success">
+                              In Stock
+                            </span>
+                          )}
+                        </td>
+                        <td>
+                          <div className="table-actions">
+                            <button
+                              className="btn-icon edit"
+                              onClick={() => openModal("EditBook", book)}
+                              disabled={loading}
+                            >
+                              <FiEdit2 size={16} />
+                            </button>
+                            <button
+                              className="btn-icon delete"
+                              onClick={() => openDeleteModal(book.id, "Book")}
+                              disabled={loading}
+                            >
+                              <FiTrash2 size={16} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+          </div>
+        )}
+
+        {activeTab === "discounts" && (
+          <div className="data-table-container">
+            <div className="table-header">
+              <h3>Discount Management</h3>
+              <button
+                className="btn btn-primary"
+                onClick={() => openModal("CreateDiscount")}
+                disabled={loading}
+              >
+                <FiPlus size={16} /> Add Discount
+              </button>
+            </div>
+            <div className="table-responsive">
+              {discounts.length === 0 ? (
+                <div className="empty-state">
+                  <p>No discounts available.</p>
+                  <button
+                    className="btn btn-primary"
+                    onClick={() => openModal("CreateDiscount")}
+                  >
+                    Add Discount
+                  </button>
+                </div>
+              ) : (
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Discount</th>
+                      <th>Start Date</th>
+                      <th>End Date</th>
+                      <th>Status</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {discounts.map((discount) => {
+                      const isActive =
+                        new Date(discount.endDate) > new Date();
+                      return (
+                        <tr key={discount.id}>
+                          <td>{discount.name}</td>
+                          <td>{discount.discountPercent}%</td>
+                          <td>
+                            {new Date(
+                              discount.startDate
+                            ).toLocaleDateString()}
                           </td>
                           <td>
-                            {book.bookImage ? (
-                              <img
-                                src={book.bookImage}
-                                alt={book.title}
-                                className="book-thumbnail"
-                                onClick={() => openImageModal(book)}
-                              />
-                            ) : (
-                              <span>No Image</span>
-                            )}
+                            {new Date(discount.endDate).toLocaleDateString()}
                           </td>
                           <td>
-                            {book.stock === 0 ? (
-                              <span className="status-badge danger">
-                                Out of Stock
-                              </span>
-                            ) : book.stock < 10 ? (
-                              <span className="status-badge warning">
-                                Low Stock
-                              </span>
-                            ) : (
-                              <span className="status-badge success">
-                                In Stock
-                              </span>
-                            )}
+                            <span
+                              className={`status-badge ${isActive ? "success" : "danger"
+                                }`}
+                            >
+                              {isActive ? "Active" : "Expired"}
+                            </span>
                           </td>
                           <td>
                             <div className="table-actions">
                               <button
                                 className="btn-icon edit"
-                                onClick={() => openModal("EditBook", book)}
+                                onClick={() =>
+                                  openModal("EditDiscount", discount)
+                                }
                                 disabled={loading}
                               >
                                 <FiEdit2 size={16} />
                               </button>
                               <button
                                 className="btn-icon delete"
-                                onClick={() => openDeleteModal(book.id, "Book")}
+                                onClick={() =>
+                                  openDeleteModal(discount.id, "Discount")
+                                }
                                 disabled={loading}
                               >
                                 <FiTrash2 size={16} />
@@ -1488,335 +1577,243 @@ const AdminDashboard = () => {
                             </div>
                           </td>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                )}
-              </div>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              )}
             </div>
-          )}
 
-          {activeTab === "discounts" && (
-            <div className="data-table-container">
-              <div className="table-header">
-                <h3>Discount Management</h3>
+            <div className="discount-assignment-section">
+              <h3>Assign Discount to Book</h3>
+              <div className="assignment-form">
+                <div className="form-group">
+                  <label>Select Discount</label>
+                  <Select
+                    name="discountId"
+                    options={discounts.map((discount) => ({
+                      value: discount.id,
+                      label: `${ discount.name }(${ discount.discountPercent } %)`,
+                      }))}
+                  onChange={(selected) =>
+                    setAssignmentForm({
+                      ...assignmentForm,
+                      discountId: selected ? selected.value : null,
+                    })
+                  }
+                  isDisabled={loading}
+                  placeholder="Select a discount"
+                  className="react-select-container"
+                  classNamePrefix="react-select"
+                    />
+                </div>
+                <div className="form-group">
+                  <label>Select Book</label>
+                  <Select
+                    name="bookId"
+                    options={books.map((book) => ({
+                      value: book.id,
+                      label: book.title,
+                    }))}
+                    onChange={(selected) =>
+                      setAssignmentForm({
+                        ...assignmentForm,
+                        bookId: selected ? selected.value : null,
+                      })
+                    }
+                    isDisabled={loading}
+                    placeholder="Select a book"
+                    className="react-select-container"
+                    classNamePrefix="react-select"
+                  />
+                </div>
                 <button
-                  className="btn btn-primary"
-                  onClick={() => openModal("CreateDiscount")}
-                  disabled={loading}
+                  className="btn btn-primary assign-btn"
+                  onClick={handleAssignDiscount}
+                  disabled={
+                    loading ||
+                    !assignmentForm.bookId ||
+                    !assignmentForm.discountId
+                  }
                 >
-                  <FiPlus size={16} /> Add Discount
+                  {loading ? (
+                    <span className="loader"></span>
+                  ) : (
+                    "Confirm Assign"
+                  )}
                 </button>
               </div>
+            </div>
+
+            <div className="assigned-discounts-section">
+              <div className="table-header">
+                <h3>Assigned Discounts</h3>
+              </div>
               <div className="table-responsive">
-                {discounts.length === 0 ? (
+                {books.filter((book) => book.discountId).length === 0 ? (
                   <div className="empty-state">
-                    <p>No discounts available.</p>
-                    <button
-                      className="btn btn-primary"
-                      onClick={() => openModal("CreateDiscount")}
-                    >
-                      Add Discount
-                    </button>
+                    <p>No discounts assigned to books.</p>
                   </div>
                 ) : (
                   <table>
                     <thead>
                       <tr>
-                        <th>Name</th>
-                        <th>Discount</th>
-                        <th>Start Date</th>
-                        <th>End Date</th>
-                        <th>Status</th>
-                        <th>Actions</th>
+                        <th>Book ID</th>
+                        <th>Book Name</th>
+                        <th>Discount Name</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {discounts.map((discount) => {
-                        const isActive =
-                          new Date(discount.endDate) > new Date();
-                        return (
-                          <tr key={discount.id}>
-                            <td>{discount.name}</td>
-                            <td>{discount.discountPercent}%</td>
-                            <td>
-                              {new Date(
-                                discount.startDate
-                              ).toLocaleDateString()}
-                            </td>
-                            <td>
-                              {new Date(discount.endDate).toLocaleDateString()}
-                            </td>
-                            <td>
-                              <span
-                                className={`status-badge ${
-                                  isActive ? "success" : "danger"
-                                }`}
-                              >
-                                {isActive ? "Active" : "Expired"}
-                              </span>
-                            </td>
-                            <td>
-                              <div className="table-actions">
-                                <button
-                                  className="btn-icon edit"
-                                  onClick={() =>
-                                    openModal("EditDiscount", discount)
-                                  }
-                                  disabled={loading}
-                                >
-                                  <FiEdit2 size={16} />
-                                </button>
-                                <button
-                                  className="btn-icon delete"
-                                  onClick={() =>
-                                    openDeleteModal(discount.id, "Discount")
-                                  }
-                                  disabled={loading}
-                                >
-                                  <FiTrash2 size={16} />
-                                </button>
-                              </div>
-                            </td>
-                          </tr>
-                        );
-                      })}
+                      {books
+                        .filter((book) => book.discountId)
+                        .map((book) => {
+                          const discount = discounts.find(
+                            (d) => d.id === book.discountId
+                          );
+                          return (
+                            <tr key={book.id}>
+                              <td>{book.id}</td>
+                              <td>{book.title}</td>
+                              <td>{discount ? discount.name : "Unknown"}</td>
+                            </tr>
+                          );
+                        })}
                     </tbody>
                   </table>
                 )}
               </div>
+            </div>
+          </div>
+        )}
 
-              <div className="discount-assignment-section">
-                <h3>Assign Discount to Book</h3>
-                <div className="assignment-form">
-                  <div className="form-group">
-                    <label>Select Discount</label>
-                    <Select
-                      name="discountId"
-                      options={discounts.map((discount) => ({
-                        value: discount.id,
-                        label: `${discount.name} (${discount.discountPercent}%)`,
-                      }))}
-                      onChange={(selected) =>
-                        setAssignmentForm({
-                          ...assignmentForm,
-                          discountId: selected ? selected.value : null,
-                        })
-                      }
-                      isDisabled={loading}
-                      placeholder="Select a discount"
-                      className="react-select-container"
-                      classNamePrefix="react-select"
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label>Select Book</label>
-                    <Select
-                      name="bookId"
-                      options={books.map((book) => ({
-                        value: book.id,
-                        label: book.title,
-                      }))}
-                      onChange={(selected) =>
-                        setAssignmentForm({
-                          ...assignmentForm,
-                          bookId: selected ? selected.value : null,
-                        })
-                      }
-                      isDisabled={loading}
-                      placeholder="Select a book"
-                      className="react-select-container"
-                      classNamePrefix="react-select"
-                    />
-                  </div>
+        {activeTab === "announcements" && (
+          <div className="data-table-container">
+            <div className="table-header">
+              <h3>Announcement Management</h3>
+              <button
+                className="btn btn-primary"
+                onClick={() => openModal("CreateAnnouncement")}
+                disabled={loading}
+              >
+                <FiPlus size={16} /> Add Announcement
+              </button>
+            </div>
+            <div className="table-responsive">
+              {announcements.length === 0 ? (
+                <div className="empty-state">
+                  <p>No announcements available.</p>
                   <button
-                    className="btn btn-primary assign-btn"
-                    onClick={handleAssignDiscount}
-                    disabled={
-                      loading ||
-                      !assignmentForm.bookId ||
-                      !assignmentForm.discountId
-                    }
+                    className="btn btn-primary"
+                    onClick={() => openModal("CreateAnnouncement")}
                   >
-                    {loading ? (
-                      <span className="loader"></span>
-                    ) : (
-                      "Confirm Assign"
-                    )}
+                    Add Announcement
                   </button>
                 </div>
-              </div>
-
-              <div className="assigned-discounts-section">
-                <div className="table-header">
-                  <h3>Assigned Discounts</h3>
-                </div>
-                <div className="table-responsive">
-                  {books.filter((book) => book.discountId).length === 0 ? (
-                    <div className="empty-state">
-                      <p>No discounts assigned to books.</p>
-                    </div>
-                  ) : (
-                    <table>
-                      <thead>
-                        <tr>
-                          <th>Book ID</th>
-                          <th>Book Name</th>
-                          <th>Discount Name</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {books
-                          .filter((book) => book.discountId)
-                          .map((book) => {
-                            const discount = discounts.find(
-                              (d) => d.id === book.discountId
-                            );
-                            return (
-                              <tr key={book.id}>
-                                <td>{book.id}</td>
-                                <td>{book.title}</td>
-                                <td>{discount ? discount.name : "Unknown"}</td>
-                              </tr>
-                            );
-                          })}
-                      </tbody>
-                    </table>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {activeTab === "announcements" && (
-            <div className="data-table-container">
-              <div className="table-header">
-                <h3>Announcement Management</h3>
-                <button
-                  className="btn btn-primary"
-                  onClick={() => openModal("CreateAnnouncement")}
-                  disabled={loading}
-                >
-                  <FiPlus size={16} /> Add Announcement
-                </button>
-              </div>
-              <div className="table-responsive">
-                {announcements.length === 0 ? (
-                  <div className="empty-state">
-                    <p>No announcements available.</p>
-                    <button
-                      className="btn btn-primary"
-                      onClick={() => openModal("CreateAnnouncement")}
-                    >
-                      Add Announcement
-                    </button>
-                  </div>
-                ) : (
-                  <table>
-                    <thead>
-                      <tr>
-                        <th>Title</th>
-                        <th>Content</th>
-                        <th>Expires At</th>
-                        <th>Status</th>
-                        <th>Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {announcements.map((announcement) => {
-                        const isActive =
-                          !announcement.expiresAt ||
-                          new Date(announcement.expiresAt) > new Date();
-                        return (
-                          <tr key={announcement.id}>
-                            <td>{announcement.title}</td>
-                            <td className="content-cell">
-                              {announcement.content?.substring(0, 50)}...
-                            </td>
-                            <td>
-                              {announcement.expiresAt
-                                ? new Date(
-                                    announcement.expiresAt
-                                  ).toLocaleDateString()
-                                : "No expiry"}
-                            </td>
-                            <td>
-                              <span
-                                className={`status-badge ${
-                                  isActive ? "success" : "danger"
+              ) : (
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Title</th>
+                      <th>Content</th>
+                      <th>Expires At</th>
+                      <th>Status</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {announcements.map((announcement) => {
+                      const isActive =
+                        !announcement.expiresAt ||
+                        new Date(announcement.expiresAt) > new Date();
+                      return (
+                        <tr key={announcement.id}>
+                          <td>{announcement.title}</td>
+                          <td className="content-cell">
+                            {announcement.content?.substring(0, 50)}...
+                          </td>
+                          <td>
+                            {announcement.expiresAt
+                              ? new Date(
+                                announcement.expiresAt
+                              ).toLocaleDateString()
+                              : "No expiry"}
+                          </td>
+                          <td>
+                            <span
+                              className={`status-badge ${isActive ? "success" : "danger"
                                 }`}
+                            >
+                              {isActive ? "Active" : "Expired"}
+                            </span>
+                          </td>
+                          <td>
+                            <div className="table-actions">
+                              <button
+                                className="btn-icon edit"
+                                onClick={() =>
+                                  openModal("EditAnnouncement", announcement)
+                                }
+                                disabled={loading}
                               >
-                                {isActive ? "Active" : "Expired"}
-                              </span>
-                            </td>
-                            <td>
-                              <div className="table-actions">
-                                <button
-                                  className="btn-icon edit"
-                                  onClick={() =>
-                                    openModal("EditAnnouncement", announcement)
-                                  }
-                                  disabled={loading}
-                                >
-                                  <FiEdit2 size={16} />
-                                </button>
-                                <button
-                                  className="btn-icon delete"
-                                  onClick={() =>
-                                    openDeleteModal(
-                                      announcement.id,
-                                      "Announcement"
-                                    )
-                                  }
-                                  disabled={loading}
-                                >
-                                  <FiTrash2 size={16} />
-                                </button>
-                              </div>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                )}
-              </div>
+                                <FiEdit2 size={16} />
+                              </button>
+                              <button
+                                className="btn-icon delete"
+                                onClick={() =>
+                                  openDeleteModal(
+                                    announcement.id,
+                                    "Announcement"
+                                  )
+                                }
+                                disabled={loading}
+                              >
+                                <FiTrash2 size={16} />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              )}
             </div>
-          )}
+          </div>
+        )}
 
-          {showModal && (
-            <Modal
-              type={modalType}
-              item={currentItem}
-              onClose={() => setShowModal(false)}
-              onSave={handleSave}
-              authors={authors}
-              genres={genres}
-              userId={userId}
-            />
-          )}
+        {showModal && (
+          <Modal
+            type={modalType}
+            item={currentItem}
+            onClose={() => setShowModal(false)}
+            onSave={handleSave}
+            authors={authors}
+            genres={genres}
+            userId={userId}
+          />
+        )}
 
-          {showImageModal && (
-            <ImagePreviewModal
-              book={selectedBook}
-              onClose={() => setShowImageModal(false)}
-            />
-          )}
-          {showDeleteModal && (
-            <ConfirmDeleteModal
-              entity={deleteEntity}
-              onConfirm={() => handleDelete(deleteItem.id, deleteEntity)}
-              onCancel={() => {
-                setShowDeleteModal(false);
-                setDeleteItem(null);
-                setDeleteEntity("");
-              }}
-            />
-          )}
-        </div>
+        {showImageModal && (
+          <ImagePreviewModal
+            book={selectedBook}
+            onClose={() => setShowImageModal(false)}
+          />
+        )}
+        {showDeleteModal && (
+          <ConfirmDeleteModal
+            entity={deleteEntity}
+            onConfirm={() => handleDelete(deleteItem.id, deleteEntity)}
+            onCancel={() => {
+              setShowDeleteModal(false);
+              setDeleteItem(null);
+              setDeleteEntity("");
+            }}
+          />
+        )}
       </div>
-    </ErrorBoundary>
-  );
+    </div>
+  </ErrorBoundary>
+);
 };
 
 export default AdminDashboard;
