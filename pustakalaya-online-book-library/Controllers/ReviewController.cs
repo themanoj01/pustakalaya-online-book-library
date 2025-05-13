@@ -1,13 +1,11 @@
-﻿
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using pustakalaya_online_book_library.DTOs;
 using pustakalaya_online_book_library.Services.Interfaces;
 
 namespace pustakalaya_online_book_library.Controllers
 {
-
-    [ApiController]
     [Route("api/[controller]")]
+    [ApiController]
     public class ReviewController : ControllerBase
     {
         private readonly IReviewService _reviewService;
@@ -18,40 +16,53 @@ namespace pustakalaya_online_book_library.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> PostReview([FromBody] ReviewCreateDto dto)
+        public async Task<IActionResult> CreateReview([FromBody] ReviewCreateDto dto)
         {
             try
             {
-                await _reviewService.CreateReviewAsync(dto);
-                return Ok("Review submitted successfully.");
-            }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(ex.Message);
+                var review = await _reviewService.CreateReviewAsync(dto);
+                return Ok(review);
             }
             catch (KeyNotFoundException ex)
             {
                 return NotFound(ex.Message);
             }
-            catch (Exception)
+            catch (InvalidOperationException ex)
             {
-                return StatusCode(500, "An unexpected error occurred.");
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Failed to create review: {ex.Message}");
             }
         }
 
         [HttpGet("book/{bookId}")]
-        public async Task<IActionResult> GetReviewsByBookId(Guid bookId)
+        public async Task<IActionResult> GetReviewsByBook(Guid bookId)
         {
             try
             {
                 var reviews = await _reviewService.GetReviewsByBookIdAsync(bookId);
                 return Ok(reviews);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return StatusCode(500, "Failed to fetch reviews.");
+                return StatusCode(500, $"Failed to retrieve reviews: {ex.Message}");
+            }
+        }
+
+        [HttpGet("can-review/{bookId}/{userId}")]
+        public async Task<IActionResult> CanReview(Guid bookId, Guid userId)
+        {
+            try
+            {
+                var canReview = await _reviewService.CanUserReviewAsync(userId, bookId);
+                return Ok(new { CanReview = canReview });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Failed to check review eligibility: {ex.Message}");
             }
         }
     }
-
 }
