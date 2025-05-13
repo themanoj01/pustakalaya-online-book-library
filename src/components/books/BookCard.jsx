@@ -111,7 +111,7 @@ const BookCard = ({ book }) => {
 
         <div className="book-card-content">
           <h3 className="book-title">{book.Title}</h3>
-          <p className="book-author">by {displayAuthor}</p>
+          <p className="book-author">by {}</p>
 
           <div className="book-rating">
             <div className="stars">
